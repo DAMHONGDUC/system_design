@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// A surface panel wrapping one chart, so stacked charts read as distinct
 /// cards on the near-black background rather than bleeding into one another.
@@ -16,10 +16,10 @@ class SdChartCardV2 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(SdSpacingV2.w16),
+      padding: EdgeInsets.all(SdSpacingConstant.w16),
       decoration: BoxDecoration(
         color: context.colorScheme.surface,
-        borderRadius: BorderRadius.circular(SdSpacingV2.r16),
+        borderRadius: BorderRadius.circular(SdSpacingConstant.r16),
       ),
       child: child,
     );

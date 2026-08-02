@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// Picks the icon and accent. The surface stays the same dark card — a
 /// full-bleed red or green bar is the brightness hard rule 3 avoids.
@@ -42,10 +42,10 @@ final class SdSnackBarUtilsV2 {
           padding: EdgeInsets.zero,
           behavior: SnackBarBehavior.floating,
           margin: EdgeInsets.fromLTRB(
-            SdSpacingV2.w16,
+            SdSpacingConstant.w16,
             0,
-            SdSpacingV2.w16,
-            SdSpacingV2.h16,
+            SdSpacingConstant.w16,
+            SdSpacingConstant.h16,
           ),
           // Errors need reading; the rest are just acknowledgements.
           duration: kind == SdSnackBarKindV2.error
@@ -85,20 +85,20 @@ class _AppSnackBarBody extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: SdSpacingV2.w16,
-        vertical: SdSpacingV2.h12,
+        horizontal: SdSpacingConstant.w16,
+        vertical: SdSpacingConstant.h12,
       ),
       decoration: BoxDecoration(
         color: context.sdTheme.surfaceElevated,
-        borderRadius: BorderRadius.circular(SdSpacingV2.r16),
+        borderRadius: BorderRadius.circular(SdSpacingConstant.r16),
         // Accent as a hairline, not a fill. The icon carries the kind too,
         // so colour is never the only signal.
         border: Border.all(color: style.accent.withValues(alpha: 0.4)),
         boxShadow: <BoxShadow>[
           BoxShadow(
             color: context.sdTheme.background.withValues(alpha: 0.5),
-            blurRadius: SdSpacingV2.r12,
-            offset: Offset(0, SdSpacingV2.h4),
+            blurRadius: SdSpacingConstant.r12,
+            offset: Offset(0, SdSpacingConstant.h4),
           ),
         ],
       ),
@@ -106,10 +106,10 @@ class _AppSnackBarBody extends StatelessWidget {
         children: <Widget>[
           SdIconV2(
             icon: style.icon,
-            size: SdSpacingV2.r20,
+            size: SdSpacingConstant.r20,
             color: style.accent,
           ),
-          SizedBox(width: SdSpacingV2.w12),
+          SizedBox(width: SdSpacingConstant.w12),
           Expanded(child: Text(message, style: context.textTheme.bodyMedium!)),
         ],
       ),

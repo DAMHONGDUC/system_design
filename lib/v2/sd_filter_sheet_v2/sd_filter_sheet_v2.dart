@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_bottom_sheet_v2/sd_bottom_sheet_v2.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_filter_pill_v2/sd_filter_pill_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// Opens a single-choice filter sheet: a plain radio list of [options],
 /// [selected] pre-checked. Returns the picked value, or null if dismissed
@@ -131,10 +131,10 @@ class _FilterSheet<T> extends StatelessWidget {
         children: [
           Padding(
             padding: EdgeInsets.fromLTRB(
-              SdSpacingV2.w24,
-              SdSpacingV2.h4,
-              SdSpacingV2.w24,
-              SdSpacingV2.h12,
+              SdSpacingConstant.w24,
+              SdSpacingConstant.h4,
+              SdSpacingConstant.w24,
+              SdSpacingConstant.h12,
             ),
             child: Text(title, style: context.textTheme.titleMedium!),
           ),
@@ -151,7 +151,7 @@ class _FilterSheet<T> extends StatelessWidget {
                       color: option == selected
                           ? scheme.primary
                           : scheme.onSurfaceVariant,
-                      size: SdSpacingV2.r22,
+                      size: SdSpacingConstant.r22,
                     ),
                     title: Text(
                       labelBuilder(option),
@@ -162,7 +162,7 @@ class _FilterSheet<T> extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: SdSpacingV2.h8),
+          SizedBox(height: SdSpacingConstant.h8),
         ],
       ),
     );

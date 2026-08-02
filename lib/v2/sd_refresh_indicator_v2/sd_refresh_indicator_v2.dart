@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_content_padding_v2/sd_content_padding_v2.dart';
 import '../sd_context_v2/sd_context_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// The app's pull-to-refresh wrapper — one themed [RefreshIndicator] so every
 /// tab refreshes the same way. Wrap a scrollable [child] (use
@@ -37,7 +37,7 @@ class SdRefreshIndicatorV2 extends StatelessWidget {
       backgroundColor: context.sdTheme.surfaceElevated,
       edgeOffset:
           edgeOffset ??
-          SdContentPaddingV2.appBarInset(context) + SdSpacingV2.h20,
+          SdContentPaddingV2.appBarInset(context) + SdSpacingConstant.h20,
       child: child,
     );
   }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// Title above one chart, and the chart itself hidden from VoiceOver behind a
 /// summary — marks are unreadable to a screen reader, so [semanticsLabel]
@@ -33,7 +33,7 @@ class SdChartFrameV2 extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Text(title, style: context.textTheme.titleMedium!),
-        SizedBox(height: SdSpacingV2.h12),
+        SizedBox(height: SdSpacingConstant.h12),
         Semantics(
           label: semanticsLabel,
           child: ExcludeSemantics(

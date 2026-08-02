@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// Standard modal sheet for the app. Always use this instead of raw
 /// [showModalBottomSheet]: `useRootNavigator: true` makes the sheet render
@@ -34,7 +34,7 @@ Future<T?> showSdBottomSheetV2<T>(
     clipBehavior: Clip.antiAlias,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
-        top: Radius.circular(SdSpacingV2.r22),
+        top: Radius.circular(SdSpacingConstant.r22),
       ),
     ),
     isScrollControlled: isScrollControlled,
@@ -55,16 +55,16 @@ class _SheetDragHandle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: SdSpacingV2.h12),
+      padding: EdgeInsets.symmetric(vertical: SdSpacingConstant.h12),
       child: Center(
         child: Container(
-          width: SdSpacingV2.w32,
-          height: SdSpacingV2.h4,
+          width: SdSpacingConstant.w32,
+          height: SdSpacingConstant.h4,
           decoration: BoxDecoration(
             color: Theme.of(
               context,
             ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-            borderRadius: BorderRadius.circular(SdSpacingV2.r3),
+            borderRadius: BorderRadius.circular(SdSpacingConstant.r3),
           ),
         ),
       ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// A circular disc holding one icon — the leading badge on banners, cards and
 /// rows. [color] tints the glyph, and the disc behind it at [tintAlpha] unless
@@ -29,15 +29,15 @@ class SdIconBadgeV2 extends StatelessWidget {
   /// instead of tinting.
   final Color? background;
 
-  /// Diameter. Defaults to `SdSpacingV2.r44`.
+  /// Diameter. Defaults to `SdSpacingConstant.r44`.
   final double? size;
 
-  /// Glyph size. Defaults to `SdSpacingV2.r22`.
+  /// Glyph size. Defaults to `SdSpacingConstant.r22`.
   final double? iconSize;
 
   @override
   Widget build(BuildContext context) {
-    final double diameter = size ?? SdSpacingV2.r44;
+    final double diameter = size ?? SdSpacingConstant.r44;
 
     return Container(
       width: diameter,
@@ -48,7 +48,7 @@ class SdIconBadgeV2 extends StatelessWidget {
       ),
       child: SdIconV2(
         icon: icon,
-        size: iconSize ?? SdSpacingV2.r22,
+        size: iconSize ?? SdSpacingConstant.r22,
         color: color,
       ),
     );

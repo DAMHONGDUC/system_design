@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../sd_spacing_v2/sd_spacing_v2.dart';
+import '../../core/sd_spacing_constant.dart';
 
 /// The app's only icon-button widget — built on [InkWell] instead of
 /// [IconButton] so there is **no** implicit `visualDensity`-driven margin
@@ -67,9 +67,9 @@ class SdIconButtonV2 extends StatelessWidget {
     final resolvedColor = enabled
         ? (color ?? iconTheme.color)
         : (disabledColor ?? iconTheme.color?.withValues(alpha: 0.38));
-    final resolvedPadding = padding ?? EdgeInsets.all(SdSpacingV2.w8);
+    final resolvedPadding = padding ?? EdgeInsets.all(SdSpacingConstant.w8);
     final resolvedBorderRadius = BorderRadius.all(
-      Radius.circular(SdSpacingV2.r999),
+      Radius.circular(SdSpacingConstant.r999),
     );
 
     Widget button = InkWell(

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_app_bar_button_v2/sd_app_bar_button_v2.dart';
 import '../sd_content_padding_v2/sd_content_padding_v2.dart';
 import '../sd_context_v2/sd_context_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// What the confirming icon of an [SdSheetHeaderV2] is for — a prop, like
 /// every other look in this system.
@@ -69,9 +69,9 @@ class SdSheetHeaderV2 extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(
         edgeInset,
-        SdSpacingV2.h4,
+        SdSpacingConstant.h4,
         edgeInset,
-        SdSpacingV2.h16,
+        SdSpacingConstant.h16,
       ),
       child: Row(
         children: <Widget>[

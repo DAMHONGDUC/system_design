@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_liquid_glass_theme_v2/sd_liquid_glass_theme_v2.dart';
 import '../sd_pinned_filter_bar_v2/sd_pinned_filter_bar_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// Every screen's content insets, in one class.
 ///
@@ -23,24 +23,24 @@ import '../sd_spacing_v2/sd_spacing_v2.dart';
 /// rests on the safe area.
 abstract final class SdContentPaddingV2 {
   /// The gutter: 16 either side of any content.
-  static double get horizontal => SdSpacingV2.w16;
+  static double get horizontal => SdSpacingConstant.w16;
 
   /// Gap between the app bar and the first item of content. Separate from
   /// [bottomGap] on purpose: the two edges are different problems — this one
   /// is breathing room under chrome, that one is thumb room above the home
   /// indicator — and each can move without dragging the other with it.
-  static double get topGap => SdSpacingV2.h8;
+  static double get topGap => SdSpacingConstant.h8;
 
   /// Gap between the last item — usually the bottom action — and whatever is
   /// below it: the safe area, or the floating nav pill on a tab screen. Scroll
   /// a list to its end and this is the breathing room you see.
-  static double get bottomGap => SdSpacingV2.h16;
+  static double get bottomGap => SdSpacingConstant.h16;
 
   /// Height of the app's floating bottom bars — the shell's nav pill and the
   /// log flow's step bar. Both read it and neither hardcodes its own: the two
   /// numbers drifted apart once (68 assumed here against a 56-tall bar), and
   /// the difference was silently eaten out of [bottomGap].
-  static double get floatingBarHeight => SdSpacingV2.h56;
+  static double get floatingBarHeight => SdSpacingConstant.h56;
 
   /// Corner radius that turns a floating bar into a true stadium: exactly half
   /// its height, so the short edges are full semicircles with no straight
@@ -60,7 +60,7 @@ abstract final class SdContentPaddingV2 {
   static double navBarOffset(BuildContext context) {
     final double safeBottom = _viewBottom(context);
 
-    return safeBottom > 0 ? safeBottom : SdSpacingV2.h16;
+    return safeBottom > 0 ? safeBottom : SdSpacingConstant.h16;
   }
 
   /// How far down the app bar reaches: status bar + toolbar while the bar is
@@ -99,10 +99,10 @@ abstract final class SdContentPaddingV2 {
   /// The gutter here is the *list's* (16), not [horizontal]: the heading
   /// lines up with the left edge of the `ListTile`s under it.
   static EdgeInsets sectionHeader({bool first = false}) => EdgeInsets.fromLTRB(
-    SdSpacingV2.w16,
-    first ? 0 : SdSpacingV2.h24,
-    SdSpacingV2.w16,
-    SdSpacingV2.h8,
+    SdSpacingConstant.w16,
+    first ? 0 : SdSpacingConstant.h24,
+    SdSpacingConstant.w16,
+    SdSpacingConstant.h8,
   );
 
   /// First item starts [topGap] below the app bar.

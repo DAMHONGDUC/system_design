@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// What a button *means*, passed to [SdButtonV2] as a prop — never a named
 /// constructor per variant.
@@ -65,15 +65,15 @@ class SdButtonV2 extends StatelessWidget {
   /// Leading glyph box when a call site does not pass [iconSize] — one size
   /// for every icon in every button, so two buttons stacked on top of each
   /// other line up.
-  static double get defaultIconSize => SdSpacingV2.r20;
+  static double get defaultIconSize => SdSpacingConstant.r20;
 
   /// Breathing room between the glyph and the label.
-  static double get iconGap => SdSpacingV2.w12;
+  static double get iconGap => SdSpacingConstant.w12;
 
   /// The label slot under [SdButtonIconPlacementV2.aligned] — wide enough for
   /// the longest sign-in label in either shipped locale ("Continue with
   /// Google", "Đăng nhập bằng Apple") so neither pair has to grow out of it.
-  static double get alignedLabelWidth => SdSpacingV2.w160;
+  static double get alignedLabelWidth => SdSpacingConstant.w160;
 
   final SdButtonVariantV2 variant;
   final String label;
@@ -83,7 +83,7 @@ class SdButtonV2 extends StatelessWidget {
 
   /// Overrides [defaultIconSize] for a brand glyph that needs its own weight
   /// (Apple's mark reads smaller than Google's in the same box). Pass an
-  /// `SdSpacingV2.r*`, never a raw number.
+  /// `SdSpacingConstant.r*`, never a raw number.
   ///
   /// Under [SdButtonIconPlacementV2.aligned] this resizes the glyph but not
   /// the slot it is centred in, so optical correction never costs the
@@ -117,9 +117,9 @@ class SdButtonV2 extends StatelessWidget {
     if (compact) {
       style = ButtonStyle(
         padding: WidgetStatePropertyAll(
-          EdgeInsets.symmetric(horizontal: SdSpacingV2.w14),
+          EdgeInsets.symmetric(horizontal: SdSpacingConstant.w14),
         ),
-        minimumSize: WidgetStatePropertyAll(Size(0, SdSpacingV2.h34)),
+        minimumSize: WidgetStatePropertyAll(Size(0, SdSpacingConstant.h34)),
         visualDensity: VisualDensity.compact,
       ).merge(style);
     }

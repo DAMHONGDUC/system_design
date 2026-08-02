@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_glass_circle_v2/sd_glass_circle_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
 import '../sd_pop_scale_v2/sd_pop_scale_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// What an [SdAppBarButtonV2] sits on — a prop, like `SdButtonVariantV2`.
 ///
@@ -48,11 +48,11 @@ class SdAppBarButtonV2 extends StatelessWidget {
   });
 
   /// The glyph. Deliberately below [SdIconV2]'s 24 default.
-  static double get iconSize => SdSpacingV2.r20;
+  static double get iconSize => SdSpacingConstant.r20;
 
   /// The invisible square the touch may land in — Material's minimum, and
   /// the footprint `SdAppBarV2`'s glass circle takes for these.
-  static double get tapSize => SdSpacingV2.r44;
+  static double get tapSize => SdSpacingConstant.r44;
 
   /// Platform-native back arrow, for whoever needs to spell out a leading
   /// button rather than let `SdAppBarV2` insert one.

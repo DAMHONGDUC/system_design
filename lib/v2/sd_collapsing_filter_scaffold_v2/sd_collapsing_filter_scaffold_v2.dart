@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_content_padding_v2/sd_content_padding_v2.dart';
 import '../sd_pinned_filter_bar_v2/sd_pinned_filter_bar_v2.dart';
 import '../sd_scaffold_v2/sd_scaffold_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// A screen that is "a filter plus a scrolling list", where the filter follows
 /// the reading direction: read on down the list and the whole filter row lifts
@@ -81,7 +81,7 @@ class _CollapsingFilterScaffoldState extends State<SdCollapsingFilterScaffoldV2>
   double _drift = 0;
 
   /// Movement a drag has to sustain before the bar changes over.
-  static double get _flipDistance => SdSpacingV2.h16;
+  static double get _flipDistance => SdSpacingConstant.h16;
 
   bool _onScroll(ScrollUpdateNotification notification) {
     final double delta = notification.scrollDelta ?? 0;

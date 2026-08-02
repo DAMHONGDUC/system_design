@@ -1,9 +1,9 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_color_dot_v2/sd_color_dot_v2.dart';
 import '../sd_context_v2/sd_context_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 import '../sd_text_style_v2/sd_text_style_v2.dart';
 
 /// One slice: how much, what colour, and the label the legend gives it.
@@ -41,14 +41,14 @@ class SdDonutChartV2 extends StatelessWidget {
 
     return PieChart(
       PieChartData(
-        sectionsSpace: SdSpacingV2.w2,
-        centerSpaceRadius: SdSpacingV2.r44,
+        sectionsSpace: SdSpacingConstant.w2,
+        centerSpaceRadius: SdSpacingConstant.r44,
         sections: <PieChartSectionData>[
           for (final SdDonutSliceV2 slice in present)
             PieChartSectionData(
               value: slice.value,
               color: slice.color,
-              radius: SdSpacingV2.r28,
+              radius: SdSpacingConstant.r28,
               showTitle: false,
             ),
         ],
@@ -68,8 +68,8 @@ class SdDonutLegendV2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      spacing: SdSpacingV2.w16,
-      runSpacing: SdSpacingV2.h8,
+      spacing: SdSpacingConstant.w16,
+      runSpacing: SdSpacingConstant.h8,
       children: <Widget>[
         for (final SdDonutSliceV2 slice in slices)
           if (slice.value > 0)
@@ -77,7 +77,7 @@ class SdDonutLegendV2 extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 SdColorDotV2(color: slice.color),
-                SizedBox(width: SdSpacingV2.w6),
+                SizedBox(width: SdSpacingConstant.w6),
                 Text(
                   slice.label,
                   style: context.textTheme.bodySmall!.muted(context),

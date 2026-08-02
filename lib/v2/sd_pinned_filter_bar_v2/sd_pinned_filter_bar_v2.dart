@@ -2,9 +2,9 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_liquid_glass_theme_v2/sd_liquid_glass_theme_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// A filter row anchored just below the app bar and floating above a scrolling
 /// list: a fixed frosted strip that stays put on top while the list scrolls
@@ -38,7 +38,7 @@ class SdPinnedFilterBarV2 extends StatelessWidget {
   final Widget child;
 
   /// Height of the visible filter strip below the app bar.
-  static double get barHeight => SdSpacingV2.h56;
+  static double get barHeight => SdSpacingConstant.h56;
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +60,7 @@ class SdPinnedFilterBarV2 extends StatelessWidget {
       alignment: Alignment.centerLeft,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: SdSpacingV2.w16),
+        padding: EdgeInsets.symmetric(horizontal: SdSpacingConstant.w16),
         child: child,
       ),
     );

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// Shows [SdDialogV2] (or any dialog content) with a calm fade + gentle
 /// scale on open, reversed on close (hard rule 3: nothing flashy).
@@ -54,15 +54,15 @@ class SdDialogV2 extends StatelessWidget {
     return Dialog(
       backgroundColor: context.sdTheme.surfaceElevated,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(SdSpacingV2.r20),
+        borderRadius: BorderRadius.circular(SdSpacingConstant.r20),
       ),
-      insetPadding: EdgeInsets.symmetric(horizontal: SdSpacingV2.w32),
+      insetPadding: EdgeInsets.symmetric(horizontal: SdSpacingConstant.w32),
       child: Padding(
         padding: EdgeInsets.fromLTRB(
-          SdSpacingV2.w24,
-          SdSpacingV2.h22,
-          SdSpacingV2.w24,
-          SdSpacingV2.h16,
+          SdSpacingConstant.w24,
+          SdSpacingConstant.h22,
+          SdSpacingConstant.w24,
+          SdSpacingConstant.h16,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -70,16 +70,16 @@ class SdDialogV2 extends StatelessWidget {
           children: [
             Text(title, style: context.textTheme.titleLarge!),
             if (content != null) ...[
-              SizedBox(height: SdSpacingV2.h16),
+              SizedBox(height: SdSpacingConstant.h16),
               content!,
             ],
             if (actions.isNotEmpty) ...[
-              SizedBox(height: SdSpacingV2.h20),
+              SizedBox(height: SdSpacingConstant.h20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   for (final (i, action) in actions.indexed) ...[
-                    if (i > 0) SizedBox(width: SdSpacingV2.w8),
+                    if (i > 0) SizedBox(width: SdSpacingConstant.w8),
                     action,
                   ],
                 ],
@@ -113,22 +113,22 @@ class SdDialogOptionV2 extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = context.colorScheme;
     return InkWell(
-      borderRadius: BorderRadius.circular(SdSpacingV2.r12),
+      borderRadius: BorderRadius.circular(SdSpacingConstant.r12),
       onTap: onTap,
       child: Padding(
         padding: EdgeInsets.symmetric(
-          horizontal: SdSpacingV2.w8,
-          vertical: SdSpacingV2.h12,
+          horizontal: SdSpacingConstant.w8,
+          vertical: SdSpacingConstant.h12,
         ),
         child: Row(
           children: [
             if (icon != null) ...[
               SdIconV2(
                 icon: icon!,
-                size: SdSpacingV2.r20,
+                size: SdSpacingConstant.r20,
                 color: scheme.primary,
               ),
-              SizedBox(width: SdSpacingV2.w12),
+              SizedBox(width: SdSpacingConstant.w12),
             ],
             Expanded(child: Text(label, style: context.textTheme.bodyLarge!)),
             if (selected != null)
@@ -136,7 +136,7 @@ class SdDialogOptionV2 extends StatelessWidget {
                 icon: selected!
                     ? Icons.radio_button_checked
                     : Icons.radio_button_off,
-                size: SdSpacingV2.r20,
+                size: SdSpacingConstant.r20,
                 color: selected! ? scheme.primary : scheme.onSurfaceVariant,
               ),
           ],

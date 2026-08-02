@@ -32,10 +32,12 @@ the widget stays in the app and composes the pieces from here.
 | Static-only holder | same, `final class` | `SdChartStyleV2` |
 | Presenter function | `showSd` + name + `V2` | `showSdBottomSheetV2` |
 | File and folder | snake_case of the class | `sd_banner_v2/sd_banner_v2.dart` |
+| Anything in `core/` | `Sd` + name, **no suffix** | `SdSpacingConstant` |
 
 The `V2` suffix is the generation of the design system, not a version of the
-individual widget. A widget is never renamed to `V3` on its own — a whole new
-generation gets a new folder next to `v2/`, and both can ship at once while an
+individual widget. Things in `core/` carry no look, so they belong to no
+generation and take no suffix. A widget is never renamed to `V3` on its own —
+a whole new generation gets a new folder next to `v2/`, and both ship at once while an
 app migrates.
 
 ## 3. Layout
@@ -43,22 +45,32 @@ app migrates.
 **One folder per widget, and the folder is named after the file:**
 
 ```
-lib/v2/
-  index.dart                  # exports every folder — the only entry point
-  sd_banner_v2/
-    sd_banner_v2.dart         # the widget
-    sd_banner_v2_leading.dart # part files, if it needs them
+lib/
+  index.dart                  # the package's only entry point
+  core/
+    sd_spacing_constant.dart  # no look, no generation, no suffix
+  v2/
+    index.dart                # exports every folder below
+    sd_banner_v2/
+      sd_banner_v2.dart         # the widget
+      sd_banner_v2_leading.dart # part files, if it needs them
 ```
 
-Adding a widget is: one folder, one file, one `export` line in `index.dart`.
-Nothing else in the package changes. Never add a grouping folder
-(`buttons/`, `charts/`) — the flat list with one folder each is what keeps
-the index mechanical.
+Adding a widget is: one folder, one file, one `export` line in
+`v2/index.dart`. Nothing else in the package changes. Never add a grouping
+folder (`buttons/`, `charts/`) — the flat list with one folder each is what
+keeps the index mechanical.
+
+**`core/` is not a dumping ground.** A file belongs there only if it has no
+look at all and every future generation would use it unchanged — raw
+dimensions qualify, a colour or a text style would not. When in doubt it goes
+in `v2/`; moving something down into `core/` later is cheap, and pulling it
+back out after two generations depend on it is not.
 
 Consumers import exactly one thing:
 
 ```dart
-import 'package:system_design/v2/index.dart';
+import 'package:system_design/index.dart';
 ```
 
 ## 4. Tokens — where every value comes from
@@ -71,7 +83,7 @@ Nothing in this package hardcodes a colour, a font size, or a dimension.
 | background, surfaceElevated, textPrimary, textSecondary, chartGrid, barrier | `context.sdTheme` (the `SdThemeV2` extension) |
 | any text style | `context.textTheme` |
 | semi-bold, muted | `.semiBold`, `.muted(context)` on `TextStyle` |
-| any dimension | `SdSpacingV2` — `w*` horizontal, `h*` vertical, `r*` square/radius, `sp*` font |
+| any dimension | `SdSpacingConstant` — `w*` horizontal, `h*` vertical, `r*` square/radius, `sp*` font |
 | screen/content insets | `SdContentPaddingV2` |
 
 The host app owns the palette: it builds an `SdThemeV2` from whatever its own

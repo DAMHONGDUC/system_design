@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_content_padding_v2/sd_content_padding_v2.dart';
 import '../sd_sheet_header_v2/sd_sheet_header_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// The inside of a bottom sheet: an [SdSheetHeaderV2], then content that
 /// scrolls when it has to, under a ceiling of [maxHeightFraction] of the
@@ -70,7 +70,7 @@ class SdSheetContentV2 extends StatelessWidget {
     final double safeBottom =
         MediaQuery.viewInsetsOf(context).bottom +
         MediaQuery.paddingOf(context).bottom +
-        SdSpacingV2.h16;
+        SdSpacingConstant.h16;
 
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: maxHeight),
@@ -91,7 +91,7 @@ class SdSheetContentV2 extends StatelessWidget {
                 SdContentPaddingV2.horizontal,
                 0,
                 SdContentPaddingV2.horizontal,
-                footer == null ? safeBottom : SdSpacingV2.h16,
+                footer == null ? safeBottom : SdSpacingConstant.h16,
               ),
               child: child,
             ),

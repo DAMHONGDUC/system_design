@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../sd_spacing_v2/sd_spacing_v2.dart';
+import '../../core/sd_spacing_constant.dart';
 
 class SdHorizontalSpacingV2 extends StatelessWidget {
   const SdHorizontalSpacingV2({super.key, this.width});
@@ -9,7 +9,7 @@ class SdHorizontalSpacingV2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final value = width ?? SdSpacingV2.w12;
+    final value = width ?? SdSpacingConstant.w12;
 
     return SizedBox(width: value);
   }

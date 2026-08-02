@@ -1,8 +1,8 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// The one place the chart deck's axis, grid and tooltip styling lives, so
 /// every chart reads as the same system: recessive grid, muted labels, a
@@ -14,18 +14,18 @@ final class SdChartStyleV2 {
   static const double gridLineWidth = 1;
 
   /// Standard plot height for a card-sized chart.
-  static double get plotHeight => SdSpacingV2.h160;
+  static double get plotHeight => SdSpacingConstant.h160;
 
-  static double get leftAxisWidth => SdSpacingV2.w28;
-  static double get bottomAxisHeight => SdSpacingV2.h24;
-  static double get bottomLabelGap => SdSpacingV2.h6;
+  static double get leftAxisWidth => SdSpacingConstant.w28;
+  static double get bottomAxisHeight => SdSpacingConstant.h24;
+  static double get bottomLabelGap => SdSpacingConstant.h6;
 
   /// Muted, one step below body text — an axis label should never compete
   /// with the marks.
   static TextStyle axisLabel(BuildContext context) =>
       context.textTheme.bodySmall!.copyWith(
         color: context.sdTheme.textSecondary,
-        fontSize: SdSpacingV2.sp10,
+        fontSize: SdSpacingConstant.sp10,
       );
 
   /// Tooltips sit *on* a card, so they take the elevated surface.

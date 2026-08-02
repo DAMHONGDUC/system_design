@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// The pill that opens a filter: a leading filter glyph, the value currently
 /// filtered to, a chevron saying there is more behind it.
@@ -16,7 +16,7 @@ class SdFilterPillV2 extends StatelessWidget {
 
   /// The pill's own height — what History measures its scroll hand-off against
   /// (`_FilterRow.scrolledPastExtent`), since the pill leads the list there.
-  static double get pillHeight => SdSpacingV2.h34;
+  static double get pillHeight => SdSpacingConstant.h34;
 
   /// Text on the closed pill — the finished, localized value.
   final String label;
@@ -29,29 +29,29 @@ class SdFilterPillV2 extends StatelessWidget {
 
     return Material(
       color: scheme.surfaceContainerHigh,
-      borderRadius: BorderRadius.circular(SdSpacingV2.r20),
+      borderRadius: BorderRadius.circular(SdSpacingConstant.r20),
       child: InkWell(
-        borderRadius: BorderRadius.circular(SdSpacingV2.r20),
+        borderRadius: BorderRadius.circular(SdSpacingConstant.r20),
         onTap: onTap,
         child: Padding(
           padding: EdgeInsets.symmetric(
-            horizontal: SdSpacingV2.w14,
-            vertical: SdSpacingV2.h8,
+            horizontal: SdSpacingConstant.w14,
+            vertical: SdSpacingConstant.h8,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               SdIconV2(
                icon: Icons.filter_list,
-                size: SdSpacingV2.r16,
+                size: SdSpacingConstant.r16,
                 color: scheme.primary,
               ),
-              SizedBox(width: SdSpacingV2.w6),
+              SizedBox(width: SdSpacingConstant.w6),
               Text(label, style: context.textTheme.labelLarge!),
-              SizedBox(width: SdSpacingV2.w2),
+              SizedBox(width: SdSpacingConstant.w2),
               SdIconV2(
               icon:  Icons.expand_more,
-                size: SdSpacingV2.r18,
+                size: SdSpacingConstant.r18,
                 color: scheme.onSurfaceVariant,
               ),
             ],

@@ -1,7 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 
-import '../sd_spacing_v2/sd_spacing_v2.dart';
+import '../../core/sd_spacing_constant.dart';
 
 class SdFittedTextV2 extends StatelessWidget {
   const SdFittedTextV2(
@@ -29,8 +29,8 @@ class SdFittedTextV2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const double step = 0.1;
-    final double min = (minFontSize ?? SdSpacingV2.sp8).roundToDouble();
-    final double maxFs = (style.fontSize ?? SdSpacingV2.sp14)
+    final double min = (minFontSize ?? SdSpacingConstant.sp8).roundToDouble();
+    final double maxFs = (style.fontSize ?? SdSpacingConstant.sp14)
         .roundToDouble();
 
     return AutoSizeText(

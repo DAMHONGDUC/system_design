@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_content_padding_v2/sd_content_padding_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// Body layout for any screen that is "content, then an action at the
 /// bottom": the sign-in screen, the account screen, the premium screen.
@@ -46,7 +46,7 @@ class SdActionViewV2 extends StatelessWidget {
   /// stay inset even where the content above is full-bleed.
   final EdgeInsetsGeometry? actionsPadding;
 
-  /// Gap between action rows. Defaults to [SdSpacingV2.h8].
+  /// Gap between action rows. Defaults to [SdSpacingConstant.h8].
   final double? actionSpacing;
 
   @override
@@ -77,7 +77,7 @@ class SdActionViewV2 extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
-                      spacing: actionSpacing ?? SdSpacingV2.h8,
+                      spacing: actionSpacing ?? SdSpacingConstant.h8,
                       children: actions,
                     ),
                   ),

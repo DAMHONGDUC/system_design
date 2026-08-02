@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_icon_badge_v2/sd_icon_badge_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 import '../sd_text_style_v2/sd_text_style_v2.dart';
 
 /// A tappable feature banner: a tinted leading icon badge, a title and one
@@ -42,26 +42,26 @@ class SdBannerV2 extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: EdgeInsets.all(SdSpacingV2.w16),
+          padding: EdgeInsets.all(SdSpacingConstant.w16),
           child: Row(
             children: [
               SdIconBadgeV2(icon: icon, color: color),
-              SizedBox(width: SdSpacingV2.w16),
+              SizedBox(width: SdSpacingConstant.w16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(title, style: context.textTheme.titleMedium!),
-                    SizedBox(height: SdSpacingV2.h2),
+                    SizedBox(height: SdSpacingConstant.h2),
                     subtitleChild ??
                         Text(subtitle, style: context.textTheme.bodySmall!.muted(context)),
                   ],
                 ),
               ),
-              SizedBox(width: SdSpacingV2.w8),
+              SizedBox(width: SdSpacingConstant.w8),
               SdIconV2(
                 icon: Icons.chevron_right,
-                size: SdSpacingV2.r20,
+                size: SdSpacingConstant.r20,
                 color: context.colorScheme.onSurfaceVariant,
               ),
             ],

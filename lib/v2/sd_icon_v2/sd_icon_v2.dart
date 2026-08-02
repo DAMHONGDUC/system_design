@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../sd_spacing_v2/sd_spacing_v2.dart';
+import '../../core/sd_spacing_constant.dart';
 
 /// The kind of source [SdIconV2] should render.
 enum SdIconVariantV2 {
@@ -26,12 +26,12 @@ enum SdIconVariantV2 {
 /// - [SdIconVariantV2.imageMemory] → [bytes]
 ///
 /// [size] always resolves to a concrete value: it defaults to
-/// [SdSpacingV2.r24] (Material's 24, run through screenutil) so every
+/// [SdSpacingConstant.r24] (Material's 24, run through screenutil) so every
 /// icon has an explicit size rather than inheriting an ambient one. [color]
 /// falls back to the surrounding [IconTheme] when null (ignored for raster
 /// images unless [applyColorToImage] is true).
 ///
-/// [hasPadding] wraps the rendered icon with [SdSpacingV2.r8] padding
+/// [hasPadding] wraps the rendered icon with [SdSpacingConstant.r8] padding
 /// on all sides — useful for giving tappable icons a larger hit area without
 /// affecting the visual icon size itself.
 class SdIconV2 extends StatelessWidget {
@@ -76,7 +76,7 @@ class SdIconV2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolvedSize = size ?? SdSpacingV2.r24;
+    final resolvedSize = size ?? SdSpacingConstant.r24;
     final resolvedColor = color ?? IconTheme.of(context).color;
     final colorFilter = resolvedColor == null
         ? null
@@ -162,7 +162,7 @@ class SdIconV2 extends StatelessWidget {
     }
 
     final resolvedPadding =
-        padding ?? (hasPadding ? EdgeInsets.all(SdSpacingV2.r8) : null);
+        padding ?? (hasPadding ? EdgeInsets.all(SdSpacingConstant.r8) : null);
 
     if (resolvedPadding == null) return child;
     return Padding(padding: resolvedPadding, child: child);

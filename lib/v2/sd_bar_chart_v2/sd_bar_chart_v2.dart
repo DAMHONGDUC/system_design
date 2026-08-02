@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_chart_style_v2/sd_chart_style_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 
 /// One bar: its height and the axis label under it. A null [label] leaves
 /// that tick blank — how a series thins out labels that would collide.
@@ -45,7 +45,7 @@ class SdBarChartV2 extends StatelessWidget {
   /// Already-localized tooltip for a bar's value.
   final String Function(num value) tooltip;
 
-  /// Bar thickness. Defaults to `SdSpacingV2.w14`.
+  /// Bar thickness. Defaults to `SdSpacingConstant.w14`.
   final double? barWidth;
 
   @override
@@ -57,7 +57,7 @@ class SdBarChartV2 extends StatelessWidget {
     final double interval = maxValue <= targetTicks
         ? 1
         : (maxValue / targetTicks).ceilToDouble();
-    final double width = barWidth ?? SdSpacingV2.w14;
+    final double width = barWidth ?? SdSpacingConstant.w14;
     final TextStyle tooltipStyle = SdChartStyleV2.tooltipLabel(context);
     final Color tooltipBackground = SdChartStyleV2.tooltipBackground(context);
 
@@ -93,7 +93,7 @@ class SdBarChartV2 extends StatelessWidget {
                   width: width,
                   color: color,
                   borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(SdSpacingV2.r4),
+                    top: Radius.circular(SdSpacingConstant.r4),
                   ),
                 ),
               ],

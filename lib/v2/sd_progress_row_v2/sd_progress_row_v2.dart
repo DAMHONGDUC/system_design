@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 import '../sd_text_style_v2/sd_text_style_v2.dart';
 
 /// A labelled proportional track: name on the left, a bar filled to
@@ -19,12 +19,12 @@ class SdProgressRowV2 extends StatelessWidget {
   });
 
   /// Width of the leading label column, so stacked rows align their tracks.
-  static double get labelWidth => SdSpacingV2.w56 + SdSpacingV2.w28;
+  static double get labelWidth => SdSpacingConstant.w56 + SdSpacingConstant.w28;
 
   /// Width of the trailing value column.
-  static double get valueWidth => SdSpacingV2.w28;
+  static double get valueWidth => SdSpacingConstant.w28;
 
-  static double get trackHeight => SdSpacingV2.h16;
+  static double get trackHeight => SdSpacingConstant.h16;
 
   /// Already-localized category name.
   final String label;
@@ -53,10 +53,10 @@ class SdProgressRowV2 extends StatelessWidget {
             style: context.textTheme.bodySmall,
           ),
         ),
-        SizedBox(width: SdSpacingV2.w8),
+        SizedBox(width: SdSpacingConstant.w8),
         Expanded(
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(SdSpacingV2.r4),
+            borderRadius: BorderRadius.circular(SdSpacingConstant.r4),
             child: Stack(
               children: <Widget>[
                 Container(
@@ -69,7 +69,7 @@ class SdProgressRowV2 extends StatelessWidget {
                     height: trackHeight,
                     decoration: BoxDecoration(
                       color: fill,
-                      borderRadius: BorderRadius.circular(SdSpacingV2.r4),
+                      borderRadius: BorderRadius.circular(SdSpacingConstant.r4),
                     ),
                   ),
                 ),
@@ -77,7 +77,7 @@ class SdProgressRowV2 extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(width: SdSpacingV2.w8),
+        SizedBox(width: SdSpacingConstant.w8),
         SizedBox(
           width: valueWidth,
           child: Text(

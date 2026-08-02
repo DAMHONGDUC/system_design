@@ -17,7 +17,7 @@ dependencies:
 ```
 
 ```dart
-import 'package:system_design/v2/index.dart';
+import 'package:system_design/index.dart';
 ```
 
 One import, and that is the only supported entry point.
@@ -50,9 +50,11 @@ loudly, rather than rendering the wrong thing.
 
 ```
 lib/
-  system_design.dart          # re-exports v2/index.dart, for pub convention
+  index.dart                  # THE entry point — the only import a consumer needs
+  core/
+    sd_spacing_constant.dart  # raw dimensions, shared by every generation
   v2/
-    index.dart                # THE entry point — exports every folder below
+    index.dart                # every widget below, re-exported by lib/index.dart
     sd_banner_v2/
       sd_banner_v2.dart
     sd_button_v2/
@@ -60,13 +62,18 @@ lib/
     …                         # one folder per widget, ~40 of them
 ```
 
-`v2` is the generation of the system. A future generation gets a `v3/` folder
-beside it with its own index, so an app can migrate widget by widget instead
-of all at once.
+`core/` is what does not belong to a widget generation: `SdSpacingConstant`,
+the screenutil dimensions any version of the system measures in. It carries no
+look, so it carries no version.
+
+`v2` is the generation of the system, and owns everything that does have a
+look. A future generation gets a `v3/` folder beside it with its own index,
+exported from `lib/index.dart` too, so an app can migrate widget by widget
+instead of all at once.
 
 ## What is in v2
 
-**Tokens and contract** — `SdSpacingV2`, `SdContentPaddingV2`, `SdThemeV2`,
+**Tokens and contract** — `SdSpacingConstant` (in `core/`), `SdContentPaddingV2`, `SdThemeV2`,
 `SdContextV2X` (`context.theme` / `.colorScheme` / `.textTheme` / `.sdTheme`),
 `SdTextStyleV2X` (`.semiBold`, `.muted(context)`).
 

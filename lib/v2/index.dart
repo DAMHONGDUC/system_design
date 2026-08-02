@@ -1,15 +1,14 @@
-/// System Design — v2 widget set.
+/// System Design — the v2 widget set.
 ///
-/// The only import a consumer needs:
-///
-/// ```dart
-/// import 'package:system_design/v2/index.dart';
-/// ```
+/// Consumers import `package:system_design/index.dart`, not this file: the
+/// package's entry point re-exports this alongside `core/`. This list exists
+/// so a widget generation stays one self-contained folder.
 ///
 /// Every widget lives in its own folder under `v2/` and is exported here.
 /// Adding a widget means adding one folder and one line below — nothing else
 /// in the package changes.
 library;
+
 export 'sd_action_view_v2/sd_action_view_v2.dart';
 export 'sd_app_bar_button_v2/sd_app_bar_button_v2.dart';
 export 'sd_app_bar_v2/sd_app_bar_v2.dart';
@@ -47,7 +46,6 @@ export 'sd_section_header_v2/sd_section_header_v2.dart';
 export 'sd_sheet_content_v2/sd_sheet_content_v2.dart';
 export 'sd_sheet_header_v2/sd_sheet_header_v2.dart';
 export 'sd_snack_bar_v2/sd_snack_bar_v2.dart';
-export 'sd_spacing_v2/sd_spacing_v2.dart';
 export 'sd_switcher_v2/sd_switcher_v2.dart';
 export 'sd_text_style_v2/sd_text_style_v2.dart';
 export 'sd_theme_v2/sd_theme_v2.dart';

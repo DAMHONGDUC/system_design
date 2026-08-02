@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
-import '../sd_spacing_v2/sd_spacing_v2.dart';
 import '../sd_text_style_v2/sd_text_style_v2.dart';
 
 /// One "here is what you get" row: icon, title, supporting line. Shared by
@@ -28,12 +28,12 @@ class SdBenefitRowV2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: SdSpacingV2.h16),
+      padding: EdgeInsets.only(bottom: SdSpacingConstant.h16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           SdIconV2(icon: icon, color: context.colorScheme.primary),
-          SizedBox(width: SdSpacingV2.w16),
+          SizedBox(width: SdSpacingConstant.w16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,12 +45,12 @@ class SdBenefitRowV2 extends StatelessWidget {
                       child: Text(title, style: context.textTheme.titleMedium!),
                     ),
                     if (trailing != null) ...<Widget>[
-                      SizedBox(width: SdSpacingV2.w8),
+                      SizedBox(width: SdSpacingConstant.w8),
                       trailing!,
                     ],
                   ],
                 ),
-                SizedBox(height: SdSpacingV2.h4),
+                SizedBox(height: SdSpacingConstant.h4),
                 Text(body, style: context.textTheme.bodyMedium!.muted(context)),
               ],
             ),

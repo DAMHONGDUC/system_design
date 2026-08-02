@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../sd_spacing_v2/sd_spacing_v2.dart';
+import '../../core/sd_spacing_constant.dart';
 
 /// A small filled circle used as a colour key — next to a severity value, on
 /// a calendar day, in a legend. Colour alone never carries the meaning; it
@@ -10,12 +10,12 @@ class SdColorDotV2 extends StatelessWidget {
 
   final Color color;
 
-  /// Diameter. Defaults to `SdSpacingV2.r12`.
+  /// Diameter. Defaults to `SdSpacingConstant.r12`.
   final double? size;
 
   @override
   Widget build(BuildContext context) {
-    final double diameter = size ?? SdSpacingV2.r12;
+    final double diameter = size ?? SdSpacingConstant.r12;
 
     return Container(
       width: diameter,
