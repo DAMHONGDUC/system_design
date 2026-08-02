@@ -1,0 +1,18 @@
+# Dart / Flutter tooling
+.dart_tool/
+.packages
+.flutter-plugins
+.flutter-plugins-dependencies
+build/
+doc/api/
+
+# A library package pins nothing — the consuming app resolves versions.
+pubspec.lock
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# macOS
+.DS_Store

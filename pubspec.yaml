@@ -1,0 +1,23 @@
+name: system_design
+description: Shared design system — tokens, theme and presentation-only widgets, reusable across apps.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  auto_size_text: ^3.0.0
+  fl_chart: ^1.2.0
+  flutter:
+    sdk: flutter
+  flutter_screenutil: ^5.9.3
+  flutter_svg: ^2.3.0
+  liquid_glass_renderer: ^0.2.0-dev.4
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
