@@ -12,12 +12,18 @@ class SdBenefitRowV2 extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.body,
+    this.trailing,
     super.key,
   });
 
   final IconData icon;
   final String title;
   final String body;
+
+  /// Marker beside the title — a badge saying this one is not included, say.
+  /// It sits on the title's line, not the row's centre, so a two-line body
+  /// cannot drag it out of alignment with the heading it qualifies.
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +38,18 @@ class SdBenefitRowV2 extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(title, style: context.textTheme.titleMedium!),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(title, style: context.textTheme.titleMedium!),
+                    ),
+                    if (trailing != null) ...<Widget>[
+                      SizedBox(width: SdSpacingV2.w8),
+                      trailing!,
+                    ],
+                  ],
+                ),
                 SizedBox(height: SdSpacingV2.h4),
                 Text(body, style: context.textTheme.bodyMedium!.muted(context)),
               ],
