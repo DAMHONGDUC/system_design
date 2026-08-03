@@ -52,24 +52,38 @@ abstract final class SdContentPaddingV2 {
 
   /// How far the shell's nav pill sits above the bottom edge of the screen.
   ///
-  /// The device's own bottom inset, but never less than [minNavBarOffset].
-  /// Where there is a home indicator that inset is already the gap and the
-  /// pill rests exactly on it. Where there is none (a Home-button iPhone, most
-  /// Androids, the default test view) the pill would hug the edge of the
-  /// glass, and where the inset is small (an iPad, or landscape) it would sit
-  /// too close to be comfortable — the floor covers both.
+  /// The device's own bottom inset, clamped between [minNavBarOffset] and
+  /// [maxNavBarOffset].
+  ///
+  /// The floor stops the pill hugging the glass where the device asks for
+  /// little or nothing — a Home-button iPhone, most Androids, the default
+  /// test view, an iPad, landscape. The ceiling stops a deep inset pushing
+  /// the pill visibly up the screen.
+  ///
+  /// Note what the ceiling costs on a portrait iPhone, whose home indicator
+  /// inset is 34: the pill lands 4 short of it, so its lower edge sits inside
+  /// the strip iOS reserves for the indicator and the edge-swipe gesture.
+  /// That is a deliberate trade of system clearance for a tighter bar, not an
+  /// oversight — raise [maxNavBarOffset] to 34 to give the clearance back.
   ///
   /// The log flow's step bar does not follow this: it always rests on the safe
   /// area, whatever that is.
   static double navBarOffset(BuildContext context) {
     final double safeBottom = _viewBottom(context);
 
-    return math.max(safeBottom, minNavBarOffset);
+    return math.min(
+      math.max(safeBottom, minNavBarOffset),
+      maxNavBarOffset,
+    );
   }
 
   /// The floor under [navBarOffset]. Below this the pill reads as stuck to the
   /// bottom edge, whatever the device claims it needs.
   static double get minNavBarOffset => SdSpacingConstant.h24;
+
+  /// The ceiling over [navBarOffset]. Above this the pill reads as floating
+  /// away from the bottom rather than sitting at it.
+  static double get maxNavBarOffset => SdSpacingConstant.h30;
 
   /// How far down the app bar reaches: status bar + toolbar while the bar is
   /// frosted glass (the body passes behind it), 0 when it is opaque and the
