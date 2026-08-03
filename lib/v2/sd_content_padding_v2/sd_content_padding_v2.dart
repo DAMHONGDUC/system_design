@@ -134,12 +134,31 @@ abstract final class SdContentPaddingV2 {
   /// First item starts [topGap] below the app bar.
   static double top(BuildContext context) => appBarInset(context) + topGap;
 
-  /// Last item ends [bottomGap] above the home indicator.
+  /// Where the last item ends.
   ///
   /// The shell's five tab screens pass [floatingNav] — their content scrolls
-  /// behind the nav pill, so it has to clear the pill's own footprint too.
+  /// behind the nav pill, so it clears the pill's whole footprint plus
+  /// [bottomGap]. Everything else — a pushed detail, a sheet route — takes
+  /// [detailBottom], which is a different rule and says so.
   static double bottom(BuildContext context, {bool floatingNav = false}) =>
-      (floatingNav ? _navInset(context) : _viewBottom(context)) + bottomGap;
+      floatingNav ? _navInset(context) + bottomGap : detailBottom(context);
+
+  /// Bottom inset for a screen with nothing floating over it.
+  ///
+  /// The device's own safe area, floored at [minDetailBottom]. The floor is
+  /// the whole point: a Home-button iPhone and most Androids report 0, and
+  /// without it the last row would sit flush against the bottom edge of the
+  /// glass with nothing under it.
+  ///
+  /// Deliberately NOT [bottomGap] on top of the inset. A device that reports
+  /// 34 already gives the row more room than the floor asks for, and stacking
+  /// a gap on top of a generous inset is what makes a detail screen look like
+  /// it ends early.
+  static double detailBottom(BuildContext context) =>
+      math.max(_viewBottom(context), minDetailBottom);
+
+  /// The floor under [detailBottom].
+  static double get minDetailBottom => SdSpacingConstant.h20;
 
   /// The whole thing: gutter + [top] + [bottom].
   static EdgeInsets screen(BuildContext context, {bool floatingNav = false}) =>
