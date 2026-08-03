@@ -5,20 +5,25 @@ import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
 import '../sd_text_style_v2/sd_text_style_v2.dart';
 
-/// One "here is what you get" row: icon, title, supporting line. Shared by
-/// the paywall and the login pitch, which sell different things the same way.
+/// One "here is what you get" row: icon, title, and an optional supporting
+/// line. Shared by the paywall and the login pitch, which sell different
+/// things the same way.
 class SdBenefitRowV2 extends StatelessWidget {
   const SdBenefitRowV2({
     required this.icon,
     required this.title,
-    required this.body,
+    this.body,
     this.trailing,
     super.key,
   });
 
   final IconData icon;
   final String title;
-  final String body;
+
+  /// The supporting line. Null collapses the row to a single line — for a
+  /// list that has to sit beside something else on one screen, where the
+  /// titles already say enough.
+  final String? body;
 
   /// Marker beside the title — a badge saying this one is not included, say.
   /// It sits on the title's line, not the row's centre, so a two-line body
@@ -27,10 +32,20 @@ class SdBenefitRowV2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String? body = this.body;
+
     return Padding(
-      padding: EdgeInsets.only(bottom: SdSpacingConstant.h16),
+      // A one-line row needs less air under it than a two-line one; giving
+      // both the same gap makes a compact list look accidentally sparse.
+      padding: EdgeInsets.only(
+        bottom: body == null ? SdSpacingConstant.h12 : SdSpacingConstant.h16,
+      ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        // One line centres on its icon; two lines hang from the top, so the
+        // icon sits beside the title rather than the whole block.
+        crossAxisAlignment: body == null
+            ? CrossAxisAlignment.center
+            : CrossAxisAlignment.start,
         children: <Widget>[
           SdIconV2(icon: icon, color: context.colorScheme.primary),
           SizedBox(width: SdSpacingConstant.w16),
@@ -50,8 +65,13 @@ class SdBenefitRowV2 extends StatelessWidget {
                     ],
                   ],
                 ),
-                SizedBox(height: SdSpacingConstant.h4),
-                Text(body, style: context.textTheme.bodyMedium!.muted(context)),
+                if (body != null) ...<Widget>[
+                  SizedBox(height: SdSpacingConstant.h4),
+                  Text(
+                    body,
+                    style: context.textTheme.bodyMedium!.muted(context),
+                  ),
+                ],
               ],
             ),
           ),
