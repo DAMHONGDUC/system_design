@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
@@ -50,18 +52,24 @@ abstract final class SdContentPaddingV2 {
 
   /// How far the shell's nav pill sits above the bottom edge of the screen.
   ///
-  /// Where there is a home indicator the pill rests exactly on it — that inset
-  /// is already the gap. Where there is none (a Home-button iPhone, most
-  /// Androids, the default test view) the pill would hug the edge of the glass,
-  /// so it takes a flat 16 instead.
+  /// The device's own bottom inset, but never less than [minNavBarOffset].
+  /// Where there is a home indicator that inset is already the gap and the
+  /// pill rests exactly on it. Where there is none (a Home-button iPhone, most
+  /// Androids, the default test view) the pill would hug the edge of the
+  /// glass, and where the inset is small (an iPad, or landscape) it would sit
+  /// too close to be comfortable — the floor covers both.
   ///
   /// The log flow's step bar does not follow this: it always rests on the safe
   /// area, whatever that is.
   static double navBarOffset(BuildContext context) {
     final double safeBottom = _viewBottom(context);
 
-    return safeBottom > 0 ? safeBottom : SdSpacingConstant.h16;
+    return math.max(safeBottom, minNavBarOffset);
   }
+
+  /// The floor under [navBarOffset]. Below this the pill reads as stuck to the
+  /// bottom edge, whatever the device claims it needs.
+  static double get minNavBarOffset => SdSpacingConstant.h24;
 
   /// How far down the app bar reaches: status bar + toolbar while the bar is
   /// frosted glass (the body passes behind it), 0 when it is opaque and the
