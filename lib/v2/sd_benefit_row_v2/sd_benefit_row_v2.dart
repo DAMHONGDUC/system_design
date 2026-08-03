@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:system_design/index.dart';
 
 import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
@@ -65,10 +66,10 @@ class SdBenefitRowV2 extends StatelessWidget {
                     ],
                   ],
                 ),
-                if (body != null) ...<Widget>[
+                if (body.isNotNullAndNotEmpty) ...[
                   SizedBox(height: SdSpacingConstant.h4),
                   Text(
-                    body,
+                    body!,
                     style: context.textTheme.bodyMedium!.muted(context),
                   ),
                 ],
