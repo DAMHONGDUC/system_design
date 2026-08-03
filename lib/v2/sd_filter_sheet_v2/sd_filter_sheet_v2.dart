@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
 import '../sd_bottom_sheet_v2/sd_bottom_sheet_v2.dart';
+import '../sd_content_padding_v2/sd_content_padding_v2.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_filter_pill_v2/sd_filter_pill_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
@@ -131,9 +132,9 @@ class _FilterSheet<T> extends StatelessWidget {
         children: [
           Padding(
             padding: EdgeInsets.fromLTRB(
-              SdSpacingConstant.w24,
+              SdContentPaddingV2.horizontal,
               SdSpacingConstant.h4,
-              SdSpacingConstant.w24,
+              SdContentPaddingV2.horizontal,
               SdSpacingConstant.h12,
             ),
             child: Text(title, style: context.textTheme.titleMedium!),

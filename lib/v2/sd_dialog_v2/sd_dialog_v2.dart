@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
+import '../sd_content_padding_v2/sd_content_padding_v2.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
 
@@ -59,9 +60,9 @@ class SdDialogV2 extends StatelessWidget {
       insetPadding: EdgeInsets.symmetric(horizontal: SdSpacingConstant.w32),
       child: Padding(
         padding: EdgeInsets.fromLTRB(
-          SdSpacingConstant.w24,
+          SdContentPaddingV2.horizontal,
           SdSpacingConstant.h22,
-          SdSpacingConstant.w24,
+          SdContentPaddingV2.horizontal,
           SdSpacingConstant.h16,
         ),
         child: Column(
