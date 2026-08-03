@@ -20,9 +20,10 @@ import '../sd_pinned_filter_bar_v2/sd_pinned_filter_bar_v2.dart';
 /// to pad for something floating over it, and the two would double up. One
 /// class computes it, every screen reads it, nothing adds it twice.
 ///
-/// Floating chrome is the exception and asks for none of this: the shell's nav
-/// pill sits [navBarOffset] off the bottom edge and the log flow's step bar
-/// rests on the safe area.
+/// Floating chrome is the exception and asks for none of this: the app's two
+/// floating bottom bars — the shell's nav pill and the log flow's step bar —
+/// share [navBarOffset] off the bottom edge and [floatingBarHorizontal] off
+/// the side edges, so the two pills always agree.
 abstract final class SdContentPaddingV2 {
   /// The gutter: 16 either side of any content.
   static double get horizontal => SdSpacingConstant.w16;
@@ -50,24 +51,30 @@ abstract final class SdContentPaddingV2 {
   /// 56-tall bar and only looked right because the shape clamps it.
   static double get floatingBarRadius => floatingBarHeight / 2;
 
-  /// How far the shell's nav pill sits above the bottom edge of the screen.
+  /// Side margin shared by the app's two floating bottom bars — the shell's
+  /// nav pill and the log flow's step bar — so both lift off the edges by the
+  /// same amount. Its own field rather than a bare [SdSpacingConstant.w24] at
+  /// each call site: that is exactly how the two drifted apart before this
+  /// existed.
+  static double get floatingBarHorizontal => SdSpacingConstant.w24;
+
+  /// How far the app's two floating bottom bars — the shell's nav pill and the
+  /// log flow's step bar — sit above the bottom edge of the screen. Both read
+  /// this, not their own copy, so they always agree.
   ///
   /// The device's own bottom inset, clamped between [minNavBarOffset] and
   /// [maxNavBarOffset].
   ///
-  /// The floor stops the pill hugging the glass where the device asks for
+  /// The floor stops a bar hugging the glass where the device asks for
   /// little or nothing — a Home-button iPhone, most Androids, the default
   /// test view, an iPad, landscape. The ceiling stops a deep inset pushing
-  /// the pill visibly up the screen.
+  /// the bar visibly up the screen.
   ///
   /// Note what the ceiling costs on a portrait iPhone, whose home indicator
-  /// inset is 34: the pill lands 14 short of it, so its lower edge sits inside
+  /// inset is 34: the bar lands 14 short of it, so its lower edge sits inside
   /// the strip iOS reserves for the indicator and the edge-swipe gesture.
   /// That is a deliberate trade of system clearance for a tighter bar, not an
   /// oversight — raise [maxNavBarOffset] to 34 to give the clearance back.
-  ///
-  /// The log flow's step bar does not follow this: it always rests on the safe
-  /// area, whatever that is.
   static double navBarOffset(BuildContext context) {
     final double safeBottom = _viewBottom(context);
 
@@ -155,11 +162,12 @@ abstract final class SdContentPaddingV2 {
   );
 
   /// Bottom inset for a floating bar handed to `Scaffold.bottomNavigationBar`
-  /// — the log flow's step bar. Unlike the shell's nav pill that one only
-  /// floats where glass is supported; otherwise it takes a real layout slot,
-  /// clears the safe area itself, and the body owes only the gap.
+  /// — the log flow's step bar. Shares [navBarOffset] with the shell's nav
+  /// pill, so the body clears exactly what the bar occupies; unlike the nav
+  /// pill it only floats where glass is supported, otherwise it takes a real
+  /// layout slot, clears the safe area itself, and the body owes only the gap.
   static double bottomBar(BuildContext context) => SdGlassV2.isSupported
-      ? _viewBottom(context) + floatingBarHeight + bottomGap
+      ? navBarOffset(context) + floatingBarHeight + bottomGap
       : bottomGap;
 
   /// The nav pill's footprint: how far off the bottom edge it sits, plus its
