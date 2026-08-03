@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:system_design/index.dart';
 
 import '../../core/sd_spacing_constant.dart';
+import '../../utils/text_ext.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
 import '../sd_text_style_v2/sd_text_style_v2.dart';
