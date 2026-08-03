@@ -61,7 +61,7 @@ abstract final class SdContentPaddingV2 {
   /// the pill visibly up the screen.
   ///
   /// Note what the ceiling costs on a portrait iPhone, whose home indicator
-  /// inset is 34: the pill lands 4 short of it, so its lower edge sits inside
+  /// inset is 34: the pill lands 14 short of it, so its lower edge sits inside
   /// the strip iOS reserves for the indicator and the edge-swipe gesture.
   /// That is a deliberate trade of system clearance for a tighter bar, not an
   /// oversight — raise [maxNavBarOffset] to 34 to give the clearance back.
@@ -71,19 +71,16 @@ abstract final class SdContentPaddingV2 {
   static double navBarOffset(BuildContext context) {
     final double safeBottom = _viewBottom(context);
 
-    return math.min(
-      math.max(safeBottom, minNavBarOffset),
-      maxNavBarOffset,
-    );
+    return math.min(math.max(safeBottom, minNavBarOffset), maxNavBarOffset);
   }
 
   /// The floor under [navBarOffset]. Below this the pill reads as stuck to the
   /// bottom edge, whatever the device claims it needs.
-  static double get minNavBarOffset => SdSpacingConstant.h24;
+  static double get minNavBarOffset => SdSpacingConstant.h16;
 
   /// The ceiling over [navBarOffset]. Above this the pill reads as floating
   /// away from the bottom rather than sitting at it.
-  static double get maxNavBarOffset => SdSpacingConstant.h30;
+  static double get maxNavBarOffset => SdSpacingConstant.h20;
 
   /// How far down the app bar reaches: status bar + toolbar while the bar is
   /// frosted glass (the body passes behind it), 0 when it is opaque and the
