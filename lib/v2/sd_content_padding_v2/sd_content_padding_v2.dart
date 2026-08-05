@@ -45,7 +45,7 @@ abstract final class SdContentPaddingV2 {
   ///
   /// Lists of `ListTile`s are not this: those rows carry their own insets and
   /// sit flush, which is why Settings and the export history take no gap.
-  static double get listItemGap => SdSpacingConstant.h8;
+  static double get listItemGap => SdSpacingConstant.h12;
 
   /// Height of the app's floating bottom bars — the shell's nav pill and the
   /// log flow's step bar. Both read it and neither hardcodes its own: the two
