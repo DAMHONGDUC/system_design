@@ -39,6 +39,16 @@ abstract final class SdContentPaddingV2 {
   /// a list to its end and this is the breathing room you see.
   static double get bottomGap => SdSpacingConstant.h16;
 
+  /// The one padding every `SdButtonV2` wears, whatever its variant — a
+  /// filled, outlined and text button read the same size next to each other
+  /// because none of them types its own. `SdButtonV2.compact` is the one
+  /// deliberate exception (chrome-sized app-bar actions) and keeps its own,
+  /// tighter padding.
+  static EdgeInsets get button => EdgeInsets.symmetric(
+    horizontal: SdSpacingConstant.w24,
+    vertical: SdSpacingConstant.h12,
+  );
+
   /// Gap between two items of the same list — attacks, medications, anything
   /// drawn as a stack of cards. One number for every list in the app, so two
   /// screens showing the same kind of thing cannot come out differently.

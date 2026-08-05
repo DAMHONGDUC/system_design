@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
+import '../sd_content_padding_v2/sd_content_padding_v2.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
 
@@ -44,11 +45,15 @@ enum SdButtonIconPlacementV2 { inline, aligned }
 /// SdButtonV2(variant: SdButtonVariantV2.primary, label: ..., onPressed: ...)
 /// ```
 ///
+/// Every variant wears the same [SdContentPaddingV2.button] padding and
+/// centres its content — Material's own `.icon` constructors are
+/// deliberately not used, since they carry their own padding per variant,
+/// which is what made the filled Apple button and the outlined Google
+/// button sit differently. [compact] is the one exception, for chrome-sized
+/// app-bar actions.
+///
 /// With an [icon] the content is always the same shape whatever the variant:
-/// a [defaultIconSize] glyph, a fixed [iconGap], then the label. Material's
-/// own `.icon` constructors are deliberately not used — they carry their own
-/// padding per variant, which is what made the filled Apple button and the
-/// outlined Google button sit differently.
+/// a [defaultIconSize] glyph, a fixed [iconGap], then the label.
 class SdButtonV2 extends StatelessWidget {
   const SdButtonV2({
     required this.variant,
@@ -68,7 +73,7 @@ class SdButtonV2 extends StatelessWidget {
   static double get defaultIconSize => SdSpacingConstant.r20;
 
   /// Breathing room between the glyph and the label.
-  static double get iconGap => SdSpacingConstant.w12;
+  static double get iconGap => SdSpacingConstant.w16;
 
   /// The label slot under [SdButtonIconPlacementV2.aligned] — wide enough for
   /// the longest sign-in label in either shipped locale ("Continue with
@@ -99,19 +104,31 @@ class SdButtonV2 extends StatelessWidget {
   /// which is also what keeps the foreground colour per variant.
   final TextStyle? labelStyle;
 
-  ButtonStyle? _style(BuildContext context) {
-    ButtonStyle? style;
+  ButtonStyle _style(BuildContext context) {
+    // The one padding and centring every variant wears — set first so it
+    // only ever loses to `compact`'s own override below, never to a
+    // variant's color style, which merges its colors in on top instead.
+    ButtonStyle style = ButtonStyle(
+      padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(
+        SdContentPaddingV2.button,
+      ),
+      alignment: Alignment.center,
+    );
 
     if (variant == SdButtonVariantV2.destructive) {
-      style = FilledButton.styleFrom(
-        backgroundColor: context.colorScheme.error,
-        foregroundColor: context.colorScheme.onPrimary,
+      style = style.merge(
+        FilledButton.styleFrom(
+          backgroundColor: context.colorScheme.error,
+          foregroundColor: context.colorScheme.onPrimary,
+        ),
       );
     }
     if (variant == SdButtonVariantV2.positive) {
-      style = FilledButton.styleFrom(
-        backgroundColor: context.colorScheme.secondary,
-        foregroundColor: context.colorScheme.onPrimary,
+      style = style.merge(
+        FilledButton.styleFrom(
+          backgroundColor: context.colorScheme.secondary,
+          foregroundColor: context.colorScheme.onPrimary,
+        ),
       );
     }
     if (compact) {
@@ -170,7 +187,7 @@ class SdButtonV2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ButtonStyle? style = _style(context);
+    final ButtonStyle style = _style(context);
     final Widget child = _child();
 
     return switch (variant) {
