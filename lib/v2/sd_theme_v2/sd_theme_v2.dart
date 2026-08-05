@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 class SdThemeV2 extends ThemeExtension<SdThemeV2> {
   const SdThemeV2({
     required this.background,
+    required this.surfaceModal,
     required this.surfaceElevated,
     required this.textPrimary,
     required this.textSecondary,
@@ -25,8 +26,16 @@ class SdThemeV2 extends ThemeExtension<SdThemeV2> {
   /// which is the card.
   final Color background;
 
+  /// The one surface every modal wears — bottom sheets and dialogs alike, so
+  /// a dialog opening over a sheet is never a second shade of dark.
+  ///
+  /// A step *below* the card rather than above it: a modal already separates
+  /// itself with the barrier scrim and its rounded corners, and going darker
+  /// keeps the cards that sit on it reading as the nearer layer.
+  final Color surfaceModal;
+
   /// One step above the card, for anything that must stay visible while
-  /// sitting *on* a card or a sheet: dialogs, snack bars, chart tooltips,
+  /// sitting *on* a card, a sheet or a dialog: snack bars, chart tooltips,
   /// option tiles.
   final Color surfaceElevated;
 
@@ -46,6 +55,7 @@ class SdThemeV2 extends ThemeExtension<SdThemeV2> {
   /// `context.sdTheme`); this only keeps a release build from crashing.
   static const SdThemeV2 fallback = SdThemeV2(
     background: Color(0xFF000000),
+    surfaceModal: Color(0xFF161618),
     surfaceElevated: Color(0xFF2C2C2E),
     textPrimary: Color(0xFFFFFFFF),
     textSecondary: Color(0xFF98989F),
@@ -56,6 +66,7 @@ class SdThemeV2 extends ThemeExtension<SdThemeV2> {
   @override
   SdThemeV2 copyWith({
     Color? background,
+    Color? surfaceModal,
     Color? surfaceElevated,
     Color? textPrimary,
     Color? textSecondary,
@@ -63,6 +74,7 @@ class SdThemeV2 extends ThemeExtension<SdThemeV2> {
     Color? barrier,
   }) => SdThemeV2(
     background: background ?? this.background,
+    surfaceModal: surfaceModal ?? this.surfaceModal,
     surfaceElevated: surfaceElevated ?? this.surfaceElevated,
     textPrimary: textPrimary ?? this.textPrimary,
     textSecondary: textSecondary ?? this.textSecondary,
@@ -76,6 +88,7 @@ class SdThemeV2 extends ThemeExtension<SdThemeV2> {
 
     return SdThemeV2(
       background: Color.lerp(background, other.background, t)!,
+      surfaceModal: Color.lerp(surfaceModal, other.surfaceModal, t)!,
       surfaceElevated: Color.lerp(
         surfaceElevated,
         other.surfaceElevated,

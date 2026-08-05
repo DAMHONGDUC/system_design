@@ -53,7 +53,7 @@ class SdDialogV2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: context.sdTheme.surfaceElevated,
+      backgroundColor: context.sdTheme.surfaceModal,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(SdSpacingConstant.r20),
       ),

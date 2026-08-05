@@ -8,7 +8,7 @@ import '../sd_context_v2/sd_context_v2.dart';
 /// ABOVE the bottom navigation bar (the shell's branch navigators live
 /// inside the Scaffold body, so a non-root sheet slides under the nav bar).
 ///
-/// The sheet is a flat opaque [context.colorScheme.surface] panel — the one card colour,
+/// The sheet is a flat opaque [SdThemeV2.surfaceModal] panel — the one modal colour,
 /// so a sheet and the cards it covers never read as two different darks. We
 /// draw our own drag handle instead of `showDragHandle`, which reserves a full
 /// 48 tap row above the content and would push every sheet header down.
@@ -29,7 +29,7 @@ Future<T?> showSdBottomSheetV2<T>(
     showDragHandle: false,
     isDismissible: dismissible,
     enableDrag: dismissible,
-    backgroundColor: context.colorScheme.surface,
+    backgroundColor: context.sdTheme.surfaceModal,
     barrierColor: context.sdTheme.barrier,
     clipBehavior: Clip.antiAlias,
     shape: RoundedRectangleBorder(
