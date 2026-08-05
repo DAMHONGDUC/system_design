@@ -147,8 +147,7 @@ class _CollapsingFilterScaffoldState
                   top: 0,
                   left: 0,
                   right: 0,
-                  // Still laid out while collapsed (its height is what the body
-                  // padded for), just invisible and out of the way of taps.
+                  // Still laid out while collapsed (its height is what the body padded for), just invisible and untappable.
                   child: IgnorePointer(
                     ignoring: collapsed,
                     child: AnimatedSlide(

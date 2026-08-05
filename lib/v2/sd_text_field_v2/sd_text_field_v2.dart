@@ -135,8 +135,7 @@ class SdTextFieldV2 extends StatelessWidget {
               minWidth: SdSpacingConstant.w48,
               minHeight: SdSpacingConstant.w48,
             ),
-            // Every state is spelled out: leaving one to Material means one
-            // state of this field is drawn by something other than this file.
+            // Every state is spelled out: leaving one to Material means it's drawn by something other than this file.
             border: _border(idle),
             enabledBorder: _border(idle),
             disabledBorder: _border(idle.withValues(alpha: 0.14)),
@@ -146,8 +145,7 @@ class SdTextFieldV2 extends StatelessWidget {
               context.colorScheme.error,
               width: focusedBorderWidth,
             ),
-            // The helper/error line is drawn below, so the box itself never
-            // reserves space for one it does not have.
+            // The helper/error line is drawn below, so the box never reserves space for one it doesn't have.
             helperText: null,
             errorText: null,
           ),

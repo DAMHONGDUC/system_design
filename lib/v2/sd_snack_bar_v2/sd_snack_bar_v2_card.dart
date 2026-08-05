@@ -42,8 +42,7 @@ class SdSnackBarCardV2 extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.sdTheme.surfaceElevated,
         borderRadius: BorderRadius.circular(SdSpacingConstant.r16),
-        // Accent as a hairline, not a fill. The icon carries the kind too,
-        // so colour is never the only signal.
+        // Accent as a hairline, not a fill — the icon carries the kind too, so colour is never the only signal.
         border: Border.all(color: style.accent.withValues(alpha: 0.4)),
         boxShadow: <BoxShadow>[
           BoxShadow(

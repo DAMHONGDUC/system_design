@@ -43,8 +43,7 @@ class SdGlassV2 {
 /// a calm frosted surface and never introduces a bright specular glare or
 /// rainbow fringing.
 const LiquidGlassSettings kChromeGlass = LiquidGlassSettings(
-  // context.sdTheme.background at ~50% — keeps the bar dark and text legible while
-  // the blur carries the "glass" read.
+  // context.sdTheme.background at ~50% — keeps the bar dark and text legible while the blur carries the "glass" read.
   glassColor: Color(0x800E0E10),
   thickness: 12,
   blur: 10,

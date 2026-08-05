@@ -37,11 +37,8 @@ class SdAppBarV2 extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Every screen's leading button — explicit or auto-inserted for a
-    // pushed route that can pop — is an SdAppBarButtonV2, the same class the
-    // trailing actions use, so back and delete can never drift apart.
-    // automaticallyImplyLeading: false below stops AppBar from also trying
-    // to insert its own default back button on top of this.
+    // - every leading button (explicit or auto-inserted for a route that can pop) is an SdAppBarButtonV2, so back and delete can't drift apart
+    // - automaticallyImplyLeading: false stops AppBar inserting its own default back button on top
     final canPop = ModalRoute.of(context)?.canPop ?? false;
     Widget? resolvedLeading =
         leading ??
@@ -63,13 +60,10 @@ class SdAppBarV2 extends StatelessWidget implements PreferredSizeWidget {
       );
     }
 
-    // Glass per element, but drawn by the button itself (SdAppBarButtonSurfaceV2)
-    // so the touch swell carries the circle with it. Composite actions
-    // (filter pill, view toggle) bring their own surface either way.
+    // - glass per element, drawn by the button itself (SdAppBarButtonSurfaceV2) so the touch swell carries the circle
+    // - composite actions (filter pill, view toggle) bring their own surface either way
     //
-    // Centered, not bare: AppBar forces the leading into a tight
-    // `leadingWidth` box (56 by default), which would stretch a full-width
-    // child into a wider oval than the naturally sized action circles.
+    // Centered, not bare: AppBar's tight `leadingWidth` box (56 default) would stretch a full-width child into a wider oval than the action circles.
     if (resolvedLeading != null) {
       resolvedLeading = Center(child: resolvedLeading);
     }
@@ -80,8 +74,7 @@ class SdAppBarV2 extends StatelessWidget implements PreferredSizeWidget {
           sigmaX: kChromeGlass.blur,
           sigmaY: kChromeGlass.blur,
         ),
-        // Same colour as the app background — no divider, no distinct slab;
-        // the translucency lets the blurred content glow through faintly.
+        // Same colour as the app background — no divider, no distinct slab; translucency lets content glow through.
         child: ColoredBox(
           color: context.sdTheme.background.withValues(alpha: 0.65),
           child: AppBar(

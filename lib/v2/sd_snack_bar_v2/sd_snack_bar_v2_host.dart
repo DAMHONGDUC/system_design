@@ -50,8 +50,7 @@ class _SdSnackBarHostV2State extends State<_SdSnackBarHostV2>
 
   @override
   void dispose() {
-    // The overlay entry can go before the timer fires — a route pop, or a test
-    // ending. An uncancelled timer would outlive the tree it calls back into.
+    // Cancel the timer: it can outlive a route pop or torn-down test if left uncancelled.
     _timer?.cancel();
     _curve.dispose();
     _controller.dispose();
@@ -88,14 +87,11 @@ class _SdSnackBarHostV2State extends State<_SdSnackBarHostV2>
             begin: Offset(0, atTop ? -0.4 : 0.4),
             end: Offset.zero,
           ).animate(_curve),
-          // Floating above every route means it would also take taps meant
-          // for the route — a card over a sheet's buttons swallows them for
-          // its whole duration. It leaves on its own; a message is never
-          // worth a tap that does not land. That costs swipe-to-dismiss, and
-          // that is the cheaper half of the trade.
+          // - floating above every route would also take taps meant for it — a card over a sheet's buttons swallows them
+          // - so it leaves on its own; a message is never worth a tap that doesn't land
+          // - costs swipe-to-dismiss, the cheaper half of the trade
           child: IgnorePointer(
-            // The overlay has no Material ancestor, and text without one
-            // renders Flutter's yellow underlined fallback.
+            // The overlay has no Material ancestor; text without one renders Flutter's yellow underlined fallback.
             child: Material(
               type: MaterialType.transparency,
               child: SdSnackBarCardV2(

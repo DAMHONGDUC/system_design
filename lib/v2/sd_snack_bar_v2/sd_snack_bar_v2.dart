@@ -66,8 +66,7 @@ final class SdSnackBarUtilsV2 {
   ) {
     final OverlayState? overlay = Overlay.maybeOf(context, rootOverlay: true);
 
-    // No overlay means no Navigator above this context — nothing to draw into,
-    // and a message is never worth throwing over.
+    // No overlay means nothing to draw into — a message is never worth throwing over.
     if (overlay == null) return;
 
     _remove();
@@ -83,9 +82,8 @@ final class SdSnackBarUtilsV2 {
         onDismissed: () {
           if (identical(_current, entry)) _remove();
         },
-        // The overlay went away under us — a popped route, a torn-down test.
-        // Only forget the handle; touching an entry whose overlay is gone is
-        // what turns one stale message into an assertion in the next screen.
+        // - the overlay can go away under us: a popped route, a torn-down test
+        // - only forget the handle; touching a gone overlay turns a stale message into an assertion
         onDisposed: () {
           if (identical(_current, entry)) _current = null;
         },

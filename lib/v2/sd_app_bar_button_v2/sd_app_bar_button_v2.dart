@@ -76,8 +76,7 @@ class SdAppBarButtonV2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget target = GestureDetector(
-      // Opaque so the whole invisible square takes the tap, not just the
-      // glyph painted in the middle of it.
+      // Opaque so the whole invisible square takes the tap, not just the glyph in its middle.
       behavior: HitTestBehavior.opaque,
       onTap: onPressed,
       child: SizedBox.square(
@@ -87,8 +86,7 @@ class SdAppBarButtonV2 extends StatelessWidget {
         ),
       ),
     );
-    // Inside the pop, so the swell carries the surface and the glyph together
-    // rather than growing the glyph inside a circle that stays put.
+    // Inside the pop, so the swell carries the surface and glyph together rather than growing inside a static circle.
     final Widget dressed = switch (surface) {
       SdAppBarButtonSurfaceV2.glassCircle => SdGlassCircleV2(child: target),
       SdAppBarButtonSurfaceV2.none => target,

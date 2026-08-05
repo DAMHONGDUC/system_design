@@ -97,8 +97,7 @@ class SdSheetHeaderV2 extends StatelessWidget {
                 SdSheetActionV2.confirm => Icons.check,
                 SdSheetActionV2.edit => Icons.edit,
               },
-              // Same glass disc as the X; the tinted glyph is what still marks
-              // this as the one action that writes something.
+              // Same glass disc as the X; the tinted glyph marks this as the action that writes something.
               color: context.colorScheme.secondary,
               tooltip: confirmTooltip,
               onPressed: onConfirm,

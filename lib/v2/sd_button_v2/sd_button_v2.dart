@@ -157,9 +157,7 @@ class SdButtonV2 extends StatelessWidget {
   double get _iconGap => iconGap * _effectiveSize.scale;
 
   ButtonStyle _style(BuildContext context) {
-    // The one padding and centring every variant wears — set first so it
-    // only ever loses to `compact`'s own override below, never to a
-    // variant's color style, which merges its colors in on top instead.
+    // The one padding and centring every variant wears — set first so it only loses to `compact`'s override, never a variant's colour style.
     ButtonStyle style = ButtonStyle(
       padding: WidgetStatePropertyAll<EdgeInsetsGeometry>(_padding),
       alignment: Alignment.center,
@@ -207,15 +205,11 @@ class SdButtonV2 extends StatelessWidget {
           Flexible(child: _label(TextAlign.center)),
         ],
       ),
-      // Start-aligned inside a slot that is a minimum, not a fixed width: the
-      // labels begin on the same x, and one too long for the slot takes the
-      // room it needs (losing the alignment) rather than being cut off.
+      // Start-aligned inside a minimum-width slot: labels begin on the same x, a too-long one takes the room it needs rather than being cut off.
       SdButtonIconPlacementV2.aligned => Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          // The slot keeps [defaultIconSize] (scaled) whatever the glyph
-          // measures, so an optically-corrected mark cannot shift the pair
-          // out of line.
+          // The slot keeps [defaultIconSize] (scaled) whatever the glyph measures, so an optically-corrected mark can't shift the pair out of line.
           SizedBox.square(
             dimension: defaultIconSize * _effectiveSize.scale,
             child: OverflowBox(

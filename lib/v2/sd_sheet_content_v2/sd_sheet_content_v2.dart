@@ -65,8 +65,7 @@ class SdSheetContentV2 extends StatelessWidget {
   Widget build(BuildContext context) {
     final double maxHeight =
         MediaQuery.sizeOf(context).height * maxHeightFraction;
-    // The keyboard, when the content has a field, then the home indicator:
-    // whichever is there, the last row has to clear it.
+    // Clears the keyboard when a field is focused, else the home indicator.
     final double safeBottom =
         MediaQuery.viewInsetsOf(context).bottom +
         MediaQuery.paddingOf(context).bottom +

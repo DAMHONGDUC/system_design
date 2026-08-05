@@ -36,14 +36,12 @@ class SdBenefitRowV2 extends StatelessWidget {
     final String? body = this.body;
 
     return Padding(
-      // A one-line row needs less air under it than a two-line one; giving
-      // both the same gap makes a compact list look accidentally sparse.
+      // A one-line row needs less air than a two-line one; the same gap for both makes a compact list look sparse.
       padding: EdgeInsets.only(
         bottom: body == null ? SdSpacingConstant.h12 : SdSpacingConstant.h16,
       ),
       child: Row(
-        // One line centres on its icon; two lines hang from the top, so the
-        // icon sits beside the title rather than the whole block.
+        // One line centres on its icon; two lines hang from the top, so the icon sits beside the title, not the whole block.
         crossAxisAlignment: body == null
             ? CrossAxisAlignment.center
             : CrossAxisAlignment.start,

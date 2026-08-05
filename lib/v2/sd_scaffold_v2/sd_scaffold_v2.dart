@@ -44,8 +44,7 @@ class SdScaffoldV2 extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: SdGlassV2.isSupported,
-      // Let the body flow behind a floating glass bottom bar so it refracts
-      // through it (mirrors the shell's bottom nav).
+      // Let the body flow behind a floating glass bottom bar so it refracts through it (mirrors the shell's bottom nav).
       extendBody: SdGlassV2.isSupported && bottomNavigationBar != null,
       appBar: SdAppBarV2(
         title: title,
@@ -55,11 +54,9 @@ class SdScaffoldV2 extends StatelessWidget {
       ),
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
-      // Tap anywhere outside a focused field (e.g. the medications search box)
-      // to drop focus and dismiss the keyboard. Translucent so it never eats
-      // taps meant for buttons/list rows — a tap only reaches here when nothing
-      // nearer claims it; a scroll drag defeats the tap so scrolling is
-      // unaffected.
+      // - tap anywhere outside a focused field drops focus and dismisses the keyboard
+      // - translucent so it never eats taps meant for buttons/list rows; only reached when nothing nearer claims it
+      // - a scroll drag defeats the tap, so scrolling is unaffected
       body: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         behavior: HitTestBehavior.translucent,
