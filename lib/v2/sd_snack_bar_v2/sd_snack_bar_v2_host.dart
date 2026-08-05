@@ -88,14 +88,16 @@ class _SdSnackBarHostV2State extends State<_SdSnackBarHostV2>
             begin: Offset(0, atTop ? -0.4 : 0.4),
             end: Offset.zero,
           ).animate(_curve),
-          // The overlay has no Material ancestor, and text without one renders
-          // Flutter's yellow underlined fallback.
-          child: Material(
-            type: MaterialType.transparency,
-            child: Dismissible(
-              key: ValueKey<String>(widget.message),
-              direction: DismissDirection.horizontal,
-              onDismissed: (DismissDirection _) => widget.onDismissed(),
+          // Floating above every route means it would also take taps meant
+          // for the route — a card over a sheet's buttons swallows them for
+          // its whole duration. It leaves on its own; a message is never
+          // worth a tap that does not land. That costs swipe-to-dismiss, and
+          // that is the cheaper half of the trade.
+          child: IgnorePointer(
+            // The overlay has no Material ancestor, and text without one
+            // renders Flutter's yellow underlined fallback.
+            child: Material(
+              type: MaterialType.transparency,
               child: SdSnackBarCardV2(
                 message: widget.message,
                 kind: widget.kind,
