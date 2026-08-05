@@ -62,7 +62,7 @@ class SdAppBarV2 extends StatelessWidget implements PreferredSizeWidget {
 
     // - glass per element, drawn by the button itself (SdAppBarButtonSurfaceV2) so the touch swell carries the circle
     // - composite actions (filter pill, view toggle) bring their own surface either way
-    //
+
     // Centered, not bare: AppBar's tight `leadingWidth` box (56 default) would stretch a full-width child into a wider oval than the action circles.
     if (resolvedLeading != null) {
       resolvedLeading = Center(child: resolvedLeading);
