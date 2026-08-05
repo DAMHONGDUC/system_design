@@ -39,6 +39,14 @@ abstract final class SdContentPaddingV2 {
   /// a list to its end and this is the breathing room you see.
   static double get bottomGap => SdSpacingConstant.h16;
 
+  /// Gap between two items of the same list — attacks, medications, anything
+  /// drawn as a stack of cards. One number for every list in the app, so two
+  /// screens showing the same kind of thing cannot come out differently.
+  ///
+  /// Lists of `ListTile`s are not this: those rows carry their own insets and
+  /// sit flush, which is why Settings and the export history take no gap.
+  static double get listItemGap => SdSpacingConstant.h8;
+
   /// Height of the app's floating bottom bars — the shell's nav pill and the
   /// log flow's step bar. Both read it and neither hardcodes its own: the two
   /// numbers drifted apart once (68 assumed here against a 56-tall bar), and
