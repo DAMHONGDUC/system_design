@@ -57,6 +57,12 @@ abstract final class SdContentPaddingV2 {
   /// sit flush, which is why Settings and the export history take no gap.
   static double get listItemGap => SdSpacingConstant.h12;
 
+  /// Gap between two whole cards/sections stacked on a screen — dashboard's
+  /// mixed cards, insights' correlation/forecast/sleep cards. A different
+  /// rhythm than [listItemGap]: these are distinct sections, not repeated
+  /// rows of the same kind of data.
+  static double get sectionGap => SdSpacingConstant.h20;
+
   /// Height of the app's floating bottom bars — the shell's nav pill and the
   /// log flow's step bar. Both read it and neither hardcodes its own: the two
   /// numbers drifted apart once (68 assumed here against a 56-tall bar), and
