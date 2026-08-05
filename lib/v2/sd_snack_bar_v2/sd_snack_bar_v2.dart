@@ -1,118 +1,109 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
 
+part 'sd_snack_bar_v2_card.dart';
+part 'sd_snack_bar_v2_host.dart';
+
 /// Picks the icon and accent. The surface stays the same dark card — a
 /// full-bleed red or green bar is the brightness hard rule 3 avoids.
 enum SdSnackBarKindV2 { success, error, info }
 
+/// Which edge the card comes from.
+///
+/// [bottom] is the default and what every screen wants. [top] exists for a
+/// route that owns the bottom of the screen — a sheet whose own surface would
+/// otherwise sit on the message.
+enum SdSnackBarPlacementV2 { top, bottom }
+
 /// The one way to show a snackbar; never call `showSnackBar` directly.
 /// Takes an already-localized string.
+///
+/// It draws into the **root overlay**, not a `ScaffoldMessenger`. A messenger
+/// renders into the nearest registered `Scaffold`, so a route without one —
+/// the paywall sheet — sent its messages to the screen *underneath*, where
+/// they were covered by the very sheet that raised them. The overlay is above
+/// every route, so there is nothing left to hide behind.
 final class SdSnackBarUtilsV2 {
   /// Something the user asked for completed.
-  static void success(BuildContext context, String message) =>
-      _show(context, message, SdSnackBarKindV2.success);
+  static void success(
+    BuildContext context,
+    String message, {
+    SdSnackBarPlacementV2 placement = SdSnackBarPlacementV2.bottom,
+  }) => _show(context, message, SdSnackBarKindV2.success, placement);
 
   /// Something failed and the user may need to act.
-  static void error(BuildContext context, String message) =>
-      _show(context, message, SdSnackBarKindV2.error);
+  static void error(
+    BuildContext context,
+    String message, {
+    SdSnackBarPlacementV2 placement = SdSnackBarPlacementV2.bottom,
+  }) => _show(context, message, SdSnackBarKindV2.error, placement);
 
   /// Neutral confirmation — a value was noted, a job was queued.
-  static void info(BuildContext context, String message) =>
-      _show(context, message, SdSnackBarKindV2.info);
+  static void info(
+    BuildContext context,
+    String message, {
+    SdSnackBarPlacementV2 placement = SdSnackBarPlacementV2.bottom,
+  }) => _show(context, message, SdSnackBarKindV2.info, placement);
+
+  /// How long the card stays. Errors need reading; the rest are just
+  /// acknowledgements.
+  static const Duration errorDuration = Duration(seconds: 5);
+  static const Duration duration = Duration(seconds: 3);
+
+  /// One at a time: a queue replays stale state after the screen moved on.
+  static OverlayEntry? _current;
 
   static void _show(
     BuildContext context,
     String message,
     SdSnackBarKindV2 kind,
+    SdSnackBarPlacementV2 placement,
   ) {
-    final ScaffoldMessengerState messenger = ScaffoldMessenger.of(context);
+    final OverlayState? overlay = Overlay.maybeOf(context, rootOverlay: true);
 
-    messenger
-      // One at a time: a queue replays stale state after the screen moved on.
-      ..clearSnackBars()
-      ..showSnackBar(
-        SnackBar(
-          content: _AppSnackBarBody(message: message, kind: kind),
-          // The body draws the card; the SnackBar only positions it.
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          padding: EdgeInsets.zero,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.fromLTRB(
-            SdSpacingConstant.w16,
-            0,
-            SdSpacingConstant.w16,
-            SdSpacingConstant.h16,
-          ),
-          // Errors need reading; the rest are just acknowledgements.
-          duration: kind == SdSnackBarKindV2.error
-              ? const Duration(seconds: 5)
-              : const Duration(seconds: 3),
-          dismissDirection: DismissDirection.horizontal,
-        ),
-      );
-  }
-}
+    // No overlay means no Navigator above this context — nothing to draw into,
+    // and a message is never worth throwing over.
+    if (overlay == null) return;
 
-class _AppSnackBarBody extends StatelessWidget {
-  const _AppSnackBarBody({required this.message, required this.kind});
+    _remove();
 
-  final String message;
-  final SdSnackBarKindV2 kind;
+    late final OverlayEntry entry;
 
-  ({IconData icon, Color accent}) _style(BuildContext context) =>
-      switch (kind) {
-    SdSnackBarKindV2.success => (
-      icon: Icons.check_circle_outline,
-      accent: context.colorScheme.secondary,
-    ),
-    SdSnackBarKindV2.error => (
-      icon: Icons.error_outline,
-      accent: context.colorScheme.error,
-    ),
-    SdSnackBarKindV2.info => (
-      icon: Icons.info_outline,
-      accent: context.colorScheme.primary,
-    ),
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    final ({IconData icon, Color accent}) style = _style(context);
-
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: SdSpacingConstant.w16,
-        vertical: SdSpacingConstant.h12,
-      ),
-      decoration: BoxDecoration(
-        color: context.sdTheme.surfaceElevated,
-        borderRadius: BorderRadius.circular(SdSpacingConstant.r16),
-        // Accent as a hairline, not a fill. The icon carries the kind too,
-        // so colour is never the only signal.
-        border: Border.all(color: style.accent.withValues(alpha: 0.4)),
-        boxShadow: <BoxShadow>[
-          BoxShadow(
-            color: context.sdTheme.background.withValues(alpha: 0.5),
-            blurRadius: SdSpacingConstant.r12,
-            offset: Offset(0, SdSpacingConstant.h4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: <Widget>[
-          SdIconV2(
-            icon: style.icon,
-            size: SdSpacingConstant.r20,
-            color: style.accent,
-          ),
-          SizedBox(width: SdSpacingConstant.w12),
-          Expanded(child: Text(message, style: context.textTheme.bodyMedium!)),
-        ],
+    entry = OverlayEntry(
+      builder: (BuildContext _) => _SdSnackBarHostV2(
+        message: message,
+        kind: kind,
+        placement: placement,
+        duration: kind == SdSnackBarKindV2.error ? errorDuration : duration,
+        onDismissed: () {
+          if (identical(_current, entry)) _remove();
+        },
+        // The overlay went away under us — a popped route, a torn-down test.
+        // Only forget the handle; touching an entry whose overlay is gone is
+        // what turns one stale message into an assertion in the next screen.
+        onDisposed: () {
+          if (identical(_current, entry)) _current = null;
+        },
       ),
     );
+    _current = entry;
+
+    overlay.insert(entry);
+  }
+
+  static void _remove() {
+    final OverlayEntry? entry = _current;
+
+    _current = null;
+
+    if (entry == null) return;
+    if (entry.mounted) entry.remove();
+
+    entry.dispose();
   }
 }
