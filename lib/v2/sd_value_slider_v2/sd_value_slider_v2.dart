@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_text_style_v2/sd_text_style_v2.dart';
 
-
 /// A number the user drags: the current value, big, over the slider that
 /// sets it. Used by the attack detail's intensity dialog and onboarding's
 /// pressure threshold page — the same control, so it lives here rather than
@@ -47,7 +46,9 @@ class SdValueSliderV2 extends StatelessWidget {
       children: <Widget>[
         Text(
           label,
-          style: context.textTheme.displaySmall!.semiBold.copyWith(color: color),
+          style: context.textTheme.displaySmall!.semiBold.copyWith(
+            color: color,
+          ),
         ),
         Slider(
           value: value,

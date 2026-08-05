@@ -42,7 +42,7 @@ class SdFilterPillV2 extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               SdIconV2(
-               icon: Icons.filter_list,
+                icon: Icons.filter_list,
                 size: SdSpacingConstant.r16,
                 color: scheme.primary,
               ),
@@ -50,7 +50,7 @@ class SdFilterPillV2 extends StatelessWidget {
               Text(label, style: context.textTheme.labelLarge!),
               SizedBox(width: SdSpacingConstant.w2),
               SdIconV2(
-              icon:  Icons.expand_more,
+                icon: Icons.expand_more,
                 size: SdSpacingConstant.r18,
                 color: scheme.onSurfaceVariant,
               ),

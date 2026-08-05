@@ -71,9 +71,8 @@ class SdBarChartV2 extends StatelessWidget {
           left: SdChartStyleV2.countLeftTitles(context, interval),
           bottom: SdChartStyleV2.categoryBottomTitles(
             context,
-            (int index) => index < 0 || index >= bars.length
-                ? null
-                : bars[index].label,
+            (int index) =>
+                index < 0 || index >= bars.length ? null : bars[index].label,
           ),
         ),
         barTouchData: BarTouchData(

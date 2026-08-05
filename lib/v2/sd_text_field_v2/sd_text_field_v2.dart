@@ -111,9 +111,7 @@ class SdTextFieldV2 extends StatelessWidget {
             isDense: true,
             filled: false,
             hintText: hint,
-            hintStyle: textStyle.copyWith(
-              color: context.sdTheme.textSecondary,
-            ),
+            hintStyle: textStyle.copyWith(color: context.sdTheme.textSecondary),
             contentPadding: EdgeInsets.symmetric(
               horizontal: SdSpacingConstant.w16,
               vertical: SdSpacingConstant.h12,

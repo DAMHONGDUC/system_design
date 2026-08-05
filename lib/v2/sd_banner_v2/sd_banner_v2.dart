@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
+import '../sd_card_v2/sd_card_v2.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_icon_badge_v2/sd_icon_badge_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
@@ -36,36 +37,35 @@ class SdBannerV2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: EdgeInsets.all(SdSpacingConstant.w16),
-          child: Row(
-            children: [
-              SdIconBadgeV2(icon: icon, color: color),
-              SizedBox(width: SdSpacingConstant.w16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: context.textTheme.titleMedium!),
-                    SizedBox(height: SdSpacingConstant.h2),
-                    subtitleChild ??
-                        Text(subtitle, style: context.textTheme.bodySmall!.muted(context)),
-                  ],
-                ),
+    return SdCardV2(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.all(SdSpacingConstant.w16),
+        child: Row(
+          children: [
+            SdIconBadgeV2(icon: icon, color: color),
+            SizedBox(width: SdSpacingConstant.w16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: context.textTheme.titleMedium!),
+                  SizedBox(height: SdSpacingConstant.h2),
+                  subtitleChild ??
+                      Text(
+                        subtitle,
+                        style: context.textTheme.bodySmall!.muted(context),
+                      ),
+                ],
               ),
-              SizedBox(width: SdSpacingConstant.w8),
-              SdIconV2(
-                icon: Icons.chevron_right,
-                size: SdSpacingConstant.r20,
-                color: context.colorScheme.onSurfaceVariant,
-              ),
-            ],
-          ),
+            ),
+            SizedBox(width: SdSpacingConstant.w8),
+            SdIconV2(
+              icon: Icons.chevron_right,
+              size: SdSpacingConstant.r20,
+              color: context.colorScheme.onSurfaceVariant,
+            ),
+          ],
         ),
       ),
     );

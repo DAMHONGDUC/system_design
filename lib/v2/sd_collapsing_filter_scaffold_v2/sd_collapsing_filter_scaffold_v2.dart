@@ -66,7 +66,8 @@ class SdCollapsingFilterScaffoldV2 extends StatefulWidget {
       _CollapsingFilterScaffoldState();
 }
 
-class _CollapsingFilterScaffoldState extends State<SdCollapsingFilterScaffoldV2> {
+class _CollapsingFilterScaffoldState
+    extends State<SdCollapsingFilterScaffoldV2> {
   /// Calm, and the same 250ms the rest of the app's chrome moves in.
   static const Duration _duration = Duration(milliseconds: 250);
 

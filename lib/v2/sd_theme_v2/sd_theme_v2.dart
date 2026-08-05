@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 /// The colour slots System Design widgets need that `ColorScheme` has no name
 /// for. The package declares the contract; the host app fills it in and
 /// registers it on `ThemeData.extensions`, so swapping palettes never touches
@@ -89,11 +88,7 @@ class SdThemeV2 extends ThemeExtension<SdThemeV2> {
     return SdThemeV2(
       background: Color.lerp(background, other.background, t)!,
       surfaceModal: Color.lerp(surfaceModal, other.surfaceModal, t)!,
-      surfaceElevated: Color.lerp(
-        surfaceElevated,
-        other.surfaceElevated,
-        t,
-      )!,
+      surfaceElevated: Color.lerp(surfaceElevated, other.surfaceElevated, t)!,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
       textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
       chartGrid: Color.lerp(chartGrid, other.chartGrid, t)!,

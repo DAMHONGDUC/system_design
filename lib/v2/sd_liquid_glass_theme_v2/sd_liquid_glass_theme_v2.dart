@@ -3,7 +3,6 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
-
 /// Whether this device can actually render Liquid Glass.
 ///
 /// The effect is a fragment-shader image filter, and only Impeller can run
