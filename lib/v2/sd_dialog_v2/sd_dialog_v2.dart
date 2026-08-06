@@ -76,14 +76,15 @@ class SdDialogV2 extends StatelessWidget {
             ],
             if (actions.isNotEmpty) ...[
               SizedBox(height: SdSpacingConstant.h20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  for (final (i, action) in actions.indexed) ...[
-                    if (i > 0) SizedBox(width: SdSpacingConstant.w8),
-                    action,
-                  ],
-                ],
+              // Falls back to stacking the actions when a narrow dialog
+              // (insetPadding leaves little room) can't fit them side by
+              // side — a plain Row overflows instead of ever giving up the
+              // row layout.
+              OverflowBar(
+                alignment: MainAxisAlignment.end,
+                spacing: SdSpacingConstant.w8,
+                overflowSpacing: SdSpacingConstant.h8,
+                children: actions,
               ),
             ],
           ],
