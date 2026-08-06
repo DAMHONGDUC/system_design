@@ -165,7 +165,7 @@ abstract final class SdContentPaddingV2 {
   /// [bottomGap]. Everything else — a pushed detail, a sheet route — takes
   /// [detailBottom], which is a different rule and says so.
   static double bottom(BuildContext context, {bool floatingNav = false}) =>
-      floatingNav ? _navInset(context) + bottomGap : detailBottom(context);
+      floatingNav ? floatingBarInset(context) + bottomGap : detailBottom(context);
 
   /// Bottom inset for a screen with nothing floating over it.
   ///
@@ -213,9 +213,10 @@ abstract final class SdContentPaddingV2 {
       ? navBarOffset(context) + floatingBarHeight + bottomGap
       : bottomGap;
 
-  /// The nav pill's footprint: how far off the bottom edge it sits, plus its
-  /// own height.
-  static double _navInset(BuildContext context) =>
+  /// A floating bottom bar's whole footprint: how far off the bottom edge it
+  /// sits, plus its own height. What anything drawn over the bar has to clear
+  /// — content via [bottom], and a snackbar via `SdFloatingBarScopeV2`.
+  static double floatingBarInset(BuildContext context) =>
       navBarOffset(context) + floatingBarHeight;
 
   /// The device's bottom inset (home indicator), off the **view** — the same

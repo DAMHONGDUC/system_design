@@ -31,6 +31,7 @@ export 'sd_empty_state_v2/sd_empty_state_v2.dart';
 export 'sd_filter_pill_v2/sd_filter_pill_v2.dart';
 export 'sd_filter_sheet_v2/sd_filter_sheet_v2.dart';
 export 'sd_fitted_text_v2/sd_fitted_text_v2.dart';
+export 'sd_floating_bar_scope_v2/sd_floating_bar_scope_v2.dart';
 export 'sd_glass_circle_v2/sd_glass_circle_v2.dart';
 export 'sd_horizontal_spacing_v2/sd_horizontal_spacing_v2.dart';
 export 'sd_icon_badge_v2/sd_icon_badge_v2.dart';

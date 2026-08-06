@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
+import '../sd_floating_bar_scope_v2/sd_floating_bar_scope_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
 
 part 'sd_snack_bar_v2_card.dart';
@@ -69,6 +71,11 @@ final class SdSnackBarUtilsV2 {
     // No overlay means nothing to draw into — a message is never worth throwing over.
     if (overlay == null) return;
 
+    // Read here, from the caller's context, not in the entry's builder: the
+    // root overlay sits ABOVE the shell, so a scope inside it is invisible
+    // from down there.
+    final double floatingBarInset = SdFloatingBarScopeV2.insetOf(context);
+
     _remove();
 
     late final OverlayEntry entry;
@@ -78,6 +85,7 @@ final class SdSnackBarUtilsV2 {
         message: message,
         kind: kind,
         placement: placement,
+        floatingBarInset: floatingBarInset,
         duration: kind == SdSnackBarKindV2.error ? errorDuration : duration,
         onDismissed: () {
           if (identical(_current, entry)) _remove();

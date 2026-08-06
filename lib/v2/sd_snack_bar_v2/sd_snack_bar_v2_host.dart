@@ -8,6 +8,7 @@ class _SdSnackBarHostV2 extends StatefulWidget {
     required this.message,
     required this.kind,
     required this.placement,
+    required this.floatingBarInset,
     required this.duration,
     required this.onDismissed,
     required this.onDisposed,
@@ -16,6 +17,10 @@ class _SdSnackBarHostV2 extends StatefulWidget {
   final String message;
   final SdSnackBarKindV2 kind;
   final SdSnackBarPlacementV2 placement;
+
+  /// What a floating bottom bar occupies where this was raised, 0 without one.
+  final double floatingBarInset;
+
   final Duration duration;
   final VoidCallback onDismissed;
   final VoidCallback onDisposed;
@@ -74,12 +79,15 @@ class _SdSnackBarHostV2State extends State<_SdSnackBarHostV2>
     final EdgeInsets safe = MediaQuery.viewPaddingOf(context);
     final bool atTop = widget.placement == SdSnackBarPlacementV2.top;
     final double offset = SdSpacingConstant.h16;
+    // Rests on whichever is lower: the home indicator, or the nav pill the
+    // message would otherwise land on top of.
+    final double floor = math.max(safe.bottom, widget.floatingBarInset);
 
     return Positioned(
       left: SdSpacingConstant.w16,
       right: SdSpacingConstant.w16,
       top: atTop ? safe.top + offset : null,
-      bottom: atTop ? null : safe.bottom + offset,
+      bottom: atTop ? null : floor + offset,
       child: FadeTransition(
         opacity: _curve,
         child: SlideTransition(
