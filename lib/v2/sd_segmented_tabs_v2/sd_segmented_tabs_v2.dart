@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 
 import '../../core/sd_spacing_constant.dart';
+import '../sd_badge_v2/sd_badge_v2.dart';
 import '../sd_context_v2/sd_context_v2.dart';
+import '../sd_liquid_glass_theme_v2/sd_liquid_glass_theme_v2.dart';
 import '../sd_text_style_v2/sd_text_style_v2.dart';
 
 /// One segment of [SdSegmentedTabsV2]: what it is called, and how much is in
@@ -43,10 +46,13 @@ class SdSegmentedTabsV2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final Widget track = Container(
       height: height,
       decoration: BoxDecoration(
-        color: context.colorScheme.surfaceContainerHigh,
+        // Opaque fill only when glass is off; the glass supplies the surface.
+        color: SdGlassV2.isSupported
+            ? null
+            : context.colorScheme.surfaceContainerHigh,
         borderRadius: BorderRadius.circular(height / 2),
       ),
       child: Stack(
@@ -97,6 +103,16 @@ class SdSegmentedTabsV2 extends StatelessWidget {
           ),
         ],
       ),
+    );
+
+    if (!SdGlassV2.isSupported) return track;
+    // Frosted, and the thumb and labels paint crisply on top of it — the same
+    // treatment the shell's nav pill gets.
+    return LiquidGlass.withOwnLayer(
+      settings: kChromeGlass,
+      shape: LiquidRoundedSuperellipse(borderRadius: height / 2),
+      clipBehavior: Clip.antiAlias,
+      child: track,
     );
   }
 }
@@ -163,16 +179,26 @@ class _Count extends StatelessWidget {
         ? context.colorScheme.primary
         : context.sdTheme.textSecondary;
 
+    // Capped, or a four-figure count widens the chip until it squeezes the
+    // label beside it out of the segment. Shares the badge's ceiling: one
+    // number for how high a count chip counts anywhere in the system.
+    final String label = value > SdBadgeV2.maxCount
+        ? '${SdBadgeV2.maxCount}+'
+        : '$value';
+
     return Container(
-      constraints: BoxConstraints(minWidth: SdSpacingConstant.r20),
-      padding: EdgeInsets.symmetric(horizontal: SdSpacingConstant.w4),
+      constraints: BoxConstraints(minWidth: SdSpacingConstant.r22),
+      padding: EdgeInsets.symmetric(
+        horizontal: SdSpacingConstant.w8,
+        vertical: SdSpacingConstant.h2,
+      ),
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: accent.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(SdSpacingConstant.r20),
       ),
       child: Text(
-        '$value',
+        label,
         style: context.textTheme.labelSmall!.semiBold.copyWith(color: accent),
         maxLines: 1,
       ),
