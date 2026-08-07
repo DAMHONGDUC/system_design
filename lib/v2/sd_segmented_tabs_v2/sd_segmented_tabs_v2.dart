@@ -56,6 +56,10 @@ class SdSegmentedTabsV2 extends StatelessWidget {
         borderRadius: BorderRadius.circular(height / 2),
       ),
       child: Stack(
+        // Expand, or the row of segments takes only the height of its own
+        // text and the Stack parks it at the top edge — the labels sit
+        // against the top of the track instead of centred in it.
+        fit: StackFit.expand,
         children: <Widget>[
           // Thumb: one segment wide, aligned to the selection. Calm 200ms
           // slide, no flash (WIDGET_RULES § 6).
