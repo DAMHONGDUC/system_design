@@ -29,6 +29,8 @@ final class SdSpacingConstant {
   static double get w160 => 160.w;
 
   // --- Vertical (.h) ---
+  /// A hairline — the divider's thickness, and nothing else so far.
+  static double get h1 => 1.h;
   static double get h2 => 2.h;
   static double get h4 => 4.h;
   static double get h6 => 6.h;

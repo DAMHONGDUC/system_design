@@ -26,6 +26,7 @@ export 'sd_color_dot_v2/sd_color_dot_v2.dart';
 export 'sd_content_padding_v2/sd_content_padding_v2.dart';
 export 'sd_context_v2/sd_context_v2.dart';
 export 'sd_dialog_v2/sd_dialog_v2.dart';
+export 'sd_divider_v2/sd_divider_v2.dart';
 export 'sd_donut_chart_v2/sd_donut_chart_v2.dart';
 export 'sd_empty_state_v2/sd_empty_state_v2.dart';
 export 'sd_filter_pill_v2/sd_filter_pill_v2.dart';
