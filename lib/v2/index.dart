@@ -12,6 +12,7 @@ library;
 export 'sd_action_view_v2/sd_action_view_v2.dart';
 export 'sd_app_bar_button_v2/sd_app_bar_button_v2.dart';
 export 'sd_app_bar_v2/sd_app_bar_v2.dart';
+export 'sd_badge_dot_v2/sd_badge_dot_v2.dart';
 export 'sd_banner_v2/sd_banner_v2.dart';
 export 'sd_bar_chart_v2/sd_bar_chart_v2.dart';
 export 'sd_benefit_row_v2/sd_benefit_row_v2.dart';
