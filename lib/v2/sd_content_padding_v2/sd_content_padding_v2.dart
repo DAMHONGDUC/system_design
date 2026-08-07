@@ -63,6 +63,15 @@ abstract final class SdContentPaddingV2 {
   /// rows of the same kind of data.
   static double get sectionGap => SdSpacingConstant.h20;
 
+  /// Gap above a pinned bottom action — the daylight between the last thing
+  /// the content scrolled to and the button holding the bottom edge.
+  ///
+  /// Its own field, not [bottomGap]: that one is the air *below* the last
+  /// item, and pinning created a second edge on the side the content arrives
+  /// from. Equal to it on purpose, so a pinned footer sits with the same air
+  /// above and below.
+  static double get pinnedActionsGap => SdSpacingConstant.h16;
+
   /// Height of the app's floating bottom bars — the shell's nav pill and the
   /// log flow's step bar. Both read it and neither hardcodes its own: the two
   /// numbers drifted apart once (68 assumed here against a 56-tall bar), and
