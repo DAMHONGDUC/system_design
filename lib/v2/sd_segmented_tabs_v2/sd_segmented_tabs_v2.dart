@@ -27,7 +27,7 @@ class SdSegmentV2 {
 /// reads as Android on an iOS-first app, and it wants a `TabController` for
 /// what is one integer.
 ///
-/// The count sits inside the segment rather than on its corner as an
+/// The count sits inside the segment as plain text, not on its corner as an
 /// `SdBadgeV2` would: a corner badge on a tab has to overhang something, and
 /// in a track that means overhanging the neighbouring tab.
 class SdSegmentedTabsV2 extends StatelessWidget {
@@ -175,33 +175,23 @@ class _Count extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color accent = selected
-        ? context.colorScheme.primary
+    // Plain text, no tinted chip behind it: a filled pill next to a label
+    // competes with the label for the same glance, and the number is the
+    // quieter half of the pair.
+    final Color colour = selected
+        ? context.colorScheme.primary.withValues(alpha: 0.7)
         : context.sdTheme.textSecondary;
-
-    // Capped, or a four-figure count widens the chip until it squeezes the
-    // label beside it out of the segment. Shares the badge's ceiling: one
-    // number for how high a count chip counts anywhere in the system.
+    // Capped, or a four-figure count pushes the label out of the segment.
+    // Shares the badge's ceiling: one number for how high a count reads
+    // anywhere in the system.
     final String label = value > SdBadgeV2.maxCount
         ? '${SdBadgeV2.maxCount}+'
         : '$value';
 
-    return Container(
-      constraints: BoxConstraints(minWidth: SdSpacingConstant.r22),
-      padding: EdgeInsets.symmetric(
-        horizontal: SdSpacingConstant.w8,
-        vertical: SdSpacingConstant.h2,
-      ),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: accent.withValues(alpha: 0.18),
-        borderRadius: BorderRadius.circular(SdSpacingConstant.r20),
-      ),
-      child: Text(
-        label,
-        style: context.textTheme.labelSmall!.semiBold.copyWith(color: accent),
-        maxLines: 1,
-      ),
+    return Text(
+      label,
+      style: context.textTheme.labelLarge!.copyWith(color: colour),
+      maxLines: 1,
     );
   }
 }
