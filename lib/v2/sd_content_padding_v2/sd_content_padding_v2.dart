@@ -174,7 +174,9 @@ abstract final class SdContentPaddingV2 {
   /// [bottomGap]. Everything else — a pushed detail, a sheet route — takes
   /// [detailBottom], which is a different rule and says so.
   static double bottom(BuildContext context, {bool floatingNav = false}) =>
-      floatingNav ? floatingBarInset(context) + bottomGap : detailBottom(context);
+      floatingNav
+      ? floatingBarInset(context) + bottomGap
+      : detailBottom(context);
 
   /// Bottom inset for a screen with nothing floating over it.
   ///

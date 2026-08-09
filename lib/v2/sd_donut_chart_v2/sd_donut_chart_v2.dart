@@ -28,10 +28,27 @@ class SdDonutSliceV2 {
 /// never the sole signal.
 ///
 /// Slices with a zero value are dropped rather than drawn as a hairline.
+///
+/// [centerRadius] and [thickness] exist for the one case the default size
+/// cannot serve: a donut sitting beside its legend rather than above it, where
+/// the full-width ring would not fit. Pass `SdSpacingConstant` values — the
+/// two add up to the ring's outer radius, so the widget needs twice their sum
+/// in both directions.
 class SdDonutChartV2 extends StatelessWidget {
-  const SdDonutChartV2({required this.slices, super.key});
+  const SdDonutChartV2({
+    required this.slices,
+    this.centerRadius,
+    this.thickness,
+    super.key,
+  });
 
   final List<SdDonutSliceV2> slices;
+
+  /// Radius of the hole. Defaults to `SdSpacingConstant.r44`.
+  final double? centerRadius;
+
+  /// Width of the ring itself. Defaults to `SdSpacingConstant.r28`.
+  final double? thickness;
 
   @override
   Widget build(BuildContext context) {
@@ -42,13 +59,13 @@ class SdDonutChartV2 extends StatelessWidget {
     return PieChart(
       PieChartData(
         sectionsSpace: SdSpacingConstant.w2,
-        centerSpaceRadius: SdSpacingConstant.r44,
+        centerSpaceRadius: centerRadius ?? SdSpacingConstant.r44,
         sections: <PieChartSectionData>[
           for (final SdDonutSliceV2 slice in present)
             PieChartSectionData(
               value: slice.value,
               color: slice.color,
-              radius: SdSpacingConstant.r28,
+              radius: thickness ?? SdSpacingConstant.r28,
               showTitle: false,
             ),
         ],
