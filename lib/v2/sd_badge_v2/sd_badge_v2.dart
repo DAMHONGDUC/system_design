@@ -35,6 +35,14 @@ class SdBadgeV2 extends StatelessWidget {
   /// wide enough to cover the icon it sits on.
   static const int maxCount = 99;
 
+  /// The capped form of [value] — "99+" past [maxCount].
+  ///
+  /// Public because the badge is not the only place a count is stated: a
+  /// Settings row carries the same number as the badge it mirrors, and two
+  /// copies of the cap is two chances for one of them to say "132".
+  static String formatCount(int value) =>
+      value > maxCount ? '$maxCount+' : '$value';
+
   final Widget child;
 
   /// Nothing is drawn when false — the badge never occupies space it is not
@@ -103,9 +111,7 @@ class _Count extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color fill = color ?? context.colorScheme.primary;
-    final String label = value > SdBadgeV2.maxCount
-        ? '${SdBadgeV2.maxCount}+'
-        : '$value';
+    final String label = SdBadgeV2.formatCount(value);
 
     return Container(
       // A minimum width, not a fixed one: one digit stays a circle and more
