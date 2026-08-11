@@ -40,6 +40,42 @@ generation and take no suffix. A widget is never renamed to `V3` on its own —
 a whole new generation gets a new folder next to `v2/`, and both ship at once while an
 app migrates.
 
+### There are two generations now, and they never import each other
+
+`v2/` is what **BaroEase** renders. `v3/` is what **Seller OS** renders. Both
+are exported from `lib/index.dart` and both are live — this is the situation
+the paragraph above describes, not a migration in progress.
+
+**`v3` is not a port of `v2`.** It repeats several widget names because both
+products need a button and a card, and it repeats several *token* names
+because both need a background colour. That is convergence, and it stops
+there:
+
+- **No file under `v3/` may import from `v2/`, or the reverse.** The two are
+  built on incompatible premises — v2 is dark-only with frosted-glass chrome
+  that the body scrolls behind; v3 ships light and dark with opaque chrome
+  that takes real layout space. `SdContentPaddingV3` is a fifth the size of
+  `SdContentPaddingV2` for exactly that reason, and sharing either would drag
+  one product's chrome into the other's.
+- **`core/` is still shared, and still the only shared thing.** Both
+  generations measure in `SdSpacingConstant`. Adding a getter there is fine
+  and additive; changing or removing one is a change to a shipped app.
+- **`v2/` is frozen for `v3` work.** If a v3 widget wants a behaviour a v2
+  widget already has, copy the idea and write it in v3 — never edit v2 to
+  suit a product it does not ship in.
+
+**Every generation-scoped name carries its suffix, including extension
+members.** v3's `BuildContext` getters are `theme3` / `colorScheme3` /
+`textTheme3` / `sdTheme3` and its `TextStyle` getters are `semiBold3` /
+`muted3`, precisely so that a file importing the package index gets both
+generations' extensions without either shadowing the other. An unsuffixed
+member on a generation's extension is a bug, not a convenience.
+
+v3 also carries three token holders v2 never had — `SdRadiusV3` (semantic
+radii), `SdMotionV3` (durations and curves) and the extra slots on
+`SdThemeV3` (`profit`/`loss`, the status accents, `border`/`divider`). They
+are listed here so nobody adds a fourth by hand at a call site.
+
 ## 3. Layout
 
 **One folder per widget, and the folder is named after the file:**
