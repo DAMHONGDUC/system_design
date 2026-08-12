@@ -31,8 +31,20 @@ abstract final class SdContentPaddingV3 {
   /// The gutter: 16 either side of any content.
   static double get horizontal => SdSpacingConstant.w16;
 
-  /// Gap between the app bar and the first item of content.
-  static double get topGap => SdSpacingConstant.h16;
+  /// Gap between the app bar and the first item of content. **8, and every
+  /// screen reads it from here** — owner's rule. The bar is already a band of
+  /// empty space at its own bottom edge, so anything more under it reads as a
+  /// hole between the chrome and the page — the more so now the bar is a full
+  /// `kToolbarHeight` and carries that band itself.
+  ///
+  /// **It is a `SizedBox` the screen puts at the top of its content, never
+  /// padding and never added to a bar's height** — owner's rule. A gap folded
+  /// into [screen] or [fullBleed] is invisible at the call site, and a gap
+  /// added to `SdAppBarV3.toolbarHeight` makes the bar measure taller than it
+  /// draws, which is how a docked control ends up mis-set in a row whose
+  /// height nobody can point at. Being a box in the tree, it can be seen,
+  /// moved and skipped.
+  static double get topGap => SdSpacingConstant.h8;
 
   /// Gap between the last item and whatever is below it.
   static double get bottomGap => SdSpacingConstant.h24;
@@ -65,6 +77,19 @@ abstract final class SdContentPaddingV3 {
   /// needs-attention and activity blocks. A different rhythm than
   /// [listItemGap]: these are distinct sections, not repeated rows.
   static double get sectionGap => SdSpacingConstant.h24;
+
+  /// The height of a horizontal filter-chip strip — Inventory's five tabs,
+  /// Orders' five.
+  ///
+  /// Here rather than typed on each screen because `SdSearchHeaderV3` pins
+  /// one under the app bar and has to know how tall it is before it lays it
+  /// out. A screen that made its own strip a different height would leave the
+  /// pinned header measuring a row it does not have.
+  static double get filterStrip => SdSpacingConstant.h56;
+
+  /// The vertical inset inside [filterStrip] — the daylight above and below
+  /// the chips.
+  static double get filterStripGap => SdSpacingConstant.h8;
 
   /// Gap above a pinned bottom action — the daylight between the last thing
   /// the content scrolled to and the button holding the bottom edge.
@@ -160,11 +185,14 @@ abstract final class SdContentPaddingV3 {
   /// The floor under [bottom].
   static double get minBottom => SdSpacingConstant.h24;
 
-  /// The whole thing: gutter + [topGap] + [bottom].
+  /// The whole thing: gutter + [bottom].
+  ///
+  /// **No top inset.** [topGap] is a `SizedBox` the screen places itself —
+  /// see that getter.
   static EdgeInsets screen(BuildContext context, {bool floatingNav = false}) =>
       EdgeInsets.fromLTRB(
         horizontal,
-        topGap,
+        0,
         horizontal,
         bottom(context, floatingNav: floatingNav),
       );
@@ -172,11 +200,12 @@ abstract final class SdContentPaddingV3 {
   /// Same vertical insets, no gutter — for a list of rows or cards that bring
   /// their own horizontal padding. Adding the gutter on top of theirs would
   /// push the rows off the grid the rest of the app sits on.
+  ///
+  /// **No top inset**, for the same reason as [screen].
   static EdgeInsets fullBleed(
     BuildContext context, {
     bool floatingNav = false,
   }) => EdgeInsets.only(
-    top: topGap,
     bottom: bottom(context, floatingNav: floatingNav),
   );
 

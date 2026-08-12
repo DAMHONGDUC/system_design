@@ -46,6 +46,7 @@ class SdLoadingV3Page extends StatelessWidget {
   final Color? color;
 
   @override
-  Widget build(BuildContext context) =>
-      Center(child: SdLoadingV3(size: SdLoadingV3.pageSize, color: color));
+  Widget build(BuildContext context) => Center(
+    child: SdLoadingV3(size: SdLoadingV3.pageSize, color: color),
+  );
 }

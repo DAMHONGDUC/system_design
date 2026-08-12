@@ -42,7 +42,6 @@ final class SdRadiusV3 {
 
   /// A sheet rounds its top edge only — the bottom runs off-screen, and
   /// rounding it leaves two bright slivers of barrier in the corners.
-  static BorderRadius get modalTop => BorderRadius.vertical(
-    top: Radius.circular(modal),
-  );
+  static BorderRadius get modalTop =>
+      BorderRadius.vertical(top: Radius.circular(modal));
 }

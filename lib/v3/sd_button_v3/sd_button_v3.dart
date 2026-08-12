@@ -98,7 +98,9 @@ class SdButtonV3 extends StatelessWidget {
     final EdgeInsets padding = SdContentPaddingV3.button * scale;
 
     final TextStyle labelStyle = context.textTheme3.labelLarge!.semiBold3
-        .copyWith(color: _enabled ? style.foreground : style.disabledForeground);
+        .copyWith(
+          color: _enabled ? style.foreground : style.disabledForeground,
+        );
 
     final Widget content = Row(
       mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,

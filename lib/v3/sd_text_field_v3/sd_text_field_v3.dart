@@ -155,7 +155,9 @@ class SdTextFieldV3 extends StatelessWidget {
               enabledBorder: _outline(borderColor),
               disabledBorder: _outline(context.sdTheme3.divider),
               focusedBorder: _outline(
-                _hasError ? context.sdTheme3.danger : context.colorScheme3.primary,
+                _hasError
+                    ? context.sdTheme3.danger
+                    : context.colorScheme3.primary,
                 width: SdSpacingConstant.w2,
               ),
             ),

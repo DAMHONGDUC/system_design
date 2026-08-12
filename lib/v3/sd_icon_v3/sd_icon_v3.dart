@@ -17,7 +17,13 @@ import '../sd_context_v3/sd_context_v3.dart';
 ///
 /// Pass an `SdSpacingConstant.r*` for [size], never a raw number.
 class SdIconV3 extends StatelessWidget {
-  const SdIconV3(this.icon, {this.size, this.color, this.semanticLabel, super.key});
+  const SdIconV3(
+    this.icon, {
+    this.size,
+    this.color,
+    this.semanticLabel,
+    super.key,
+  });
 
   /// The size an icon takes when nothing asks for another — a list row's
   /// leading glyph, an inline affordance.

@@ -66,7 +66,9 @@ class SdBadgeV3 extends StatelessWidget {
           ],
           Text(
             label,
-            style: context.textTheme3.labelSmall!.semiBold3.copyWith(color: tint),
+            style: context.textTheme3.labelSmall!.semiBold3.copyWith(
+              color: tint,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
