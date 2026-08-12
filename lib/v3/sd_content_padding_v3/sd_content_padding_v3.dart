@@ -16,13 +16,17 @@ import '../../core/sd_spacing_constant.dart';
 /// also pads for something floating over it, and the two would double up. One
 /// class computes it, every screen reads it, nothing adds it twice.
 ///
-/// **v3's chrome is opaque and takes real layout space** — a plain
-/// [BottomNavigationBar] and an opaque app bar, not v2's floating glass pill.
-/// So there is no `appBarInset` here and no nav-bar footprint to clear: the
-/// `Scaffold` has already subtracted both by the time a body builds, and a
-/// screen owes only the gaps. That is the single biggest difference between
-/// the two generations' padding, and the reason this class is a fifth of the
-/// size of v2's.
+/// **v3's app bar is opaque and takes real layout space; its tab bar floats.**
+/// So there is no `appBarInset` here — the `Scaffold` has already subtracted
+/// the bar by the time a body builds — but there *is* a floating-bar
+/// footprint, because `SdGlassNavBarV3` hovers over the content rather than
+/// occupying a slot. The five tab screens pass `floatingNav: true` and every
+/// other route does not.
+///
+/// The asymmetry is deliberate. A frosted app bar costs a shader pass on
+/// every scroll frame of a list that can run to thousands of rows; the tab
+/// bar is a fixed 64pt strip whose cost does not grow with the content, and
+/// it is the one piece of chrome the whole app is judged by.
 abstract final class SdContentPaddingV3 {
   /// The gutter: 16 either side of any content.
   static double get horizontal => SdSpacingConstant.w16;
@@ -80,33 +84,100 @@ abstract final class SdContentPaddingV3 {
     SdSpacingConstant.h8,
   );
 
-  /// Where the last item ends: the device's own safe area, floored at
-  /// [minBottom].
+  // --- The floating glass tab bar ---
+  //
+  // `SdGlassNavBarV3` floats over the content rather than taking a layout
+  // slot, so its footprint is something every tab screen has to pad by. All
+  // of it lives here, and nothing types one of these numbers at a call site:
+  // that is exactly how a bar and the padding beneath it drift apart.
+
+  /// Height of the floating tab bar itself, excluding how far it sits off the
+  /// bottom edge.
+  static double get floatingBarHeight => SdSpacingConstant.h64;
+
+  /// Corner radius that makes the bar a true stadium: exactly half its
+  /// height, so the short edges are full semicircles with no straight
+  /// segment left. Derived, never typed.
+  static double get floatingBarRadius => floatingBarHeight / 2;
+
+  /// Side margin. The bar is inset from the screen edges — that detachment is
+  /// what makes it read as floating rather than as a docked toolbar.
+  static double get floatingBarHorizontal => SdSpacingConstant.w16;
+
+  /// How far the bar sits above the bottom edge.
   ///
-  /// The floor is the whole point — a Home-button iPhone and most Androids
-  /// report 0, and without it the last row sits flush against the bottom edge
-  /// of the glass. Deliberately NOT [bottomGap] stacked on top of the inset: a
-  /// device reporting 34 already gives more room than the floor asks for.
-  static double bottom(BuildContext context) =>
-      math.max(_viewBottom(context), minBottom);
+  /// **The same rule as `SdContentPaddingV2.navBarOffset`** — owner's call, so
+  /// the two generations' floating bars sit identically and a screenshot of
+  /// one app can be held against the other.
+  ///
+  /// The device's own bottom inset, clamped between [minNavBarOffset] and
+  /// [maxNavBarOffset]. The floor stops the bar hugging the glass where the
+  /// device asks for little or nothing — a Home-button iPhone, most Androids,
+  /// the default test view, an iPad, landscape. The ceiling stops a deep inset
+  /// pushing the bar visibly up the screen.
+  ///
+  /// Note what the ceiling costs on a portrait iPhone, whose home-indicator
+  /// inset is 34: the bar lands 14 short of it, so its lower edge sits inside
+  /// the strip iOS reserves for the indicator and the edge-swipe gesture. That
+  /// is a deliberate trade of system clearance for a tighter bar, not an
+  /// oversight — raise [maxNavBarOffset] to 34 to give the clearance back.
+  static double navBarOffset(BuildContext context) {
+    final double safeBottom = _viewBottom(context);
+
+    return math.min(math.max(safeBottom, minNavBarOffset), maxNavBarOffset);
+  }
+
+  /// The floor under [navBarOffset]. Below this the bar reads as stuck to the
+  /// bottom edge, whatever the device claims it needs.
+  static double get minNavBarOffset => SdSpacingConstant.h16;
+
+  /// The ceiling over [navBarOffset]. Above this the bar reads as floating
+  /// away from the bottom rather than sitting at it.
+  static double get maxNavBarOffset => SdSpacingConstant.h20;
+
+  /// The bar's whole footprint — how far off the bottom it sits plus its own
+  /// height. What anything drawn underneath has to clear.
+  static double floatingBarInset(BuildContext context) =>
+      navBarOffset(context) + floatingBarHeight;
+
+  /// Where the last item ends.
+  ///
+  /// The five tab screens pass [floatingNav], because their content scrolls
+  /// behind the glass bar and has to clear its whole footprint plus a gap.
+  /// Everything else — a pushed detail, a sheet route — has nothing floating
+  /// over it and takes the plain safe-area rule.
+  ///
+  /// That plain rule: the device's own safe area, floored at [minBottom]. The
+  /// floor is the whole point — a Home-button iPhone and most Androids report
+  /// 0, and without it the last row sits flush against the bottom edge of the
+  /// glass. Deliberately NOT [bottomGap] stacked on top of the inset: a device
+  /// reporting 34 already gives more room than the floor asks for.
+  static double bottom(BuildContext context, {bool floatingNav = false}) =>
+      floatingNav
+      ? floatingBarInset(context) + bottomGap
+      : math.max(_viewBottom(context), minBottom);
 
   /// The floor under [bottom].
   static double get minBottom => SdSpacingConstant.h24;
 
   /// The whole thing: gutter + [topGap] + [bottom].
-  static EdgeInsets screen(BuildContext context) => EdgeInsets.fromLTRB(
-    horizontal,
-    topGap,
-    horizontal,
-    bottom(context),
-  );
+  static EdgeInsets screen(BuildContext context, {bool floatingNav = false}) =>
+      EdgeInsets.fromLTRB(
+        horizontal,
+        topGap,
+        horizontal,
+        bottom(context, floatingNav: floatingNav),
+      );
 
   /// Same vertical insets, no gutter — for a list of rows or cards that bring
   /// their own horizontal padding. Adding the gutter on top of theirs would
   /// push the rows off the grid the rest of the app sits on.
-  static EdgeInsets fullBleed(BuildContext context) => EdgeInsets.only(
+  static EdgeInsets fullBleed(
+    BuildContext context, {
+    bool floatingNav = false,
+  }) => EdgeInsets.only(
     top: topGap,
-    bottom: bottom(context),
+    bottom: bottom(context, floatingNav: floatingNav),
   );
 
   /// The device's bottom inset (home indicator), read off the **view** rather

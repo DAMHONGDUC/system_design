@@ -71,10 +71,19 @@ members.** v3's `BuildContext` getters are `theme3` / `colorScheme3` /
 generations' extensions without either shadowing the other. An unsuffixed
 member on a generation's extension is a bug, not a convenience.
 
-v3 also carries three token holders v2 never had — `SdRadiusV3` (semantic
-radii), `SdMotionV3` (durations and curves) and the extra slots on
-`SdThemeV3` (`profit`/`loss`, the status accents, `border`/`divider`). They
-are listed here so nobody adds a fourth by hand at a call site.
+v3 also carries token holders v2 never had — `SdRadiusV3` (semantic radii),
+`SdMotionV3` (durations and curves), `SdElevationV3` (shadows) and the extra
+slots on `SdThemeV3` (`profit`/`loss`, the status accents, `border`/`divider`,
+`shadow`). They are listed here so nobody adds another by hand at a call site.
+
+**Both generations render liquid glass, and neither shares the code.** v2 has
+`SdGlassV2` and its frosted app bar; v3 has `SdGlassV3` and
+`SdGlassNavBarV3`. Each declares its own `ImageFilter.isShaderFilterSupported`
+gate and its own `LiquidGlassSettings`, because the two products need
+different tuning — v2 is dark-only and tuned calm for photophobic users, v3
+ships light and dark and sits over columns of money where chromatic
+aberration would blur digits. The support check is four lines; copying it is
+cheaper than the coupling.
 
 ## 3. Layout
 

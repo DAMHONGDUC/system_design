@@ -48,6 +48,7 @@ class SdThemeV3 extends ThemeExtension<SdThemeV3> {
     required this.info,
     required this.chartGrid,
     required this.barrier,
+    required this.shadow,
   });
 
   /// The page behind every surface — one step below `colorScheme.surface`,
@@ -110,6 +111,16 @@ class SdThemeV3 extends ThemeExtension<SdThemeV3> {
   /// Scrim behind a modal route.
   final Color barrier;
 
+  /// The colour a raised surface casts.
+  ///
+  /// **Expected to be fully transparent in a dark palette, and that is not a
+  /// missing value.** A shadow separates a card from a lighter page behind
+  /// it; on a near-black background there is nothing for it to darken, and a
+  /// shadow tuned for light reads as dirt. Dark palettes lean on [border] and
+  /// the surface step instead, which is why `SdCardV3` draws both and lets
+  /// this one disappear.
+  final Color shadow;
+
   /// Neutral defaults, so a widget still renders when the host app has not
   /// registered the extension. Debug builds assert first (see
   /// `context.sdTheme3`); this only keeps a release build from crashing.
@@ -131,6 +142,7 @@ class SdThemeV3 extends ThemeExtension<SdThemeV3> {
     info: Color(0xFF2563C9),
     chartGrid: Color(0xFFE4E7EC),
     barrier: Color(0x99000000),
+    shadow: Color(0x14101828),
   );
 
   @override
@@ -152,6 +164,7 @@ class SdThemeV3 extends ThemeExtension<SdThemeV3> {
     Color? info,
     Color? chartGrid,
     Color? barrier,
+    Color? shadow,
   }) => SdThemeV3(
     background: background ?? this.background,
     surfaceModal: surfaceModal ?? this.surfaceModal,
@@ -170,6 +183,7 @@ class SdThemeV3 extends ThemeExtension<SdThemeV3> {
     info: info ?? this.info,
     chartGrid: chartGrid ?? this.chartGrid,
     barrier: barrier ?? this.barrier,
+    shadow: shadow ?? this.shadow,
   );
 
   @override
@@ -194,6 +208,7 @@ class SdThemeV3 extends ThemeExtension<SdThemeV3> {
       info: Color.lerp(info, other.info, t)!,
       chartGrid: Color.lerp(chartGrid, other.chartGrid, t)!,
       barrier: Color.lerp(barrier, other.barrier, t)!,
+      shadow: Color.lerp(shadow, other.shadow, t)!,
     );
   }
 }

@@ -21,6 +21,7 @@ class SdScaffoldV3 extends StatelessWidget {
     this.floatingActionButton,
     this.floatingActionButtonLocation,
     this.resizeToAvoidBottomInset = true,
+    this.extendBody = false,
     super.key,
   });
 
@@ -34,6 +35,15 @@ class SdScaffoldV3 extends StatelessWidget {
   /// must not move when the keyboard opens (a scanner viewfinder).
   final bool resizeToAvoidBottomInset;
 
+  /// Runs the body under [bottomNavigationBar] instead of stopping above it.
+  ///
+  /// **Required whenever that slot holds `SdGlassNavBarV3`**, and pointless
+  /// otherwise. The glass bar only reads as glass if there is content moving
+  /// behind it; without this the scaffold reserves its height and the bar
+  /// refracts a blank strip of page. The screens behind it then owe its
+  /// footprint — see `SdContentPaddingV3.floatingBarInset`.
+  final bool extendBody;
+
   @override
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: context.sdTheme3.background,
@@ -43,5 +53,6 @@ class SdScaffoldV3 extends StatelessWidget {
     floatingActionButton: floatingActionButton,
     floatingActionButtonLocation: floatingActionButtonLocation,
     resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+    extendBody: extendBody,
   );
 }

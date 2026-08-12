@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../sd_content_padding_v3/sd_content_padding_v3.dart';
 import '../sd_context_v3/sd_context_v3.dart';
+import '../sd_elevation_v3/sd_elevation_v3.dart';
 import '../sd_radius_v3/sd_radius_v3.dart';
 
 /// Which layer a card sits on — a prop, never a named constructor.
@@ -21,10 +22,12 @@ enum SdCardLayerV3 { surface, elevated, sunken }
 /// and a card that grew them would end up with a boolean per screen that
 /// wanted a different arrangement.
 ///
-/// **Border, not shadow.** v3 ships light as well as dark, and a shadow tuned
-/// for one reads as dirt in the other; a hairline border separates a card from
-/// its background identically in both. [SdThemeV3.border] is the only edge in
-/// the system.
+/// **Border first, shadow second, and the shadow is allowed to vanish.** The
+/// hairline border is what separates a card from its background in every
+/// palette; the shadow from [SdElevationV3] only adds depth where there is a
+/// lighter page behind it to darken. A dark palette sets
+/// [SdThemeV3.shadow] transparent and the card falls back to border-only,
+/// which is the right look rather than a missing one.
 class SdCardV3 extends StatelessWidget {
   const SdCardV3({
     required this.child,
@@ -33,6 +36,7 @@ class SdCardV3 extends StatelessWidget {
     this.onTap,
     this.borderColor,
     this.semanticLabel,
+    this.elevated = false,
     super.key,
   });
 
@@ -59,6 +63,11 @@ class SdCardV3 extends StatelessWidget {
   /// tapping it does.
   final String? semanticLabel;
 
+  /// Casts [SdElevationV3.raised] instead of [SdElevationV3.card] — for the
+  /// one card on a screen that should read as sitting above the others.
+  /// A screen where several are elevated has no hierarchy, only noise.
+  final bool elevated;
+
   @override
   Widget build(BuildContext context) {
     final Color background = switch (layer) {
@@ -72,25 +81,37 @@ class SdCardV3 extends StatelessWidget {
       child: child,
     );
 
-    return Material(
-      color: background,
-      borderRadius: SdRadiusV3.cardAll,
-      child: Ink(
-        decoration: BoxDecoration(
-          borderRadius: SdRadiusV3.cardAll,
-          border: Border.all(color: borderColor ?? context.sdTheme3.border),
-        ),
-        child: onTap == null
-            ? body
-            : Semantics(
-                button: true,
-                label: semanticLabel,
-                child: InkWell(
-                  onTap: onTap,
-                  borderRadius: SdRadiusV3.cardAll,
-                  child: body,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: SdRadiusV3.cardAll,
+        // A sunken card is a well, not a raised surface — casting a shadow
+        // from something that reads as recessed is a contradiction.
+        boxShadow: layer == SdCardLayerV3.sunken
+            ? SdElevationV3.none
+            : elevated
+            ? SdElevationV3.raised(context)
+            : SdElevationV3.card(context),
+      ),
+      child: Material(
+        color: background,
+        borderRadius: SdRadiusV3.cardAll,
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: SdRadiusV3.cardAll,
+            border: Border.all(color: borderColor ?? context.sdTheme3.border),
+          ),
+          child: onTap == null
+              ? body
+              : Semantics(
+                  button: true,
+                  label: semanticLabel,
+                  child: InkWell(
+                    onTap: onTap,
+                    borderRadius: SdRadiusV3.cardAll,
+                    child: body,
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }
