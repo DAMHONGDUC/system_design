@@ -9,12 +9,18 @@ class _SdSnackBarHostV3 extends StatefulWidget {
     required this.message,
     required this.kind,
     required this.placement,
+    required this.overFloatingBar,
     required this.onDismissed,
   });
 
   final String message;
   final SdSnackBarKindV3 kind;
   final SdSnackBarPlacementV3 placement;
+
+  /// Whether the screen that raised this message has the glass nav bar under
+  /// it. Passed in rather than read here — see `SdFloatingBarScopeV3`.
+  final bool overFloatingBar;
+
   final VoidCallback onDismissed;
 
   @override
@@ -72,7 +78,14 @@ class _SdSnackBarHostV3State extends State<_SdSnackBarHostV3>
       top: fromBottom
           ? null
           : SdContentPaddingV3.statusBarInset(context) + SdSpacingConstant.h12,
-      bottom: fromBottom ? SdContentPaddingV3.detailBottom(context) : null,
+      // The same call a tab screen makes for its own last row, so a message
+      // rests exactly where the content it is about does.
+      bottom: fromBottom
+          ? SdContentPaddingV3.bottom(
+              context,
+              floatingNav: widget.overFloatingBar,
+            )
+          : null,
       child: FadeTransition(
         opacity: CurvedAnimation(
           parent: _controller,

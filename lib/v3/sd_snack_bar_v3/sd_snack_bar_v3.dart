@@ -6,6 +6,7 @@ import '../../core/sd_spacing_constant.dart';
 import '../sd_content_padding_v3/sd_content_padding_v3.dart';
 import '../sd_context_v3/sd_context_v3.dart';
 import '../sd_elevation_v3/sd_elevation_v3.dart';
+import '../sd_floating_bar_scope_v3/sd_floating_bar_scope_v3.dart';
 import '../sd_icon_v3/sd_icon_v3.dart';
 import '../sd_motion_v3/sd_motion_v3.dart';
 import '../sd_radius_v3/sd_radius_v3.dart';
@@ -82,6 +83,11 @@ final class SdSnackBarUtilsV3 {
 
     if (overlay == null) return;
 
+    // Read here, from the caller's context, never in the entry's builder: the
+    // root overlay sits ABOVE the shell, so a scope inside it is invisible
+    // from down there and every message would read "no bar".
+    final bool overFloatingBar = SdFloatingBarScopeV3.hasBarBelow(context);
+
     dismiss();
 
     final OverlayEntry entry = OverlayEntry(
@@ -89,6 +95,7 @@ final class SdSnackBarUtilsV3 {
         message: message,
         kind: kind,
         placement: placement,
+        overFloatingBar: overFloatingBar,
         onDismissed: dismiss,
       ),
     );
