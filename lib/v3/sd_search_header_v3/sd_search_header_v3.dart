@@ -114,9 +114,11 @@ class SdSearchHeaderV3 extends StatelessWidget {
   Widget build(BuildContext context) => SliverPersistentHeader(
     pinned: true,
     delegate: _SdSearchHeaderDelegateV3(
-      // Read here, where there is a context: `maxExtent` has none, and a
-      // header that guessed the status bar would sit under it.
-      topPadding: MediaQuery.paddingOf(context).top,
+      // - measured once here and handed down: `maxExtent` has no context, and
+      //   a header that guessed the status bar would sit under it
+      // - off the view, never the ambient MediaQuery, which a Scaffold body
+      //   has already had the top inset removed from
+      topPadding: SdContentPaddingV3.statusBarInset(context),
       title: title,
       controller: controller,
       hint: hint,

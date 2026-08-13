@@ -62,13 +62,17 @@ class _SdSnackBarHostV3State extends State<_SdSnackBarHostV3>
   @override
   Widget build(BuildContext context) {
     final bool fromBottom = widget.placement == SdSnackBarPlacementV3.bottom;
-    final EdgeInsets safe = MediaQuery.viewPaddingOf(context);
 
     return Positioned(
       left: SdContentPaddingV3.horizontal,
       right: SdContentPaddingV3.horizontal,
-      top: fromBottom ? null : safe.top + SdSpacingConstant.h12,
-      bottom: fromBottom ? safe.bottom + SdSpacingConstant.h24 : null,
+      // Both insets come off the view through SdContentPaddingV3. An ambient
+      // read here returns 0 for the home indicator, because this host sits
+      // inside a Scaffold body that already had it removed.
+      top: fromBottom
+          ? null
+          : SdContentPaddingV3.statusBarInset(context) + SdSpacingConstant.h12,
+      bottom: fromBottom ? SdContentPaddingV3.detailBottom(context) : null,
       child: FadeTransition(
         opacity: CurvedAnimation(
           parent: _controller,

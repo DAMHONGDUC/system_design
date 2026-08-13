@@ -37,10 +37,12 @@ class SdBottomSheetV3 extends StatelessWidget {
       left: SdContentPaddingV3.horizontal,
       right: SdContentPaddingV3.horizontal,
       top: SdSpacingConstant.h12,
-      // Clears the home indicator: a sheet's last row is the one a thumb
-      // reaches for, and it must not sit under the system gesture area.
+      // - clears the home indicator, because a sheet's last row is the one a
+      //   thumb reaches for
+      // - lifts over the keyboard, so no caller wraps this in its own Padding
       bottom:
-          MediaQuery.viewPaddingOf(context).bottom + SdSpacingConstant.h24,
+          SdContentPaddingV3.detailBottom(context) +
+          SdContentPaddingV3.keyboardInset(context),
     ),
     child: Column(
       mainAxisSize: MainAxisSize.min,

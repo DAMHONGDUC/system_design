@@ -170,20 +170,26 @@ abstract final class SdContentPaddingV3 {
   /// The five tab screens pass [floatingNav], because their content scrolls
   /// behind the glass bar and has to clear its whole footprint plus a gap.
   /// Everything else — a pushed detail, a sheet route — has nothing floating
-  /// over it and takes the plain safe-area rule.
-  ///
-  /// That plain rule: the device's own safe area, floored at [minBottom]. The
-  /// floor is the whole point — a Home-button iPhone and most Androids report
-  /// 0, and without it the last row sits flush against the bottom edge of the
-  /// glass. Deliberately NOT [bottomGap] stacked on top of the inset: a device
-  /// reporting 34 already gives more room than the floor asks for.
+  /// over it and takes [detailBottom].
   static double bottom(BuildContext context, {bool floatingNav = false}) =>
       floatingNav
       ? floatingBarInset(context) + bottomGap
-      : math.max(_viewBottom(context), minBottom);
+      : detailBottom(context);
 
-  /// The floor under [bottom].
-  static double get minBottom => SdSpacingConstant.h24;
+  /// Where the last item ends on a route with nothing floating over it.
+  ///
+  /// The device's own safe area, **floored** at [minDetailBottom]. The floor
+  /// is the whole point — a Home-button iPhone and most Androids report 0, and
+  /// without it the last row sits flush against the bottom edge of the glass.
+  ///
+  /// **Deliberately NOT [bottomGap] stacked on top of the inset.** A device
+  /// reporting 34 already gives more room than the floor asks for, and adding
+  /// a gap to a generous inset makes a detail screen look like it ends early.
+  static double detailBottom(BuildContext context) =>
+      math.max(_viewBottom(context), minDetailBottom);
+
+  /// The floor under [detailBottom].
+  static double get minDetailBottom => SdSpacingConstant.h24;
 
   /// The whole thing: gutter + [bottom].
   ///
@@ -208,6 +214,26 @@ abstract final class SdContentPaddingV3 {
   }) => EdgeInsets.only(
     bottom: bottom(context, floatingNav: floatingNav),
   );
+
+  /// The status bar, read off the **view** — see [_viewBottom] for why the
+  /// ambient `MediaQuery` is the wrong source.
+  ///
+  /// There is no `appBarInset` here and this is not one: v3's app bar is
+  /// opaque, so `Scaffold` has already subtracted it and content needs no
+  /// clearance. This exists for the one thing that draws its own chrome from
+  /// the top of the window — `SdSearchHeaderV3`, whose `maxExtent` has no
+  /// context to read from.
+  static double statusBarInset(BuildContext context) =>
+      MediaQueryData.fromView(View.of(context)).viewPadding.top;
+
+  /// How far the keyboard covers the bottom of the window, or 0 when it is
+  /// down. What a sheet holding a text field lifts itself by.
+  ///
+  /// Read from the ambient `MediaQuery` on purpose, and the only inset here
+  /// that is: the keyboard is transient, and a route animating one open needs
+  /// the value that changes with it rather than the window's resting state.
+  static double keyboardInset(BuildContext context) =>
+      MediaQuery.viewInsetsOf(context).bottom;
 
   /// The device's bottom inset (home indicator), read off the **view** rather
   /// than the ambient `MediaQuery`.
