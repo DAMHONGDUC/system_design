@@ -9,6 +9,7 @@ import '../sd_context_v3/sd_context_v3.dart';
 import '../sd_elevation_v3/sd_elevation_v3.dart';
 import '../sd_icon_v3/sd_icon_v3.dart';
 import '../sd_motion_v3/sd_motion_v3.dart';
+import '../sd_radius_v3/sd_radius_v3.dart';
 
 /// Whether this device can actually render the glass effect.
 ///
@@ -102,7 +103,12 @@ class SdGlassNavBarV3 extends StatelessWidget {
           borderRadius: BorderRadius.circular(
             SdContentPaddingV3.floatingBarRadius,
           ),
-          boxShadow: SdElevationV3.raised(context),
+          // **[SdElevationV3.modal], not [SdElevationV3.raised]** — owner's
+          // call that the bar should read as more present. It is the one
+          // piece of chrome that floats over every screen and never scrolls
+          // away, so it belongs in the same depth band as a sheet rather than
+          // sitting at the same height as the cards it passes over.
+          boxShadow: SdElevationV3.modal(context),
         ),
         child: LiquidGlass.withOwnLayer(
           // A superellipse, not a circle-cornered rectangle: it is the
@@ -175,6 +181,18 @@ class _NavItem extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
+  /// The pill drawn behind the current tab's glyph.
+  ///
+  /// Intrinsic to this item — it is what the indicator *is*, not
+  /// configuration about it, the same exemption `SdAppBarV3.toolbarHeight`
+  /// takes.
+  static double get indicatorWidth => SdSpacingConstant.w48;
+  static double get indicatorHeight => SdSpacingConstant.h30;
+
+  /// How much of the accent the pill carries. Low enough that the glyph on
+  /// top of it stays the thing being read.
+  static double get indicatorAlpha => 0.16;
+
   @override
   Widget build(BuildContext context) {
     final Color color = selected
@@ -194,17 +212,37 @@ class _NavItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            AnimatedSwitcher(
+            // **The current tab gets a shape, not only a colour.** Five
+            // glyphs that differ by hue alone are unreadable to a colour-blind
+            // seller and nearly invisible over a busy list showing through the
+            // glass — the same reasoning that makes the selected glyph a
+            // filled variant rather than a tinted outline.
+            AnimatedContainer(
               duration: SdMotionV3.fast,
-              child: SdIconV3(
-                selected
-                    ? (destination.selectedIcon ?? destination.icon)
-                    : destination.icon,
-                // Keyed so AnimatedSwitcher sees a new child when the glyph
-                // swaps rather than reusing the old one silently.
-                key: ValueKey<bool>(selected),
-                size: SdIconV3.defaultSize,
-                color: color,
+              curve: SdMotionV3.standard,
+              width: indicatorWidth,
+              height: indicatorHeight,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: selected
+                    ? context.colorScheme3.primary.withValues(
+                        alpha: indicatorAlpha,
+                      )
+                    : const Color(0x00000000),
+                borderRadius: SdRadiusV3.fullAll,
+              ),
+              child: AnimatedSwitcher(
+                duration: SdMotionV3.fast,
+                child: SdIconV3(
+                  selected
+                      ? (destination.selectedIcon ?? destination.icon)
+                      : destination.icon,
+                  // Keyed so AnimatedSwitcher sees a new child when the glyph
+                  // swaps rather than reusing the old one silently.
+                  key: ValueKey<bool>(selected),
+                  size: SdIconV3.defaultSize,
+                  color: color,
+                ),
               ),
             ),
             SizedBox(height: SdSpacingConstant.h2),
