@@ -84,19 +84,6 @@ abstract final class SdContentPaddingV3 {
   /// [listItemGap]: these are distinct sections, not repeated rows.
   static double get sectionGap => SdSpacingConstant.h24;
 
-  /// The height of a horizontal filter-chip strip — Inventory's five tabs,
-  /// Orders' five.
-  ///
-  /// Here rather than typed on each screen because `SdSearchHeaderV3` pins
-  /// one under the app bar and has to know how tall it is before it lays it
-  /// out. A screen that made its own strip a different height would leave the
-  /// pinned header measuring a row it does not have.
-  static double get filterStrip => SdSpacingConstant.h56;
-
-  /// The vertical inset inside [filterStrip] — the daylight above and below
-  /// the chips.
-  static double get filterStripGap => SdSpacingConstant.h8;
-
   /// Gap above a pinned bottom action — the daylight between the last thing
   /// the content scrolled to and the button holding the bottom edge.
   static double get pinnedActionsGap => SdSpacingConstant.h16;
