@@ -21,6 +21,7 @@ class SdIconV3 extends StatelessWidget {
     this.icon, {
     this.size,
     this.color,
+    this.fill,
     this.semanticLabel,
     super.key,
   });
@@ -41,6 +42,15 @@ class SdIconV3 extends StatelessWidget {
   final double? size;
   final Color? color;
 
+  /// How filled the glyph is, on the font's `FILL` axis: 0 is the outline, 1
+  /// is solid. Null leaves it at the font's default.
+  ///
+  /// **A continuous axis, not two icons.** Material Symbols ships as a
+  /// variable font, so this can be animated — which is how a tab bar marks
+  /// the current destination the way iOS does, by the glyph thickening rather
+  /// than by a second shape appearing behind it.
+  final double? fill;
+
   /// Set this only when the icon carries meaning no nearby text already
   /// gives. A decorative glyph beside its own label is noise to a screen
   /// reader, and leaving this null excludes it.
@@ -51,6 +61,7 @@ class SdIconV3 extends StatelessWidget {
     icon,
     size: size ?? defaultSize,
     color: color ?? context.sdTheme3.textPrimary,
+    fill: fill,
     semanticLabel: semanticLabel,
   );
 }

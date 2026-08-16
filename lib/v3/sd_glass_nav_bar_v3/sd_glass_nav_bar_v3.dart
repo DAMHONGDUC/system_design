@@ -9,7 +9,6 @@ import '../sd_context_v3/sd_context_v3.dart';
 import '../sd_elevation_v3/sd_elevation_v3.dart';
 import '../sd_icon_v3/sd_icon_v3.dart';
 import '../sd_motion_v3/sd_motion_v3.dart';
-import '../sd_radius_v3/sd_radius_v3.dart';
 
 /// Whether this device can actually render the glass effect.
 ///
@@ -181,17 +180,12 @@ class _NavItem extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
-  /// The pill drawn behind the current tab's glyph.
+  /// How solid the current tab's glyph goes, on the font's `FILL` axis.
   ///
-  /// Intrinsic to this item — it is what the indicator *is*, not
-  /// configuration about it, the same exemption `SdAppBarV3.toolbarHeight`
-  /// takes.
-  static double get indicatorWidth => SdSpacingConstant.w48;
-  static double get indicatorHeight => SdSpacingConstant.h30;
-
-  /// How much of the accent the pill carries. Low enough that the glyph on
-  /// top of it stays the thing being read.
-  static double get indicatorAlpha => 0.16;
+  /// Intrinsic to this item — it is what "selected" *looks like* here, not
+  /// configuration about it.
+  static double get selectedFill => 1;
+  static double get unselectedFill => 0;
 
   @override
   Widget build(BuildContext context) {
@@ -212,38 +206,29 @@ class _NavItem extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            // **The current tab gets a shape, not only a colour.** Five
-            // glyphs that differ by hue alone are unreadable to a colour-blind
-            // seller and nearly invisible over a busy list showing through the
-            // glass — the same reasoning that makes the selected glyph a
-            // filled variant rather than a tinted outline.
-            AnimatedContainer(
+            // **The glyph thickens; nothing appears behind it.** That is how
+            // iOS marks the current tab, and it is why there is no indicator
+            // pill here — a filled shape behind the icon is Material's idiom
+            // and reads as a foreign control sitting inside iOS chrome.
+            //
+            // `FILL` is a variable-font axis, so this is one glyph morphing
+            // rather than two glyphs swapping. Weight is the second signal
+            // alongside colour, which colour alone must never be.
+            TweenAnimationBuilder<double>(
               duration: SdMotionV3.fast,
               curve: SdMotionV3.standard,
-              width: indicatorWidth,
-              height: indicatorHeight,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: selected
-                    ? context.colorScheme3.primary.withValues(
-                        alpha: indicatorAlpha,
-                      )
-                    : const Color(0x00000000),
-                borderRadius: SdRadiusV3.fullAll,
+              tween: Tween<double>(
+                end: selected ? selectedFill : unselectedFill,
               ),
-              child: AnimatedSwitcher(
-                duration: SdMotionV3.fast,
-                child: SdIconV3(
-                  selected
-                      ? (destination.selectedIcon ?? destination.icon)
-                      : destination.icon,
-                  // Keyed so AnimatedSwitcher sees a new child when the glyph
-                  // swaps rather than reusing the old one silently.
-                  key: ValueKey<bool>(selected),
-                  size: SdIconV3.defaultSize,
-                  color: color,
-                ),
-              ),
+              builder: (BuildContext context, double fill, Widget? _) =>
+                  SdIconV3(
+                    selected
+                        ? (destination.selectedIcon ?? destination.icon)
+                        : destination.icon,
+                    size: SdIconV3.defaultSize,
+                    color: color,
+                    fill: fill,
+                  ),
             ),
             SizedBox(height: SdSpacingConstant.h2),
             Text(
