@@ -30,13 +30,12 @@ class _SdSearchHeaderDelegateV3 extends SliverPersistentHeaderDelegate {
   final ValueChanged<String>? onSubmitted;
   final List<SdAppBarActionV3> actions;
 
-  /// The row the field lives in while expanded: the gap under the title row,
-  /// the field, and the gap down to the strip. Exactly the height the header
-  /// gives back on scroll.
+  /// The row the field lives in while expanded: the gap under the title row
+  /// and the field itself. Exactly the height the header gives back on
+  /// scroll, and nothing more — what sits below the header belongs to the
+  /// body, and reserving space for it here is how one gap gets drawn twice.
   double get _searchRow =>
-      SdSearchHeaderMetricsV3.fieldGap +
-      SdSearchFieldV3.expandedHeight +
-      SdSearchHeaderMetricsV3.stripGap;
+      SdSearchHeaderMetricsV3.fieldGap + SdSearchFieldV3.expandedHeight;
 
   @override
   double get maxExtent =>

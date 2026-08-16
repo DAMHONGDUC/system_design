@@ -53,10 +53,14 @@ class SdAppBarActionV3 {
 /// draws, and they are not the same rule even when they are the same value.
 final class SdSearchHeaderMetricsV3 {
   /// Between the title row and the expanded search field.
+  ///
+  /// **The only gap this header owns.** It used to carry a second one below
+  /// the field, for the filter strip — but the strip is in the *body*, and
+  /// the screen already places `SdContentPaddingV3.topGap` in front of it.
+  /// Two boxes for one boundary is two owners for one number: Inventory's
+  /// chips sat 8 lower than every other screen's and nothing in either file
+  /// looked wrong on its own.
   static double get fieldGap => SdSpacingConstant.h8;
-
-  /// Between the expanded search field and the pinned filter strip.
-  static double get stripGap => SdSpacingConstant.h8;
 }
 
 /// The app bar for a screen whose search box *is* the screen — Inventory,
