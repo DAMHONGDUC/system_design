@@ -34,6 +34,16 @@ class SdFilterChipV3 extends StatelessWidget {
   /// zero renders as `0` and is a real answer.
   final int? count;
 
+  /// The chip's own height, and therefore the whole strip's — a filter strip
+  /// fits its chips exactly (owner's rule), so this is the only number in
+  /// that band.
+  ///
+  /// **Fixed rather than grown from the label.** A strip that can be pinned
+  /// needs an extent its sliver can state before laying anything out, and a
+  /// height that depended on text metrics would also change with the seller's
+  /// font-size setting — moving the list under it every time.
+  static double get height => SdSpacingConstant.h32;
+
   @override
   Widget build(BuildContext context) {
     final ColorScheme colors = context.colorScheme3;
@@ -45,6 +55,7 @@ class SdFilterChipV3 extends StatelessWidget {
       button: true,
       selected: selected,
       child: AnimatedContainer(
+        height: height,
         duration: SdMotionV3.fast,
         curve: SdMotionV3.standard,
         decoration: BoxDecoration(
@@ -61,12 +72,14 @@ class SdFilterChipV3 extends StatelessWidget {
             onTap: onSelected,
             borderRadius: SdRadiusV3.fullAll,
             child: Padding(
+              // Horizontal only: the height is [height], so a vertical inset
+              // here would fight it rather than add to it.
               padding: EdgeInsets.symmetric(
                 horizontal: SdSpacingConstant.w14,
-                vertical: SdSpacingConstant.h8,
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
                     label,
