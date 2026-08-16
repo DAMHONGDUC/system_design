@@ -22,6 +22,7 @@ export 'sd_card_v3/sd_card_v3.dart';
 export 'sd_content_padding_v3/sd_content_padding_v3.dart';
 export 'sd_context_v3/sd_context_v3.dart';
 export 'sd_dialog_v3/sd_dialog_v3.dart';
+export 'sd_divider_v3/sd_divider_v3.dart';
 export 'sd_elevation_v3/sd_elevation_v3.dart';
 export 'sd_empty_state_v3/sd_empty_state_v3.dart';
 export 'sd_fab_v3/sd_fab_v3.dart';
