@@ -61,11 +61,15 @@ class SdButtonV3 extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.icon,
+    this.leading,
     this.size = SdButtonSizeV3.medium,
     this.busy = false,
     this.expand = false,
     super.key,
-  });
+  }) : assert(
+         icon == null || leading == null,
+         'Pass icon or leading, never both — they occupy the same slot.',
+       );
 
   final SdButtonVariantV3 variant;
   final String label;
@@ -75,6 +79,13 @@ class SdButtonV3 extends StatelessWidget {
   final VoidCallback? onPressed;
 
   final IconData? icon;
+
+  /// Artwork in [icon]'s slot, for a mark that cannot be an [IconData] — a
+  /// vendor brand logo, which Apple and Google both supply and forbid
+  /// redrawing. Boxed to the icon size, and never tinted: the Google "G" is
+  /// four colours and stays that way.
+  final Widget? leading;
+
   final SdButtonSizeV3 size;
 
   /// Shows a spinner over the label and blocks further taps, without changing
@@ -96,7 +107,7 @@ class SdButtonV3 extends StatelessWidget {
     final SdButtonStyleV3 style = SdButtonStyleV3.of(context, variant);
     final double scale = size.scale;
     final EdgeInsets padding = SdContentPaddingV3.button * scale;
-
+    final double glyphSize = SdIconV3.defaultSize * scale;
     final TextStyle labelStyle = context.textTheme3.labelLarge!.semiBold3
         .copyWith(
           color: _enabled ? style.foreground : style.disabledForeground,
@@ -107,11 +118,12 @@ class SdButtonV3 extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         if (icon != null) ...<Widget>[
-          SdIconV3(
-            icon!,
-            size: SdIconV3.defaultSize * scale,
-            color: labelStyle.color,
-          ),
+          SdIconV3(icon!, size: glyphSize, color: labelStyle.color),
+          SizedBox(width: iconGap * scale),
+        ] else if (leading != null) ...<Widget>[
+          // Boxed to the icon size so a logo button and an icon button are
+          // the same shape, whatever the artwork's own aspect ratio.
+          SizedBox.square(dimension: glyphSize, child: leading),
           SizedBox(width: iconGap * scale),
         ],
         Flexible(
