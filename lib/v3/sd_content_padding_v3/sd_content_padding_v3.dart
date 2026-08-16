@@ -46,8 +46,14 @@ abstract final class SdContentPaddingV3 {
   /// moved and skipped.
   static double get topGap => SdSpacingConstant.h8;
 
-  /// Gap between the last item and whatever is below it.
-  static double get bottomGap => SdSpacingConstant.h24;
+  /// Gap between the last item and whatever is below it: the safe area, or
+  /// the floating nav pill on a tab screen. Scroll a list to its end and this
+  /// is the breathing room you see.
+  ///
+  /// **The same value `SdContentPaddingV2.bottomGap` uses** — owner's rule, so
+  /// the two generations end a list with identical air and a screenshot of one
+  /// app can be held against the other.
+  static double get bottomGap => SdSpacingConstant.h16;
 
   /// The one padding every `SdButtonV3` wears, whatever its variant — a
   /// filled, outlined and text button read the same size next to each other

@@ -64,11 +64,8 @@ class SdAppBarV3 extends StatelessWidget implements PreferredSizeWidget {
   static double get subtitleHeight => SdSpacingConstant.h16;
 
   @override
-  Size get preferredSize => Size.fromHeight(
-    toolbarHeight +
-        (subtitle == null ? 0 : subtitleHeight) +
-        (bottom?.preferredSize.height ?? 0),
-  );
+  Size get preferredSize =>
+      Size.fromHeight(toolbarHeight + (bottom?.preferredSize.height ?? 0));
 
   @override
   Widget build(BuildContext context) => AppBar(

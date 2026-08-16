@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v3/sd_context_v3.dart';
 import '../sd_icon_v3/sd_icon_v3.dart';
+import '../sd_motion_v3/sd_motion_v3.dart';
 import '../sd_radius_v3/sd_radius_v3.dart';
 
 /// A search box.
@@ -83,21 +84,30 @@ class SdSearchFieldV3 extends StatefulWidget {
 }
 
 class _SdSearchFieldV3State extends State<SdSearchFieldV3> {
+  /// Owned here so the glyph can answer to focus, not only to text. A field
+  /// that lights up when it is tapped is the cheapest signal that the next
+  /// keystroke is going somewhere.
+  final FocusNode _focus = FocusNode();
+
   @override
   void initState() {
     super.initState();
-    // Rebuilds when the field goes from empty to not, which is the only thing
-    // this widget's own state tracks — whether to show the clear button.
-    widget.controller.addListener(_onTextChanged);
+    // Rebuilds when the field goes from empty to not, which is what decides
+    // whether the clear button is there.
+    widget.controller.addListener(_onChanged);
+    _focus.addListener(_onChanged);
   }
 
   @override
   void dispose() {
-    widget.controller.removeListener(_onTextChanged);
+    widget.controller.removeListener(_onChanged);
+    _focus
+      ..removeListener(_onChanged)
+      ..dispose();
     super.dispose();
   }
 
-  void _onTextChanged() => setState(() {});
+  void _onChanged() => setState(() {});
 
   void _clear() {
     widget.controller.clear();
@@ -107,95 +117,106 @@ class _SdSearchFieldV3State extends State<SdSearchFieldV3> {
   @override
   Widget build(BuildContext context) {
     final bool hasText = widget.controller.text.isNotEmpty;
+    final bool isFocused = _focus.hasFocus;
     final double height = widget.height ?? SdSearchFieldV3.expandedHeight;
 
-    return SizedBox(
+    // Centres the glyph in the stadium's round cap: half the leftover either
+    // side puts its centre exactly `height / 2` from the edge — which is also
+    // where the clear button's glyph lands on the right, because that button
+    // is square and `height` wide. The pill reads symmetrical at whatever
+    // height it is currently drawn at, docked or expanded.
+    final double capInset = (height - SdIconV3.defaultSize) / 2;
+
+    return AnimatedContainer(
+      duration: SdMotionV3.fast,
+      curve: SdMotionV3.standard,
       height: height,
-      child: TextField(
-        controller: widget.controller,
-        autofocus: widget.autofocus,
-        onChanged: widget.onChanged,
-        onSubmitted: widget.onSubmitted,
-        textInputAction: TextInputAction.search,
-        // The box is taller than one line of text, so the line has to be
-        // told where to sit in it.
-        textAlignVertical: TextAlignVertical.center,
-        style: context.textTheme3.bodyLarge!.copyWith(
-          color: context.sdTheme3.textPrimary,
+      decoration: BoxDecoration(
+        color: context.sdTheme3.surfaceSunken,
+        borderRadius: SdRadiusV3.fullAll,
+        // A hairline at rest, thickening to primary on focus — the same pair
+        // `SdTextFieldV3` wears. The sunken fill alone reads as a smudge on a
+        // light page, where the page and the fill are two steps apart at
+        // most; the edge is what makes it a control.
+        border: Border.all(
+          color: isFocused
+              ? context.colorScheme3.primary
+              : context.sdTheme3.border,
+          width: isFocused ? SdSpacingConstant.w2 : SdSpacingConstant.h1,
         ),
-        decoration: InputDecoration(
-          hintText: widget.hint,
-          hintStyle: context.textTheme3.bodyLarge!.copyWith(
-            color: context.sdTheme3.textTertiary,
+      ),
+      child: Row(
+        children: <Widget>[
+          SizedBox(width: capInset),
+          SdIconV3(
+            Icons.search_rounded,
+            size: SdIconV3.defaultSize,
+            // Muted with the hint at rest so an empty field reads as one
+            // quiet group, and lifted the moment it is in use. A secondary
+            // glyph beside a tertiary hint looks like two decisions nobody
+            // made together.
+            color: hasText || isFocused
+                ? context.sdTheme3.textSecondary
+                : context.sdTheme3.textTertiary,
           ),
-          filled: true,
-          fillColor: context.sdTheme3.surfaceSunken,
-          // Collapsed, not merely dense: `isDense` still reserves Material's
-          // minimum field height, which is taller than [height].
-          isCollapsed: true,
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: SdSpacingConstant.w12,
-          ),
-          prefixIcon: Padding(
-            padding: EdgeInsets.only(
-              left: SdSpacingConstant.w16,
-              right: SdSpacingConstant.w12,
+          SizedBox(width: SdSpacingConstant.w8),
+          Expanded(
+            child: TextField(
+              controller: widget.controller,
+              focusNode: _focus,
+              autofocus: widget.autofocus,
+              onChanged: widget.onChanged,
+              onSubmitted: widget.onSubmitted,
+              textInputAction: TextInputAction.search,
+              style: context.textTheme3.bodyLarge!.copyWith(
+                color: context.sdTheme3.textPrimary,
+              ),
+              // **The pill is the box above, not this decoration.** Fill,
+              // border and radius used to live here, and `InputDecorator`
+              // sizes its content to itself: stretched from outside it
+              // painted full height but laid the text out at the top, ten
+              // points above the middle of a docked pill, which is what made
+              // the field look mis-set against the actions beside it.
+              // `textAlignVertical` cannot fix that — it has no spare space
+              // to centre within. A plain `Row` centres its children and
+              // needs no persuading.
+              decoration: InputDecoration.collapsed(
+                hintText: widget.hint,
+                hintStyle: context.textTheme3.bodyLarge!.copyWith(
+                  color: context.sdTheme3.textTertiary,
+                ),
+              ),
             ),
-            child: SdIconV3(
-              Icons.search_rounded,
-              size: SdIconV3.defaultSize,
-              color: context.sdTheme3.textSecondary,
-            ),
           ),
-          prefixIconConstraints: const BoxConstraints(),
-          suffixIcon: hasText
-              ? IconButton(
-                  onPressed: _clear,
-                  tooltip: widget.clearTooltip,
-                  padding: EdgeInsets.zero,
-                  // Square and tied to the field's *current* height, so the
-                  // button shrinks with the pill as it docks instead of
-                  // overflowing it.
-                  constraints: BoxConstraints.tightFor(
-                    width: height,
-                    height: height,
-                  ),
-                  // Without this an IconButton reserves a 48pt tap target
-                  // whatever `constraints` says, which is taller than the
-                  // docked field.
-                  style: IconButton.styleFrom(
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  icon: SdIconV3(
-                    Icons.cancel_rounded,
-                    size: SdIconV3.smallSize,
-                    color: context.sdTheme3.textTertiary,
-                    semanticLabel: widget.clearTooltip,
-                  ),
-                )
-              : null,
-          suffixIconConstraints: const BoxConstraints(),
-          // A hairline at rest, thickening to primary on focus — the same
-          // pair `SdTextFieldV3` wears. The sunken fill alone reads as a
-          // smudge on a light page, where the page and the fill are two
-          // steps apart at most; the edge is what makes it a control.
-          border: _border(context.sdTheme3.border),
-          enabledBorder: _border(context.sdTheme3.border),
-          focusedBorder: _border(
-            context.colorScheme3.primary,
-            width: SdSpacingConstant.w2,
-          ),
-        ),
+          if (hasText)
+            IconButton(
+              onPressed: _clear,
+              tooltip: widget.clearTooltip,
+              padding: EdgeInsets.zero,
+              // Square and tied to the field's *current* height, so the
+              // button shrinks with the pill as it docks instead of
+              // overflowing it.
+              constraints: BoxConstraints.tightFor(
+                width: height,
+                height: height,
+              ),
+              // Without this an IconButton reserves a 48pt tap target
+              // whatever `constraints` says, which is taller than the docked
+              // field.
+              style: IconButton.styleFrom(
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              icon: SdIconV3(
+                Icons.cancel_rounded,
+                size: SdIconV3.smallSize,
+                color: context.sdTheme3.textTertiary,
+                semanticLabel: widget.clearTooltip,
+              ),
+            )
+          else
+            SizedBox(width: capInset),
+        ],
       ),
     );
   }
-
-  OutlineInputBorder _border(Color color, {double? width}) =>
-      OutlineInputBorder(
-        borderRadius: SdRadiusV3.fullAll,
-        borderSide: BorderSide(
-          color: color,
-          width: width ?? SdSpacingConstant.h1,
-        ),
-      );
 }

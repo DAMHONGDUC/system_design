@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/sd_spacing_constant.dart';
 import '../sd_content_padding_v3/sd_content_padding_v3.dart';
 import '../sd_context_v3/sd_context_v3.dart';
+import '../sd_floating_bar_scope_v3/sd_floating_bar_scope_v3.dart';
 import '../sd_icon_v3/sd_icon_v3.dart';
 import '../sd_text_style_v3/sd_text_style_v3.dart';
 
@@ -42,9 +43,20 @@ class SdEmptyStateV3 extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Center(
     child: Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: SdContentPaddingV3.horizontal,
-        vertical: SdSpacingConstant.h32,
+      // **Centred in the band the seller can see, not in the body.** A tab
+      // screen runs its body under the glass nav pill (`extendBody`), so
+      // centring against the full height puts the message low and its last
+      // line behind the bar. Reading the scope means no caller has to
+      // remember, and a pushed route — which has no bar — adds nothing.
+      padding: EdgeInsets.only(
+        left: SdContentPaddingV3.horizontal,
+        right: SdContentPaddingV3.horizontal,
+        top: SdSpacingConstant.h32,
+        bottom:
+            SdSpacingConstant.h32 +
+            (SdFloatingBarScopeV3.hasBarBelow(context)
+                ? SdContentPaddingV3.floatingBarInset(context)
+                : 0),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
