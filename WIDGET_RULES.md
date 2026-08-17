@@ -32,7 +32,7 @@ the widget stays in the app and composes the pieces from here.
 | Static-only holder | same, `final class` | `SdChartStyleV2` |
 | Presenter function | `showSd` + name + `V2` | `showSdBottomSheetV2` |
 | File and folder | snake_case of the class | `sd_banner_v2/sd_banner_v2.dart` |
-| Anything in `core/` | `Sd` + name, **no suffix** | `SdSpacingConstant` |
+| Anything in `core/` or `core/common/` | `Sd` + name, **no suffix** | `SdSpacingConstant`, `SdLogger` |
 
 The `V2` suffix is the generation of the design system, not a version of the
 individual widget. Things in `core/` carry no look, so they belong to no
@@ -85,15 +85,44 @@ ships light and dark and sits over columns of money where chromatic
 aberration would blur digits. The support check is four lines; copying it is
 cheaper than the coupling.
 
+### `core/common/` is app infrastructure, and it plays by different rules
+
+Everything above is about rendering. `core/common/` is the one place in this
+package that is not: it holds the plumbing every app of ours stands up
+identically — `SdLogger` and the `SdCrashReporter` contract today.
+
+- **Pure Dart, no Flutter, ever.** It is exported from `common.dart`, a second
+  entrypoint next to `index.dart`, precisely so a feature's `domain/` can log
+  without importing a widget library. A `package:flutter/*` import in here
+  breaks that for every app at once.
+- **No vendor SDK, ever.** `SdCrashReporter` is an interface and a no-op; the
+  Crashlytics (or Sentry, or anything) implementation stays in the host app
+  and arrives through `SdCrashReporter.attach`. That is the whole reason this
+  can be shared: an app that reports nothing pays no dependency for it.
+- **The `Sd` prefix still applies** — owner's rule, and it is why the naming
+  table above covers `core/common/` in the same row as `core/`. One package,
+  one prefix: a reader seeing `SdLogger` in an app file knows without looking
+  that it is shared code, and that is worth more than a name that reads
+  slightly more naturally in one app.
+- **Additive only.** A second app is already calling these. Adding a method is
+  fine; changing a signature is a change to a shipped app, same as `core/`.
+
+Anything with a look, a token or a `BuildContext` is not common — it is a
+generation's, and it goes in `v2/` or `v3/`.
+
 ## 3. Layout
 
 **One folder per widget, and the folder is named after the file:**
 
 ```
 lib/
-  index.dart                  # the package's only entry point
+  index.dart                  # widgets + tokens; re-exports common.dart
+  common.dart                 # pure-Dart entry point, safe from domain/
   core/
     sd_spacing_constant.dart  # no look, no generation, no suffix
+    common/
+      sd_logger.dart          # app infrastructure, not rendering
+      sd_crash_reporter.dart  # the contract only — never a vendor SDK
   v2/
     index.dart                # exports every folder below
     sd_banner_v2/
