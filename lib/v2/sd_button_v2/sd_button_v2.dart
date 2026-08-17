@@ -39,11 +39,18 @@ enum SdButtonVariantV2 {
 /// - [inline] — glyph and label travel together as one cluster that
 ///   shrink-wraps its content, so a longer label pushes the glyph sideways.
 ///   Right for a button sized by what is in it.
-/// - [aligned] — the same centred cluster, but the label sits start-aligned
-///   in a slot of [SdButtonV2.alignedLabelWidth], so two stacked buttons put
-///   their glyphs on the same x and start their labels on the same x however
-///   differently long the labels are. This is what makes the Apple and Google
-///   buttons on the login screen read as one pair.
+/// - [aligned] — the same cluster, but the label sits start-aligned in a slot
+///   of [SdButtonV2.alignedLabelWidth], so two stacked buttons put their
+///   glyphs on the same x and start their labels on the same x however
+///   differently long the labels are.
+///
+///   **No call site, and think before adding one.** It used to align the
+///   Apple and Google buttons on BaroEase's login screen into a pair, and was
+///   dropped there because a fixed-width label slot leaves each button's
+///   visible ink left of that button's own centre — BaroEase's rule is that
+///   content inside a button is horizontally centred. [aligned] buys
+///   cross-button alignment with per-button centring; reach for it only when
+///   the pairing is worth more than the centring, and never as a default.
 enum SdButtonIconPlacementV2 { inline, aligned }
 
 /// Size of an [SdButtonV2] — a prop, like [SdButtonVariantV2]. [scale]
