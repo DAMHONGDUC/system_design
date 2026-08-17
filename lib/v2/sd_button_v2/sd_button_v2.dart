@@ -15,6 +15,13 @@ import '../sd_icon_v2/sd_icon_v2.dart';
 /// - [text] — low-emphasis action (dialog "Cancel", "Not now").
 /// - [destructive] — irreversible confirm (delete); error-tinted fill so it
 ///   can never be mistaken for the safe action.
+/// - [outlinedDestructive] — a destructive action *offered*, not confirmed:
+///   error-tinted border and label over no fill. The pair matters. A screen
+///   that offers deleting alongside an ordinary action gives the ordinary one
+///   the filled [primary] and this to the dangerous one, so the eye lands on
+///   the safe button first and the dangerous one still reads as dangerous.
+///   [destructive]'s fill is louder than anything else on a screen, which is
+///   right in the confirm dialog and wrong on the way to it.
 /// - [positive] — an affirmative, additive action (add an item); teal-tinted
 ///   fill so it reads as the "good news" option next to a destructive one.
 enum SdButtonVariantV2 {
@@ -23,6 +30,7 @@ enum SdButtonVariantV2 {
   outlined,
   text,
   destructive,
+  outlinedDestructive,
   positive,
 }
 
@@ -171,6 +179,24 @@ class SdButtonV2 extends StatelessWidget {
         ),
       );
     }
+    if (variant == SdButtonVariantV2.outlinedDestructive) {
+      final Color error = context.colorScheme.error;
+      style = style.merge(
+        OutlinedButton.styleFrom(foregroundColor: error).copyWith(
+          // Resolved per state rather than a plain `side`: an error-red border
+          // around a greyed-out label reads as an enabled button that has
+          // stopped working. Disabled falls back to the hairline colour every
+          // other rule in the app draws in.
+          side: WidgetStateProperty.resolveWith<BorderSide>(
+            (Set<WidgetState> states) => BorderSide(
+              color: states.contains(WidgetState.disabled)
+                  ? context.sdTheme.surfaceElevated
+                  : error,
+            ),
+          ),
+        ),
+      );
+    }
     if (variant == SdButtonVariantV2.positive) {
       style = style.merge(
         FilledButton.styleFrom(
@@ -248,7 +274,8 @@ class SdButtonV2 extends StatelessWidget {
         style: style,
         child: child,
       ),
-      SdButtonVariantV2.outlined => OutlinedButton(
+      SdButtonVariantV2.outlined ||
+      SdButtonVariantV2.outlinedDestructive => OutlinedButton(
         onPressed: onPressed,
         style: style,
         child: child,
