@@ -198,6 +198,13 @@ pure dimensions stay parameterless (`SdChartStyleV2.plotHeight`).
 - **Animations stay calm**: fade / scale / slide, ≤400ms, gentle curves.
   Nothing flashes, strobes, or pulses — the system targets photophobic users,
   and this is not negotiable for a "delightful" micro-interaction.
+  - **This is why `SdSkeletonV2` is a still block.** Every other design
+    system's skeleton shimmers, and the gentle breathing fade looks like the
+    safe compromise — it is not. A placeholder animating on a loop is a light
+    source moving in the user's periphery for as long as the network takes,
+    which is the rule above with a longer duration. The shape was the useful
+    half anyway: it reserves the right space so nothing reflows when the data
+    lands, and the surface's spinner is what says the app is still working.
 - **Colour is never the only signal.** A state told by colour is also told by
   an icon, a label, or a shape. `SdSnackBarKindV2` changes the glyph as well
   as the accent for exactly this reason.
