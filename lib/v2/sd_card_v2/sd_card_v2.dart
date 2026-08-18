@@ -30,6 +30,11 @@ enum SdCardSurfaceV2 {
 /// identical ones — an offer among readouts, say. It is an outline over the
 /// card's own edge, drawn at [borderWidth], and it changes nothing else.
 ///
+/// Pass [fillColor] to tint that same card. It is the pair to [borderColor],
+/// not a way to give a card its own colour: the two are meant to arrive
+/// together, one accent at a low alpha inside a hairline of the same accent
+/// at a higher one.
+///
 /// Pass [gradient] for the rare card that has to be the loudest thing on its
 /// screen. It replaces the flat [surface] colour and nothing else — the
 /// radius, the clip and the ink are the same, so a gradient card is still the
@@ -41,6 +46,7 @@ class SdCardV2 extends StatelessWidget {
     this.surface = SdCardSurfaceV2.base,
     this.gradient,
     this.borderColor,
+    this.fillColor,
     super.key,
   });
 
@@ -69,6 +75,16 @@ class SdCardV2 extends StatelessWidget {
   /// photophobic and a card may be picked out without being bright.
   final Color? borderColor;
 
+  /// Replaces [surface]'s flat colour with this one. Null — the default — is
+  /// the one card colour every other card wears.
+  ///
+  /// **A translucent tint of an app accent, never a second opaque card
+  /// colour.** Pass it at a low alpha so what shows through is the screen
+  /// behind, which is what keeps a tinted card reading as the same component
+  /// rather than as a panel of its own. Ignored when [gradient] paints the
+  /// surface itself.
+  final Color? fillColor;
+
   /// The corner every card in the app wears.
   static double get radius => SdSpacingConstant.r16;
 
@@ -81,10 +97,12 @@ class SdCardV2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final BorderRadius shape = BorderRadius.circular(radius);
-    final Color color = switch (surface) {
-      SdCardSurfaceV2.base => context.colorScheme.surface,
-      SdCardSurfaceV2.elevated => context.sdTheme.surfaceElevated,
-    };
+    final Color color =
+        fillColor ??
+        switch (surface) {
+          SdCardSurfaceV2.base => context.colorScheme.surface,
+          SdCardSurfaceV2.elevated => context.sdTheme.surfaceElevated,
+        };
 
     // Transparent over the gradient rather than beside it: `Material` takes a
     // colour, not a `Decoration`, so the fill is painted underneath and the
