@@ -18,6 +18,7 @@ class SdBannerV2 extends StatelessWidget {
     required this.subtitle,
     required this.onTap,
     this.subtitleChild,
+    this.borderColor,
     super.key,
   });
 
@@ -35,10 +36,15 @@ class SdBannerV2 extends StatelessWidget {
   /// [subtitle] is shown.
   final Widget? subtitleChild;
 
+  /// Outlines the banner in this colour — for the one banner in a stack that
+  /// has to be seen first. Straight through to [SdCardV2.borderColor].
+  final Color? borderColor;
+
   @override
   Widget build(BuildContext context) {
     return SdCardV2(
       onTap: onTap,
+      borderColor: borderColor,
       child: Padding(
         padding: EdgeInsets.all(SdSpacingConstant.w16),
         child: Row(

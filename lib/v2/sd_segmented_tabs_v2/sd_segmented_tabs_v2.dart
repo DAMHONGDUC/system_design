@@ -30,6 +30,11 @@ class SdSegmentV2 {
 /// The count sits inside the segment as plain text, not on its corner as an
 /// `SdBadgeV2` would: a corner badge on a tab has to overhang something, and
 /// in a track that means overhanging the neighbouring tab.
+///
+/// **A segment's tap target is its whole cell of the track** — full height,
+/// full share of the width, edge to edge with its neighbour, so the control
+/// has no dead pixel anywhere inside its own bounds. The thumb's inset is
+/// paint, never a gap in what can be hit.
 class SdSegmentedTabsV2 extends StatelessWidget {
   const SdSegmentedTabsV2({
     required this.segments,
@@ -94,6 +99,11 @@ class SdSegmentedTabsV2 extends StatelessWidget {
               ),
             ),
           Row(
+            // Stretch, or each segment is only as tall as its own line of
+            // text and the row centres it: the hit box came out ~20 of the
+            // track's 42, and a tap near the top or bottom edge — which is
+            // most of a thumb's spread — landed on nothing at all.
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               for (final (int index, SdSegmentV2 segment) in segments.indexed)
                 Expanded(

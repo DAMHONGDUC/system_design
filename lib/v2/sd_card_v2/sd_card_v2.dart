@@ -26,6 +26,10 @@ enum SdCardSurfaceV2 {
 /// Pass [onTap] to make the whole card pressable — the ink is clipped to the
 /// radius, which is the reason it lives here rather than at each call site.
 ///
+/// Pass [borderColor] for a card that has to be picked out of a stack of
+/// identical ones — an offer among readouts, say. It is an outline over the
+/// card's own edge, drawn at [borderWidth], and it changes nothing else.
+///
 /// Pass [gradient] for the rare card that has to be the loudest thing on its
 /// screen. It replaces the flat [surface] colour and nothing else — the
 /// radius, the clip and the ink are the same, so a gradient card is still the
@@ -36,6 +40,7 @@ class SdCardV2 extends StatelessWidget {
     this.onTap,
     this.surface = SdCardSurfaceV2.base,
     this.gradient,
+    this.borderColor,
     super.key,
   });
 
@@ -56,8 +61,20 @@ class SdCardV2 extends StatelessWidget {
   /// colour, never two saturated hues meeting.
   final Gradient? gradient;
 
+  /// An outline in this colour around the card. Null — the default — is a
+  /// card with no edge at all, which is what almost every card is.
+  ///
+  /// **The colour is the app's, not this package's**, same as [gradient]: an
+  /// accent is a brand decision. Keep it to one hue; hard rule 3's users are
+  /// photophobic and a card may be picked out without being bright.
+  final Color? borderColor;
+
   /// The corner every card in the app wears.
   static double get radius => SdSpacingConstant.r16;
+
+  /// How thick [borderColor] draws. Two, not the divider's hairline: an edge
+  /// meant to be noticed against a dark surface disappears at one.
+  static double get borderWidth => SdSpacingConstant.h2;
 
   @override
   Widget build(BuildContext context) {
@@ -79,13 +96,28 @@ class SdCardV2 extends StatelessWidget {
           : InkWell(onTap: onTap, borderRadius: shape, child: child),
     );
 
+    Widget card = surfaceLayer;
+
     if (gradient case final Gradient fill) {
-      return DecoratedBox(
+      card = DecoratedBox(
         decoration: BoxDecoration(gradient: fill, borderRadius: shape),
-        child: surfaceLayer,
+        child: card,
       );
     }
 
-    return surfaceLayer;
+    // In the foreground, and last: the fill is a Material that clips its own
+    // ink, so an edge painted behind it is an edge the card covers up.
+    if (borderColor case final Color colour) {
+      card = DecoratedBox(
+        position: DecorationPosition.foreground,
+        decoration: BoxDecoration(
+          border: Border.all(color: colour, width: borderWidth),
+          borderRadius: shape,
+        ),
+        child: card,
+      );
+    }
+
+    return card;
   }
 }
