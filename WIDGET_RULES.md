@@ -198,6 +198,13 @@ pure dimensions stay parameterless (`SdChartStyleV2.plotHeight`).
 - **Animations stay calm**: fade / scale / slide, ≤400ms, gentle curves.
   Nothing flashes, strobes, or pulses — the system targets photophobic users,
   and this is not negotiable for a "delightful" micro-interaction.
+  - **A skeleton is a rectangle at `SdSkeletonV2.radius` (8), always** —
+    owner's rule, and the radius is not a prop. One shape means a screen's
+    placeholders read as one loading state instead of a pile of unrelated
+    blocks, and it deliberately does not match the thing underneath: pills
+    for lines and card radii for cards had every skeleton impersonating a
+    different component, which is how a placeholder starts being mistaken for
+    content. No circles, avatar or not.
   - **This is why `SdSkeletonV2` is a still block.** Every other design
     system's skeleton shimmers, and the gentle breathing fade looks like the
     safe compromise — it is not. A placeholder animating on a loop is a light

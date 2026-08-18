@@ -25,13 +25,16 @@ import '../sd_context_v2/sd_context_v2.dart';
 /// still block at [SdThemeV2.surfaceElevated] reserves the right space and
 /// reads as "not yet", and the spinner the surface may also carry is what
 /// says the app is still working.
+///
+/// **Every skeleton is a rectangle at [radius] (8), and there is no way to
+/// ask for another one** (owner's rule). One shape means a screen's
+/// placeholders read as one loading state rather than as a pile of unrelated
+/// blocks — and it is deliberately not the shape of the thing underneath: a
+/// pill for a line and a card radius for a card had every skeleton quietly
+/// impersonating a different component, which is how a placeholder starts
+/// being mistaken for content. Not a circle either, avatar or not.
 class SdSkeletonV2 extends StatelessWidget {
-  const SdSkeletonV2({
-    required this.height,
-    this.width,
-    this.radius,
-    super.key,
-  });
+  const SdSkeletonV2({required this.height, this.width, super.key});
 
   /// One line of body text, at [fraction] of the available width.
   ///
@@ -47,23 +50,20 @@ class SdSkeletonV2 extends StatelessWidget {
   /// The gap a caller should leave between two placeholder lines.
   static double get lineGap => SdSpacingConstant.h8;
 
+  /// The one corner every skeleton wears. Not a prop — see the class doc.
+  static double get radius => SdSpacingConstant.r8;
+
   final double height;
 
   /// Null fills whatever width the parent gives.
   final double? width;
-
-  /// Defaults to half the height, capped at the card radius — which is what
-  /// makes a stack of lines read as text and a tall block read as a card.
-  final double? radius;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: context.sdTheme.surfaceElevated,
-        borderRadius: BorderRadius.circular(
-          radius ?? (height / 2).clamp(0, SdSpacingConstant.r16),
-        ),
+        borderRadius: BorderRadius.circular(radius),
       ),
       child: SizedBox(height: height, width: width),
     );
