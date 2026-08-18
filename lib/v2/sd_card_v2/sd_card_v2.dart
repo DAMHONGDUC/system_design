@@ -72,9 +72,11 @@ class SdCardV2 extends StatelessWidget {
   /// The corner every card in the app wears.
   static double get radius => SdSpacingConstant.r16;
 
-  /// How thick [borderColor] draws. Two, not the divider's hairline: an edge
-  /// meant to be noticed against a dark surface disappears at one.
-  static double get borderWidth => SdSpacingConstant.h2;
+  /// How thick [borderColor] draws — a hairline, the same line
+  /// `SdDividerV2` is. Two was tried first and read as a frame drawn around
+  /// the card rather than as the card's own edge; an outline that has to be
+  /// quiet gets its quiet from the colour's alpha, not from more pixels.
+  static double get borderWidth => SdSpacingConstant.h1;
 
   @override
   Widget build(BuildContext context) {
