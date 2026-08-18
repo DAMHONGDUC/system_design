@@ -212,6 +212,14 @@ pure dimensions stay parameterless (`SdChartStyleV2.plotHeight`).
     which is the rule above with a longer duration. The shape was the useful
     half anyway: it reserves the right space so nothing reflows when the data
     lands, and the surface's spinner is what says the app is still working.
+- **A control's tap target is the whole cell it looks like, never the ink
+  inside it.** `SdSegmentedTabsV2` centred each segment's `GestureDetector`
+  on its own line of text, so ~20 of the track's 42 was live and a tap near
+  either edge — most of a thumb's spread — landed on nothing; the row of
+  segments stretches to the track now. Applies to anything laid out in a
+  track, a row or a grid: the hit box is the cell, and any inset that makes
+  it look smaller is paint.
+
 - **Colour is never the only signal.** A state told by colour is also told by
   an icon, a label, or a shape. `SdSnackBarKindV2` changes the glyph as well
   as the accent for exactly this reason.
