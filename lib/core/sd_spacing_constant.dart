@@ -19,6 +19,7 @@ final class SdSpacingConstant {
   static double get w20 => 20.w;
   static double get w24 => 24.w;
   static double get w28 => 28.w;
+  static double get w30 => 30.w;
   static double get w32 => 32.w;
   static double get w40 => 40.w;
   static double get w44 => 44.w;
