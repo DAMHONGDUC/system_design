@@ -10,7 +10,7 @@ import '../sd_text_style_v3/sd_text_style_v3.dart';
 /// Stale`, Orders' `All | To Ship | Shipped | Delivered | Returns`.
 ///
 /// **[count] is part of the chip, not a badge stuck beside it.** Every filter
-/// strip in Seller OS answers "how many" as well as "which", and a seller
+/// strip in Reseller Studio answers "how many" as well as "which", and a seller
 /// scanning the strip decides where to tap from the number. Rendering it
 /// inside means the count can never drift away from the label it counts, and
 /// the selected chip's count inherits the selected foreground automatically.

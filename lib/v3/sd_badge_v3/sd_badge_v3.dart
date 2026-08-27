@@ -13,7 +13,7 @@ enum SdBadgeToneV3 { neutral, success, warning, danger, info }
 /// A small status marker: an item's `Listed`, an order's `To Ship`, a
 /// listing's `Draft`.
 ///
-/// **The badge always carries a label, and [icon] is additive.** Seller OS
+/// **The badge always carries a label, and [icon] is additive.** Reseller Studio
 /// draws twelve or so states across items, listings, orders and offers, and a
 /// colour-only marker asks the seller to memorise a legend — which is exactly
 /// the failure the "colour is never the only signal" rule exists to stop.

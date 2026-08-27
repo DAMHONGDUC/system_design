@@ -1,4 +1,4 @@
-/// System Design — the v3 widget set, built for Seller OS.
+/// System Design — the v3 widget set, built for Reseller Studio.
 ///
 /// Consumers import `package:system_design/index.dart`, not this file: the
 /// package's entry point re-exports this alongside `core/` and `v2/`. This

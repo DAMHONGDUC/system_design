@@ -9,7 +9,7 @@
 /// generations, and each owns everything about its own look.
 ///
 /// **Both ship at once, and neither imports the other.** BaroEase renders on
-/// v2; Seller OS renders on v3. An app that wanted to move between them could
+/// v2; Reseller Studio renders on v3. An app that wanted to move between them could
 /// do it widget by widget, because every name is suffixed with its
 /// generation — `SdButtonV2` and `SdButtonV3` can sit in one file, and the
 /// two `BuildContext` extensions do not collide (`context.sdTheme` is v2's,

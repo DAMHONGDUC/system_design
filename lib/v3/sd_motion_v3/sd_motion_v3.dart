@@ -8,7 +8,7 @@ import 'package:flutter/animation.dart';
 /// separate animations. Reach past [fast] and [normal] only when the motion
 /// genuinely covers more distance.
 ///
-/// Seller OS is a working tool used in a stockroom with one hand — motion
+/// Reseller Studio is a working tool used in a stockroom with one hand — motion
 /// exists to explain where something came from, never to be admired. Nothing
 /// here loops, bounces or overshoots, and nothing crosses [slow].
 final class SdMotionV3 {

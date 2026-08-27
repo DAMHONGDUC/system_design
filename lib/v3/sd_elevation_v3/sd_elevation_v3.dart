@@ -10,7 +10,7 @@ import '../sd_context_v3/sd_context_v3.dart';
 /// a near-black page there is nothing to darken, and a shadow tuned for light
 /// reads as grime. Dark leans on the border and the surface step instead.
 ///
-/// Kept deliberately shallow. Seller OS is a working tool with a lot of
+/// Kept deliberately shallow. Reseller Studio is a working tool with a lot of
 /// stacked surfaces, and the moment shadows get deep enough to notice
 /// individually, a screen with six cards looks like it is hovering apart.
 final class SdElevationV3 {

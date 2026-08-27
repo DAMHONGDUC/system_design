@@ -60,7 +60,7 @@ enum SdButtonSizeV3 {
 /// makes two buttons in a row sit differently.
 ///
 /// **[busy] is why this widget exists rather than a styled [FilledButton].**
-/// Almost every button in Seller OS writes to Firestore, so almost every one
+/// Almost every button in Reseller Studio writes to Firestore, so almost every one
 /// needs a pending state, and the naive version — swapping the label for a
 /// spinner — makes the button resize mid-tap and shifts the whole row. Here
 /// the spinner is drawn *over* the label in a [Stack] and the label is only

@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 /// app migrates, and a shared base would make every v2 slot a constraint on
 /// v3's palette. The overlap in slot names is convergence, not inheritance.
 ///
-/// v3 adds three groups v2 had no use for, all of them earned by Seller OS:
+/// v3 adds three groups v2 had no use for, all of them earned by Reseller Studio:
 ///
 /// - **[profit] / [loss]** — money that reads as good or bad news at a
 ///   glance. Kept apart from [success]/[danger] on purpose: a $0 profit is

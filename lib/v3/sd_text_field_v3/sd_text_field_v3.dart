@@ -11,7 +11,7 @@ import '../sd_text_style_v3/sd_text_style_v3.dart';
 /// [TextFormField].
 ///
 /// **The label sits above the field, not inside it.** A floating label saves
-/// vertical space and costs the one thing every form in Seller OS needs: with
+/// vertical space and costs the one thing every form in Reseller Studio needs: with
 /// the field filled, the label is the only thing saying what the number means,
 /// and a shrunk label over a filled box is the first thing to become
 /// unreadable at arm's length in a stockroom.

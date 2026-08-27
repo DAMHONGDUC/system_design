@@ -42,7 +42,7 @@ app migrates.
 
 ### There are two generations now, and they never import each other
 
-`v2/` is what **BaroEase** renders. `v3/` is what **Seller OS** renders. Both
+`v2/` is what **BaroEase** renders. `v3/` is what **Reseller Studio** renders. Both
 are exported from `lib/index.dart` and both are live — this is the situation
 the paragraph above describes, not a migration in progress.
 

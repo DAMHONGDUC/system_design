@@ -28,7 +28,7 @@ extension SdTextStyleV3X on TextStyle {
   ///
   /// Every price, cost, total and count in a list or a table takes this.
   /// Proportional digits are why a running total appears to shuffle sideways
-  /// while it updates, and Seller OS is mostly columns of money.
+  /// while it updates, and Reseller Studio is mostly columns of money.
   TextStyle get tabular3 =>
       copyWith(fontFeatures: const <FontFeature>[FontFeature.tabularFigures()]);
 
