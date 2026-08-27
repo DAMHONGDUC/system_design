@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
+import '../sd_button_v2/sd_button_v2.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_pressable_scale_v2/sd_pressable_scale_v2.dart';
 
@@ -28,7 +29,12 @@ class SdTextActionV2 extends StatelessWidget {
   });
 
   final String label;
-  final VoidCallback onTap;
+
+  /// Null disables it — the accent drops to the muted text colour and the
+  /// press gesture is gone, exactly like [SdButtonV2] with a null
+  /// `onPressed`. A disabled control that still scales under the finger says
+  /// it worked when it did not.
+  final VoidCallback? onTap;
 
   /// Defaults to `SdSpacingConstant.h12` top and bottom — see the tap-target
   /// note above. Pass a smaller inset only where something else already
@@ -37,19 +43,20 @@ class SdTextActionV2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SdPressableScaleV2(
-      onTap: onTap,
-      child: Padding(
-        padding:
-            padding ?? EdgeInsets.symmetric(vertical: SdSpacingConstant.h12),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: context.textTheme.bodyMedium?.copyWith(
-            color: context.colorScheme.primary,
-          ),
+    final VoidCallback? tap = onTap;
+    final Widget text = Padding(
+      padding: padding ?? EdgeInsets.symmetric(vertical: SdSpacingConstant.h8),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: context.textTheme.bodyMedium?.copyWith(
+          color: tap == null
+              ? context.sdTheme.textSecondary
+              : context.colorScheme.primary,
         ),
       ),
     );
+
+    return tap == null ? text : SdPressableScaleV2(onTap: tap, child: text);
   }
 }
