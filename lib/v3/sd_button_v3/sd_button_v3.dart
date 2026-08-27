@@ -17,7 +17,18 @@ import '../sd_text_style_v3/sd_text_style_v3.dart';
 /// - [text] — low-emphasis ("Cancel", "Not now", "Skip").
 /// - [destructive] — an irreversible confirm (delete, archive-all); error
 ///   fill so it can never be mistaken for the safe action.
-enum SdButtonVariantV3 { primary, secondary, outlined, text, destructive }
+/// - [vendor] — a third-party sign-in button (Apple, Google). Literal black
+///   and white, outside the palette on purpose: Apple allows its button in
+///   black or white and nothing else, so a theme change must never be able to
+///   re-tint somebody else's trademark.
+enum SdButtonVariantV3 {
+  primary,
+  secondary,
+  outlined,
+  text,
+  destructive,
+  vendor,
+}
 
 /// Size of an [SdButtonV3] — a prop, like [SdButtonVariantV3]. [scale]
 /// multiplies the shared padding, icon and icon gap around one baseline, so a
@@ -238,6 +249,12 @@ class SdButtonStyleV3 {
         background: colors.error,
         foreground: colors.onError,
         disabledForeground: colors.onError,
+      ),
+      // Literal, not palette: the app's colours must not reach a vendor mark.
+      SdButtonVariantV3.vendor => SdButtonStyleV3(
+        background: context.isDark3 ? Colors.white : Colors.black,
+        foreground: context.isDark3 ? Colors.black : Colors.white,
+        disabledForeground: context.isDark3 ? Colors.black : Colors.white,
       ),
     };
   }
