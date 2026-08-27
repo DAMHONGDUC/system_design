@@ -36,6 +36,7 @@ final class SdSpacingConstant {
   static double get h4 => 4.h;
   static double get h6 => 6.h;
   static double get h8 => 8.h;
+  static double get h10 => 10.h;
   static double get h12 => 12.h;
   static double get h14 => 14.h;
   static double get h16 => 16.h;
