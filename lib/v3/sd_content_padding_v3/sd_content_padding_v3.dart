@@ -25,7 +25,7 @@ import '../../core/sd_spacing_constant.dart';
 ///
 /// The asymmetry is deliberate. A frosted app bar costs a shader pass on
 /// every scroll frame of a list that can run to thousands of rows; the tab
-/// bar is a fixed 64pt strip whose cost does not grow with the content, and
+/// bar is a compact fixed strip whose cost does not grow with the content, and
 /// it is the one piece of chrome the whole app is judged by.
 abstract final class SdContentPaddingV3 {
   /// The gutter: 16 either side of any content.
@@ -111,7 +111,7 @@ abstract final class SdContentPaddingV3 {
 
   /// Height of the floating tab bar itself, excluding how far it sits off the
   /// bottom edge.
-  static double get floatingBarHeight => SdSpacingConstant.h64;
+  static double get floatingBarHeight => SdSpacingConstant.h56;
 
   /// Corner radius that makes the bar a true stadium: exactly half its
   /// height, so the short edges are full semicircles with no straight
@@ -120,17 +120,15 @@ abstract final class SdContentPaddingV3 {
 
   /// Side margin. The bar is inset from the screen edges — that detachment is
   /// what makes it read as floating rather than as a docked toolbar.
-  static double get floatingBarHorizontal => SdSpacingConstant.w16;
+  static double get floatingBarHorizontal => SdSpacingConstant.w24;
 
   /// How far the current tab's glass capsule sits inside the bar on every
   /// side.
   ///
-  /// Uneven on purpose: the bar is much taller than one destination is wide,
-  /// so an even inset would leave the capsule reading as a circle in a
-  /// stadium. The vertical figure is the one that sets [selectedTabRadius].
+  /// The even inset keeps the compact thumb concentric with the outer pill.
   static EdgeInsets get selectedTabInset => EdgeInsets.symmetric(
     horizontal: SdSpacingConstant.w4,
-    vertical: SdSpacingConstant.h6,
+    vertical: SdSpacingConstant.h4,
   );
 
   /// The capsule's corner, **concentric** with the bar's — the outer radius
