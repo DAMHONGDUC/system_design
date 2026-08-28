@@ -122,6 +122,23 @@ abstract final class SdContentPaddingV3 {
   /// what makes it read as floating rather than as a docked toolbar.
   static double get floatingBarHorizontal => SdSpacingConstant.w16;
 
+  /// How far the current tab's glass capsule sits inside the bar on every
+  /// side.
+  ///
+  /// Uneven on purpose: the bar is much taller than one destination is wide,
+  /// so an even inset would leave the capsule reading as a circle in a
+  /// stadium. The vertical figure is the one that sets [selectedTabRadius].
+  static EdgeInsets get selectedTabInset => EdgeInsets.symmetric(
+    horizontal: SdSpacingConstant.w4,
+    vertical: SdSpacingConstant.h6,
+  );
+
+  /// The capsule's corner, **concentric** with the bar's — the outer radius
+  /// less the inset between them, which is what keeps the two curves parallel
+  /// instead of merely both round. Derived, never typed.
+  static double get selectedTabRadius =>
+      floatingBarRadius - selectedTabInset.vertical / 2;
+
   /// How far the bar sits above the bottom edge.
   ///
   /// **The same rule as `SdContentPaddingV2.navBarOffset`** — owner's call, so

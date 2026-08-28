@@ -72,6 +72,9 @@ class SdNavDestinationV3 {
 /// `floatingNav: true` to pick it up. Get this wrong and the last row of
 /// every list hides behind the bar.
 ///
+/// The current tab is marked twice: its glyph fills in, and a second, brighter
+/// pane of glass slides under it — see [_SelectedCapsule].
+///
 /// Degrades to a flat translucent fill where the shader cannot run — see
 /// [SdGlassV3]. The geometry is identical either way, so nothing reflows.
 class SdGlassNavBarV3 extends StatelessWidget {
@@ -85,6 +88,61 @@ class SdGlassNavBarV3 extends StatelessWidget {
   final List<SdNavDestinationV3> destinations;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+
+  /// Glass tuned from the app's own palette, so the bar is light over a light
+  /// page and dark over a dark one.
+  ///
+  /// **Sheer and refractive, never frosted.** A high alpha under a heavy blur
+  /// is a panel — it says "surface" and the page beneath it stops existing.
+  /// Legibility comes from the blur and the specular rim, not from opacity,
+  /// which is what lets the fill go this low.
+  static LiquidGlassSettings barSettings(BuildContext context) {
+    final Color base = context.sdTheme3.background;
+    final bool dark = context.isDark3;
+
+    return LiquidGlassSettings(
+      glassColor: base.withValues(alpha: dark ? 0.26 : 0.30),
+      // A thick pane at a real index of refraction: this is the pair that
+      // bends the list underneath, and it is what separates glass from a
+      // blurred rectangle.
+      thickness: 22,
+      refractiveIndex: 1.38,
+      blur: 15,
+      // iOS 26's specular rim is what draws the shape's edge. Lower in dark
+      // mode, where the same rim over a dark page reads as a hot white line.
+      lightIntensity: dark ? 0.9 : 1.45,
+      ambientStrength: 0.4,
+      // No rainbow fringing — this bar sits over columns of money, and
+      // chromatic aberration on small text is the fastest way to make a
+      // number hard to read. A rule, not a knob.
+      chromaticAberration: 0,
+      saturation: 1.15,
+    );
+  }
+
+  /// The current tab's capsule: brighter than the bar and carrying no blur of
+  /// its own.
+  ///
+  /// The bar has already blurred the page, and blurring a blurred backdrop a
+  /// second time smears rather than frosts. What is left is refraction and a
+  /// stronger rim, which is exactly how the system bar's indicator reads —
+  /// a lens on the glass rather than a shape painted on it.
+  static LiquidGlassSettings selectedCapsuleSettings(BuildContext context) {
+    final bool dark = context.isDark3;
+
+    return LiquidGlassSettings(
+      // Literal white, not a palette colour: this is a highlight on glass in
+      // both themes, and tinting it would make the mark colour again.
+      glassColor: Colors.white.withValues(alpha: dark ? 0.14 : 0.34),
+      thickness: 12,
+      refractiveIndex: 1.42,
+      blur: 0,
+      lightIntensity: dark ? 1.3 : 1.7,
+      ambientStrength: 0.5,
+      chromaticAberration: 0,
+      saturation: 1.05,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,21 +175,33 @@ class SdGlassNavBarV3 extends StatelessWidget {
           shape: LiquidRoundedSuperellipse(
             borderRadius: SdContentPaddingV3.floatingBarRadius,
           ),
-          settings: _settings(context),
+          settings: barSettings(context),
           fake: !SdGlassV3.isSupported,
           glassContainsChild: false,
           child: SizedBox(
             height: SdContentPaddingV3.floatingBarHeight,
-            child: Row(
+            child: Stack(
+              // Both children are unpositioned and both must fill the bar:
+              // the capsule aligns itself inside the full width, and the row
+              // divides it.
+              fit: StackFit.expand,
               children: <Widget>[
-                for (int i = 0; i < destinations.length; i++)
-                  Expanded(
-                    child: _NavItem(
-                      destination: destinations[i],
-                      selected: i == selectedIndex,
-                      onTap: () => onSelected(i),
-                    ),
-                  ),
+                _SelectedCapsule(
+                  count: destinations.length,
+                  selectedIndex: selectedIndex,
+                ),
+                Row(
+                  children: <Widget>[
+                    for (int i = 0; i < destinations.length; i++)
+                      Expanded(
+                        child: _NavItem(
+                          destination: destinations[i],
+                          selected: i == selectedIndex,
+                          onTap: () => onSelected(i),
+                        ),
+                      ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -139,34 +209,58 @@ class SdGlassNavBarV3 extends StatelessWidget {
       ),
     );
   }
+}
 
-  /// Glass tuned from the app's own palette, so the bar is light over a light
-  /// page and dark over a dark one.
+/// The glass capsule that marks the current tab and travels to the next one.
+///
+/// **It gets its own [LiquidGlassLayer] and never joins the bar's blend
+/// group.** Shapes sharing a blend group are combined with a smooth union, so
+/// a capsule lying wholly inside the bar's stadium unions into it and vanishes
+/// — the one simplification here that looks free and silently deletes the
+/// effect. Its own layer paints after the bar and takes the bar's own output
+/// as its backdrop, which is the stacked-lens look the system bar has.
+///
+/// It slides rather than fading in and out: one shape moving is what says the
+/// five destinations are a single row.
+class _SelectedCapsule extends StatelessWidget {
+  const _SelectedCapsule({required this.count, required this.selectedIndex});
+
+  final int count;
+  final int selectedIndex;
+
+  /// Where the capsule sits, as a [Alignment.x] across the bar's full width.
   ///
-  /// The alpha is the whole trick: too opaque and it is just a card, too
-  /// sheer and the labels stop being readable over a busy list. The value
-  /// below keeps contrast while still letting content show through.
-  LiquidGlassSettings _settings(BuildContext context) {
-    final Color base = context.sdTheme3.background;
+  /// An alignment rather than a left offset so the bar needs no
+  /// `LayoutBuilder`: `Positioned` only works as a direct child of the
+  /// `Stack`, which a widget class of its own cannot be.
+  double get _alignmentX =>
+      count > 1 ? -1 + 2 * selectedIndex / (count - 1) : 0;
 
-    return LiquidGlassSettings(
-      // Sheer enough that content is visibly moving underneath — at 0.62 the
-      // bar read as a frosted white panel rather than as glass. The blur is
-      // what keeps the labels legible over a busy list, not the opacity.
-      glassColor: base.withValues(alpha: context.isDark3 ? 0.42 : 0.46),
-      thickness: 14,
-      blur: 14,
-      // A visible but not theatrical edge highlight. iOS 26's specular rim is
-      // what makes the shape read as glass rather than as a blurred panel.
-      lightIntensity: context.isDark3 ? 0.6 : 1.1,
-      ambientStrength: 0.3,
-      // No rainbow fringing — this bar sits over columns of money, and
-      // chromatic aberration on small text is the fastest way to make a
-      // number hard to read.
-      chromaticAberration: 0,
-      saturation: 1.1,
-    );
-  }
+  @override
+  Widget build(BuildContext context) => AnimatedAlign(
+    // [SdMotionV3.emphasized], not [standard]: the capsule both leaves one
+    // destination and arrives at another in one animation, and a
+    // decelerating-only curve starts that move abruptly.
+    duration: SdMotionV3.normal,
+    curve: SdMotionV3.emphasized,
+    alignment: Alignment(_alignmentX, 0),
+    child: FractionallySizedBox(
+      widthFactor: 1 / count,
+      heightFactor: 1,
+      child: Padding(
+        padding: SdContentPaddingV3.selectedTabInset,
+        child: LiquidGlass.withOwnLayer(
+          shape: LiquidRoundedSuperellipse(
+            borderRadius: SdContentPaddingV3.selectedTabRadius,
+          ),
+          settings: SdGlassNavBarV3.selectedCapsuleSettings(context),
+          fake: !SdGlassV3.isSupported,
+          glassContainsChild: false,
+          child: const SizedBox.expand(),
+        ),
+      ),
+    ),
+  );
 }
 
 class _NavItem extends StatelessWidget {
@@ -199,21 +293,20 @@ class _NavItem extends StatelessWidget {
       label: destination.label,
       child: InkWell(
         onTap: onTap,
+        // The ink stays inside the capsule's shape rather than the bar's, so
+        // a press does not splash across the whole stadium.
         borderRadius: BorderRadius.circular(
-          SdContentPaddingV3.floatingBarRadius,
+          SdContentPaddingV3.selectedTabRadius,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            // **The glyph thickens; nothing appears behind it.** That is how
-            // iOS marks the current tab, and it is why there is no indicator
-            // pill here — a filled shape behind the icon is Material's idiom
-            // and reads as a foreign control sitting inside iOS chrome.
-            //
-            // `FILL` is a variable-font axis, so this is one glyph morphing
-            // rather than two glyphs swapping. Weight is the second signal
-            // alongside colour, which colour alone must never be.
+            // **The glyph thickens as well as lighting up.** `FILL` is a
+            // variable-font axis, so this is one glyph morphing rather than
+            // two glyphs swapping — weight is the second signal alongside
+            // colour, which colour alone must never be. The capsule behind it
+            // is the third, not a replacement for either.
             TweenAnimationBuilder<double>(
               duration: SdMotionV3.fast,
               curve: SdMotionV3.standard,
