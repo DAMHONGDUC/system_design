@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
@@ -88,6 +89,12 @@ class SdGlassNavBarV3 extends StatelessWidget {
   final List<SdNavDestinationV3> destinations;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
+
+  /// Test seam. The capsule's whole point is where it is and how wide it is
+  /// mid-flight, and both are real layout — a test measures its rect rather
+  /// than reading a widget's arguments back.
+  @visibleForTesting
+  static const Key selectedCapsuleKey = Key('sd-nav-selected-capsule');
 
   /// Glass tuned from the app's own palette, so the bar is light over a light
   /// page and dark over a dark one.
@@ -221,46 +228,143 @@ class SdGlassNavBarV3 extends StatelessWidget {
 /// as its backdrop, which is the stacked-lens look the system bar has.
 ///
 /// It slides rather than fading in and out: one shape moving is what says the
-/// five destinations are a single row.
-class _SelectedCapsule extends StatelessWidget {
+/// five destinations are a single row. And it **stretches along the way** —
+/// see [_stretch].
+class _SelectedCapsule extends StatefulWidget {
   const _SelectedCapsule({required this.count, required this.selectedIndex});
 
   final int count;
   final int selectedIndex;
 
-  /// Where the capsule sits, as a [Alignment.x] across the bar's full width.
+  /// How much longer the capsule gets at the midpoint of a full-length
+  /// journey, as a fraction of its resting width.
   ///
-  /// An alignment rather than a left offset so the bar needs no
-  /// `LayoutBuilder`: `Positioned` only works as a direct child of the
-  /// `Stack`, which a widget class of its own cannot be.
-  double get _alignmentX =>
-      count > 1 ? -1 + 2 * selectedIndex / (count - 1) : 0;
+  /// Intrinsic to this shape's motion — it is what the travel *looks like*,
+  /// not configuration about it.
+  static double get maxStretch => 0.3;
+
+  /// How much shorter it gets at the same moment. Smaller than [maxStretch]:
+  /// the capsule is much wider than it is tall, so an equal squash reads as
+  /// the whole mark shrinking rather than as one shape being pulled.
+  static double get maxSquash => 0.1;
+
+  /// The jump length, in destinations, at which [maxStretch] is reached.
+  /// Beyond it the stretch is capped — a shape that keeps elongating with
+  /// distance stops reading as glass and starts reading as a rubber band.
+  static double get fullStretchDistance => 2;
 
   @override
-  Widget build(BuildContext context) => AnimatedAlign(
-    // [SdMotionV3.emphasized], not [standard]: the capsule both leaves one
-    // destination and arrives at another in one animation, and a
-    // decelerating-only curve starts that move abruptly.
+  State<_SelectedCapsule> createState() => _SelectedCapsuleState();
+}
+
+class _SelectedCapsuleState extends State<_SelectedCapsule>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
     duration: SdMotionV3.normal,
-    curve: SdMotionV3.emphasized,
-    alignment: Alignment(_alignmentX, 0),
-    child: FractionallySizedBox(
-      widthFactor: 1 / count,
-      heightFactor: 1,
-      child: Padding(
-        padding: SdContentPaddingV3.selectedTabInset,
-        child: LiquidGlass.withOwnLayer(
-          shape: LiquidRoundedSuperellipse(
-            borderRadius: SdContentPaddingV3.selectedTabRadius,
-          ),
-          settings: SdGlassNavBarV3.selectedCapsuleSettings(context),
-          fake: !SdGlassV3.isSupported,
-          glassContainsChild: false,
-          child: const SizedBox.expand(),
-        ),
-      ),
-    ),
   );
+
+  late double _from = widget.selectedIndex.toDouble();
+  late double _to = widget.selectedIndex.toDouble();
+
+  /// Where the capsule is right now, in destination units.
+  ///
+  /// [SdMotionV3.emphasized], not [SdMotionV3.standard]: the capsule both
+  /// leaves one destination and arrives at another in one animation, and a
+  /// decelerating-only curve starts that move abruptly.
+  double get _index => _from == _to
+      ? _to
+      : _from +
+            (_to - _from) *
+                SdMotionV3.emphasized.transform(_controller.value);
+
+  /// The squash-and-stretch envelope: nothing at either end, everything in
+  /// the middle, scaled by how far this jump travels.
+  ///
+  /// A sine bulge rather than the curve's own derivative — the two peak at
+  /// the same moment, and the derivative of an eased curve is a second thing
+  /// to keep in step with the first for no visible gain.
+  double get _stretch {
+    final double distance = (_to - _from).abs();
+    final double reach =
+        (distance / _SelectedCapsule.fullStretchDistance).clamp(0.0, 1.0);
+
+    return math.sin(math.pi * _controller.value) * reach;
+  }
+
+  @override
+  void didUpdateWidget(_SelectedCapsule oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.selectedIndex == oldWidget.selectedIndex) return;
+
+    // Start from where the capsule actually is, not from the tab it was last
+    // heading to — tapping mid-flight redirects it rather than teleporting it.
+    _from = _index;
+    _to = widget.selectedIndex.toDouble();
+    _controller.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final EdgeInsets inset = SdContentPaddingV3.selectedTabInset;
+
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) {
+        final double slot = constraints.maxWidth / widget.count;
+
+        return AnimatedBuilder(
+          animation: _controller,
+          builder: (BuildContext context, Widget? _) {
+            final double stretch = _stretch;
+            final double width =
+                slot * (1 + stretch * _SelectedCapsule.maxStretch) -
+                inset.horizontal;
+            final double height =
+                constraints.maxHeight *
+                    (1 - stretch * _SelectedCapsule.maxSquash) -
+                inset.vertical;
+
+            // The size is real layout, never a `Transform`: the shader reads
+            // the shape's geometry, so a scaled capsule would refract at its
+            // unscaled size.
+            return Stack(
+              children: <Widget>[
+                Positioned(
+                  left: slot * (_index + 0.5) - width / 2,
+                  top: (constraints.maxHeight - height) / 2,
+                  width: width,
+                  height: height,
+                  child: LiquidGlass.withOwnLayer(
+                    key: SdGlassNavBarV3.selectedCapsuleKey,
+                    shape: LiquidRoundedSuperellipse(
+                      // Capped at half the height so a squashed capsule stays
+                      // a stadium instead of asking for a corner it has no
+                      // room for.
+                      borderRadius: math.min(
+                        SdContentPaddingV3.selectedTabRadius,
+                        height / 2,
+                      ),
+                    ),
+                    settings: SdGlassNavBarV3.selectedCapsuleSettings(context),
+                    fake: !SdGlassV3.isSupported,
+                    glassContainsChild: false,
+                    child: const SizedBox.expand(),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 }
 
 class _NavItem extends StatelessWidget {
