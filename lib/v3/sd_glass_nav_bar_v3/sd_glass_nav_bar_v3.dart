@@ -69,8 +69,8 @@ class SdNavDestinationV3 {
 /// every list hides behind the bar.
 ///
 /// **Five equal segments, one glyph each, and no painted labels** — owner's
-/// rule. The current tab is marked by its filled glyph and a second, brighter
-/// pane of glass that slides under its equal-width segment.
+/// rule. The current tab is marked by its filled glyph and a tinted thumb that
+/// slides inside the bar under its equal-width segment.
 ///
 /// Degrades to a flat translucent fill where the shader cannot run — see
 /// [SdGlassV3]. The geometry is identical either way, so nothing reflows.
@@ -92,6 +92,10 @@ class SdGlassNavBarV3 extends StatelessWidget {
   @visibleForTesting
   static const Key selectedCapsuleKey = Key('sd-nav-selected-capsule');
 
+  /// The tint inside the one glass surface. Strong enough to read as a
+  /// switcher thumb over a light page without becoming a solid button.
+  static const double selectedThumbOpacity = 0.22;
+
   /// Glass tuned from the app's own palette, so the bar is light over a light
   /// page and dark over a dark one.
   static LiquidGlassSettings barSettings(BuildContext context) {
@@ -107,25 +111,6 @@ class SdGlassNavBarV3 extends StatelessWidget {
       ambientStrength: 0.4,
       chromaticAberration: 0,
       saturation: 1.15,
-    );
-  }
-
-  /// The current tab's capsule: brighter than the bar and carrying no blur of
-  /// its own.
-  static LiquidGlassSettings selectedCapsuleSettings(BuildContext context) {
-    final bool dark = context.isDark3;
-
-    return LiquidGlassSettings(
-      // Literal white, not a palette colour: this is a highlight on glass in
-      // both themes, and tinting it would make the mark colour again.
-      glassColor: Colors.white.withValues(alpha: dark ? 0.14 : 0.34),
-      thickness: 12,
-      refractiveIndex: 1.42,
-      blur: 0,
-      lightIntensity: dark ? 1.3 : 1.7,
-      ambientStrength: 0.5,
-      chromaticAberration: 0,
-      saturation: 1.05,
     );
   }
 
@@ -184,7 +169,7 @@ class SdGlassNavBarV3 extends StatelessWidget {
   }
 }
 
-/// The glass capsule that marks the current tab and slides to the next one.
+/// The tinted thumb that marks the current tab and slides to the next one.
 ///
 /// **Always one segment wide.** This is an icon-only bar: a capsule that
 /// widens has no label to make room for and reads as unrelated motion.
@@ -210,14 +195,16 @@ class _SelectedCapsule extends StatelessWidget {
         heightFactor: 1,
         child: Padding(
           padding: inset,
-          child: LiquidGlass.withOwnLayer(
+          child: DecoratedBox(
             key: SdGlassNavBarV3.selectedCapsuleKey,
-            shape: LiquidRoundedSuperellipse(
-              borderRadius: SdContentPaddingV3.selectedTabRadius,
+            decoration: BoxDecoration(
+              color: context.colorScheme3.primary.withValues(
+                alpha: SdGlassNavBarV3.selectedThumbOpacity,
+              ),
+              borderRadius: BorderRadius.circular(
+                SdContentPaddingV3.selectedTabRadius,
+              ),
             ),
-            settings: SdGlassNavBarV3.selectedCapsuleSettings(context),
-            fake: !SdGlassV3.isSupported,
-            glassContainsChild: false,
             child: const SizedBox.expand(),
           ),
         ),
