@@ -16,6 +16,7 @@ library;
 
 export 'sd_app_bar_v3/sd_app_bar_v3.dart';
 export 'sd_badge_v3/sd_badge_v3.dart';
+export 'sd_bottom_navigation_v3/sd_bottom_navigation_v3.dart';
 export 'sd_bottom_sheet_v3/sd_bottom_sheet_v3.dart';
 export 'sd_button_v3/sd_button_v3.dart';
 export 'sd_card_v3/sd_card_v3.dart';

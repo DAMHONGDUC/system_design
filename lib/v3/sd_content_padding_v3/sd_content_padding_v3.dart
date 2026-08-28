@@ -118,9 +118,8 @@ abstract final class SdContentPaddingV3 {
   /// segment left. Derived, never typed.
   static double get floatingBarRadius => floatingBarHeight / 2;
 
-  /// Side margin. The bar is inset from the screen edges — that detachment is
-  /// what makes it read as floating rather than as a docked toolbar.
-  static double get floatingBarHorizontal => SdSpacingConstant.w24;
+  /// No side margin: the compact switcher spans the available width.
+  static double get floatingBarHorizontal => 0;
 
   /// How far the current tab's glass capsule sits inside the bar on every
   /// side.
