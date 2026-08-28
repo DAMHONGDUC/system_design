@@ -118,8 +118,8 @@ abstract final class SdContentPaddingV3 {
   /// segment left. Derived, never typed.
   static double get floatingBarRadius => floatingBarHeight / 2;
 
-  /// No side margin: the compact switcher spans the available width.
-  static double get floatingBarHorizontal => 0;
+  /// Side margin that keeps the compact switcher clear of the screen edges.
+  static double get floatingBarHorizontal => SdSpacingConstant.w24;
 
   /// How far the current tab's glass capsule sits inside the bar on every
   /// side.
