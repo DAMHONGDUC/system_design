@@ -221,9 +221,7 @@ abstract final class SdContentPaddingV3 {
   static EdgeInsets fullBleed(
     BuildContext context, {
     bool floatingNav = false,
-  }) => EdgeInsets.only(
-    bottom: bottom(context, floatingNav: floatingNav),
-  );
+  }) => EdgeInsets.only(bottom: bottom(context, floatingNav: floatingNav));
 
   /// The status bar, read off the **view** — see [_viewBottom] for why the
   /// ambient `MediaQuery` is the wrong source.

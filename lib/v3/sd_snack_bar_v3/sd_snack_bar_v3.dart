@@ -23,9 +23,11 @@ enum SdSnackBarKindV3 { success, error, info }
 
 /// Which edge the message comes from.
 ///
-/// [bottom] is what every screen wants. [top] is for a route that owns the
-/// bottom of the screen — a sheet with a pinned action row, where a message
-/// rising from below would land under the seller's thumb.
+/// **[top] is the default and what every screen wants.** The bottom of this
+/// app is where the thumb that just pressed the button already is — a pinned
+/// save action, a sheet's last row, the glass tab bar — so a message rising
+/// from down there lands under the hand that caused it. [bottom] is left for
+/// a route that owns the top of the screen instead.
 enum SdSnackBarPlacementV3 { bottom, top }
 
 /// The app's one way to show a transient message.
@@ -36,6 +38,11 @@ enum SdSnackBarPlacementV3 { bottom, top }
 /// dialog goes to the screen *underneath* — where the very sheet that raised
 /// it covers it up. Widget tests do not catch that: `find.text` matches a
 /// widget the user cannot see.
+///
+/// **A message never takes a tap.** The card is wrapped in an `IgnorePointer`,
+/// so everything under it stays live and the seller carries on working while
+/// it fades. That is also why there is no tap-to-dismiss: the timer is the
+/// only thing that takes a message away.
 ///
 /// One message at a time. A second call replaces the first rather than
 /// queueing behind it: the newer message is the one the seller's last action
@@ -51,19 +58,19 @@ final class SdSnackBarUtilsV3 {
   static void success(
     BuildContext context,
     String message, {
-    SdSnackBarPlacementV3 placement = SdSnackBarPlacementV3.bottom,
+    SdSnackBarPlacementV3 placement = SdSnackBarPlacementV3.top,
   }) => _show(context, message, SdSnackBarKindV3.success, placement);
 
   static void error(
     BuildContext context,
     String message, {
-    SdSnackBarPlacementV3 placement = SdSnackBarPlacementV3.bottom,
+    SdSnackBarPlacementV3 placement = SdSnackBarPlacementV3.top,
   }) => _show(context, message, SdSnackBarKindV3.error, placement);
 
   static void info(
     BuildContext context,
     String message, {
-    SdSnackBarPlacementV3 placement = SdSnackBarPlacementV3.bottom,
+    SdSnackBarPlacementV3 placement = SdSnackBarPlacementV3.top,
   }) => _show(context, message, SdSnackBarKindV3.info, placement);
 
   /// Take down whatever is showing. Called when a route that raised a message

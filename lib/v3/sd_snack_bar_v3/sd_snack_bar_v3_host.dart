@@ -103,12 +103,13 @@ class _SdSnackBarHostV3State extends State<_SdSnackBarHostV3>
                   curve: SdMotionV3.standard,
                 ),
               ),
-          // The overlay has no Material ancestor of its own, so the card has
-          // to bring one or every Text in it renders with debug underlines.
-          child: Material(
-            type: MaterialType.transparency,
-            child: GestureDetector(
-              onTap: _dismiss,
+          // - the overlay has no Material ancestor, so the card brings one or
+          //   its Text renders with debug underlines
+          // - IgnorePointer keeps everything under the card live, which is
+          //   also why there is no tap-to-dismiss
+          child: IgnorePointer(
+            child: Material(
+              type: MaterialType.transparency,
               child: SdSnackBarCardV3(
                 message: widget.message,
                 kind: widget.kind,

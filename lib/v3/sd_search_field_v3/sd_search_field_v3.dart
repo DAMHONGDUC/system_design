@@ -183,7 +183,7 @@ class _SdSearchFieldV3State extends State<SdSearchFieldV3> {
               decoration: InputDecoration.collapsed(
                 hintText: widget.hint,
                 hintStyle: context.textTheme3.bodyLarge!.copyWith(
-                  color: context.sdTheme3.textTertiary,
+                  color: context.sdTheme3.textPlaceholder,
                 ),
               ),
             ),

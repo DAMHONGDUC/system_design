@@ -38,6 +38,7 @@ class SdThemeV3 extends ThemeExtension<SdThemeV3> {
     required this.textPrimary,
     required this.textSecondary,
     required this.textTertiary,
+    required this.textPlaceholder,
     required this.border,
     required this.divider,
     required this.profit,
@@ -74,9 +75,19 @@ class SdThemeV3 extends ThemeExtension<SdThemeV3> {
   /// Muted body text — captions, subtitles, axis labels.
   final Color textSecondary;
 
-  /// The faintest readable text — placeholder, disabled label, a timestamp
-  /// that must not compete with the row it sits in.
+  /// The faintest readable text — a disabled label, a timestamp that must not
+  /// compete with the row it sits in.
   final Color textTertiary;
+
+  /// Text standing in for a value that is not there yet: a field's hint, a
+  /// picker's "not set".
+  ///
+  /// **A step below [textTertiary], and that gap is the whole point.**
+  /// Tertiary is the faintest colour still meant to be *read*, and a hint
+  /// drawn in it gets taken for a value the field already holds — the seller
+  /// then taps past a field they have not filled in. Nothing a user is
+  /// expected to read takes this colour.
+  final Color textPlaceholder;
 
   /// The edge of a card, an input or a chip.
   final Color border;
@@ -132,6 +143,7 @@ class SdThemeV3 extends ThemeExtension<SdThemeV3> {
     textPrimary: Color(0xFF11151C),
     textSecondary: Color(0xFF5B6472),
     textTertiary: Color(0xFF8D96A4),
+    textPlaceholder: Color(0xFFB4BCC8),
     border: Color(0xFFDDE1E8),
     divider: Color(0xFFEDEFF3),
     profit: Color(0xFF12805C),
@@ -154,6 +166,7 @@ class SdThemeV3 extends ThemeExtension<SdThemeV3> {
     Color? textPrimary,
     Color? textSecondary,
     Color? textTertiary,
+    Color? textPlaceholder,
     Color? border,
     Color? divider,
     Color? profit,
@@ -173,6 +186,7 @@ class SdThemeV3 extends ThemeExtension<SdThemeV3> {
     textPrimary: textPrimary ?? this.textPrimary,
     textSecondary: textSecondary ?? this.textSecondary,
     textTertiary: textTertiary ?? this.textTertiary,
+    textPlaceholder: textPlaceholder ?? this.textPlaceholder,
     border: border ?? this.border,
     divider: divider ?? this.divider,
     profit: profit ?? this.profit,
@@ -198,6 +212,7 @@ class SdThemeV3 extends ThemeExtension<SdThemeV3> {
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
       textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
       textTertiary: Color.lerp(textTertiary, other.textTertiary, t)!,
+      textPlaceholder: Color.lerp(textPlaceholder, other.textPlaceholder, t)!,
       border: Color.lerp(border, other.border, t)!,
       divider: Color.lerp(divider, other.divider, t)!,
       profit: Color.lerp(profit, other.profit, t)!,

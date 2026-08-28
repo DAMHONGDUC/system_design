@@ -74,9 +74,7 @@ class SdFilterChipV3 extends StatelessWidget {
             child: Padding(
               // Horizontal only: the height is [height], so a vertical inset
               // here would fight it rather than add to it.
-              padding: EdgeInsets.symmetric(
-                horizontal: SdSpacingConstant.w14,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: SdSpacingConstant.w14),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,

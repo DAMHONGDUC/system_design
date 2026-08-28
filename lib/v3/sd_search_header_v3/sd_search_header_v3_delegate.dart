@@ -38,8 +38,7 @@ class _SdSearchHeaderDelegateV3 extends SliverPersistentHeaderDelegate {
       SdSearchHeaderMetricsV3.fieldGap + SdSearchFieldV3.expandedHeight;
 
   @override
-  double get maxExtent =>
-      topPadding + SdAppBarV3.toolbarHeight + _searchRow;
+  double get maxExtent => topPadding + SdAppBarV3.toolbarHeight + _searchRow;
 
   @override
   double get minExtent => topPadding + SdAppBarV3.toolbarHeight;
@@ -128,8 +127,7 @@ class _SdSearchHeaderDelegateV3 extends SliverPersistentHeaderDelegate {
   /// sits *in* the bar rather than filling it edge to edge.
   Rect _collapsedField(double width, double trailing) => Rect.fromLTWH(
     SdContentPaddingV3.horizontal,
-    topPadding +
-        (SdAppBarV3.toolbarHeight - SdSearchFieldV3.dockedHeight) / 2,
+    topPadding + (SdAppBarV3.toolbarHeight - SdSearchFieldV3.dockedHeight) / 2,
     width - SdContentPaddingV3.horizontal - trailing,
     SdSearchFieldV3.dockedHeight,
   );
@@ -222,8 +220,8 @@ class _HeaderActions extends StatelessWidget {
             // whatever `constraints` says — taller than the bar row on any
             // device shorter than the design canvas, which overflows the row.
             style: IconButton.styleFrom(
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
             constraints: BoxConstraints.tightFor(
               width: SdAppBarActionV3.slot,
               height: SdAppBarActionV3.slot,

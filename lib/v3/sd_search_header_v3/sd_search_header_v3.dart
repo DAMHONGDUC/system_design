@@ -113,7 +113,6 @@ class SdSearchHeaderV3 extends StatelessWidget {
   /// beside the field: it is a way *into* search, not a control of it.
   final List<SdAppBarActionV3> actions;
 
-
   @override
   Widget build(BuildContext context) => SliverPersistentHeader(
     pinned: true,

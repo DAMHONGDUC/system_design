@@ -20,9 +20,16 @@ extension SdTextStyleV3X on TextStyle {
   TextStyle muted3(BuildContext context) =>
       copyWith(color: context.sdTheme3.textSecondary);
 
-  /// The faintest readable colour — placeholders, disabled labels.
+  /// The faintest readable colour — disabled labels, a timestamp that must
+  /// not compete with its row.
   TextStyle faint3(BuildContext context) =>
       copyWith(color: context.sdTheme3.textTertiary);
+
+  /// Text standing in for a value that is not there yet — a field's hint, a
+  /// picker's "not set". Fainter than [faint3] on purpose; see
+  /// `SdThemeV3.textPlaceholder`.
+  TextStyle placeholder3(BuildContext context) =>
+      copyWith(color: context.sdTheme3.textPlaceholder);
 
   /// Tabular figures, so a column of money does not jitter as digits change.
   ///

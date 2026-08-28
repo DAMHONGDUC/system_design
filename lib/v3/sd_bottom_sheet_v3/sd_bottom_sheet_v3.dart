@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/sd_spacing_constant.dart';
 import '../sd_content_padding_v3/sd_content_padding_v3.dart';
 import '../sd_context_v3/sd_context_v3.dart';
+import '../sd_keyboard_dismiss_v3/sd_keyboard_dismiss_v3.dart';
 import '../sd_radius_v3/sd_radius_v3.dart';
 import '../sd_text_style_v3/sd_text_style_v3.dart';
 
@@ -11,12 +12,13 @@ import '../sd_text_style_v3/sd_text_style_v3.dart';
 ///
 /// The handle is decorative and excluded from semantics — a screen reader
 /// announcing "handle" before the sheet's title is noise.
+///
+/// **It wraps its content in [SdKeyboardDismissV3] itself**, and needs to: a
+/// sheet is a route of its own, so it is not inside the scaffold underneath it
+/// and inherits nothing from that one — and a sheet is where most of this
+/// app's typing happens.
 class SdBottomSheetV3 extends StatelessWidget {
-  const SdBottomSheetV3({
-    required this.title,
-    required this.child,
-    super.key,
-  });
+  const SdBottomSheetV3({required this.title, required this.child, super.key});
 
   final String title;
   final Widget child;
@@ -27,49 +29,51 @@ class SdBottomSheetV3 extends StatelessWidget {
   static double get handleHeight => SdSpacingConstant.h4;
 
   @override
-  Widget build(BuildContext context) => Container(
-    decoration: BoxDecoration(
-      color: context.sdTheme3.surfaceModal,
-      borderRadius: SdRadiusV3.modalTop,
-      border: Border.all(color: context.sdTheme3.border),
-    ),
-    padding: EdgeInsets.only(
-      left: SdContentPaddingV3.horizontal,
-      right: SdContentPaddingV3.horizontal,
-      top: SdSpacingConstant.h12,
-      // - clears the home indicator, because a sheet's last row is the one a
-      //   thumb reaches for
-      // - lifts over the keyboard, so no caller wraps this in its own Padding
-      bottom:
-          SdContentPaddingV3.detailBottom(context) +
-          SdContentPaddingV3.keyboardInset(context),
-    ),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Center(
-          child: ExcludeSemantics(
-            child: Container(
-              width: handleWidth,
-              height: handleHeight,
-              decoration: BoxDecoration(
-                color: context.sdTheme3.border,
-                borderRadius: SdRadiusV3.fullAll,
+  Widget build(BuildContext context) => SdKeyboardDismissV3(
+    child: Container(
+      decoration: BoxDecoration(
+        color: context.sdTheme3.surfaceModal,
+        borderRadius: SdRadiusV3.modalTop,
+        border: Border.all(color: context.sdTheme3.border),
+      ),
+      padding: EdgeInsets.only(
+        left: SdContentPaddingV3.horizontal,
+        right: SdContentPaddingV3.horizontal,
+        top: SdSpacingConstant.h12,
+        // - clears the home indicator, because a sheet's last row is the one a
+        //   thumb reaches for
+        // - lifts over the keyboard, so no caller wraps this in its own Padding
+        bottom:
+            SdContentPaddingV3.detailBottom(context) +
+            SdContentPaddingV3.keyboardInset(context),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Center(
+            child: ExcludeSemantics(
+              child: Container(
+                width: handleWidth,
+                height: handleHeight,
+                decoration: BoxDecoration(
+                  color: context.sdTheme3.border,
+                  borderRadius: SdRadiusV3.fullAll,
+                ),
               ),
             ),
           ),
-        ),
-        SizedBox(height: SdSpacingConstant.h16),
-        Text(
-          title,
-          style: context.textTheme3.titleMedium!.semiBold3.copyWith(
-            color: context.sdTheme3.textPrimary,
+          SizedBox(height: SdSpacingConstant.h16),
+          Text(
+            title,
+            style: context.textTheme3.titleMedium!.semiBold3.copyWith(
+              color: context.sdTheme3.textPrimary,
+            ),
           ),
-        ),
-        SizedBox(height: SdSpacingConstant.h16),
-        child,
-      ],
+          SizedBox(height: SdSpacingConstant.h16),
+          child,
+        ],
+      ),
     ),
   );
 }

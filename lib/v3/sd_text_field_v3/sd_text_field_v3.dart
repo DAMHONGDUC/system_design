@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v3/sd_context_v3.dart';
+import '../sd_field_label_v3/sd_field_label_v3.dart';
 import '../sd_icon_v3/sd_icon_v3.dart';
 import '../sd_radius_v3/sd_radius_v3.dart';
 import '../sd_text_style_v3/sd_text_style_v3.dart';
@@ -24,6 +25,7 @@ class SdTextFieldV3 extends StatelessWidget {
     required this.label,
     required this.controller,
     this.hint,
+    this.isRequired = false,
     this.errorText,
     this.helperText,
     this.keyboardType,
@@ -41,13 +43,20 @@ class SdTextFieldV3 extends StatelessWidget {
     super.key,
   });
 
-  /// Always shown, always above the field. There is no "optional" flag: the
-  /// app appends its own marker, because whether a field is required is a
-  /// domain question and the plan's answer changes per state (§28/§29).
+  /// Always shown, always above the field.
   final String label;
 
   final TextEditingController controller;
+
+  /// Placeholder. Drawn in `SdThemeV3.textPlaceholder`, which is fainter than
+  /// any text meant to be read — a hint the seller mistakes for a value is a
+  /// field they tap straight past.
   final String? hint;
+
+  /// Draws the asterisk after [label]. It says the form will refuse to submit
+  /// without this field; it does not enforce anything itself, and which state
+  /// makes a field required is a domain question (hard rule 2).
+  final bool isRequired;
 
   /// Non-null tints the border and renders the message below. The app's
   /// validators produce this; the field never validates anything itself.
@@ -87,14 +96,7 @@ class SdTextFieldV3 extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(
-          label,
-          style: context.textTheme3.labelMedium!.semiBold3.copyWith(
-            color: enabled
-                ? context.sdTheme3.textSecondary
-                : context.sdTheme3.textTertiary,
-          ),
-        ),
+        SdFieldLabelV3(label: label, isRequired: isRequired, enabled: enabled),
         SizedBox(height: SdSpacingConstant.h6),
         Semantics(
           textField: true,
@@ -117,7 +119,7 @@ class SdTextFieldV3 extends StatelessWidget {
             ),
             decoration: InputDecoration(
               hintText: hint,
-              hintStyle: context.textTheme3.bodyLarge!.faint3(context),
+              hintStyle: context.textTheme3.bodyLarge!.placeholder3(context),
               filled: true,
               fillColor: enabled
                   ? context.colorScheme3.surface

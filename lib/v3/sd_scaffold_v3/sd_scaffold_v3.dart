@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../sd_context_v3/sd_context_v3.dart';
+import '../sd_keyboard_dismiss_v3/sd_keyboard_dismiss_v3.dart';
 
 /// The scaffold every v3 screen sits in.
 ///
@@ -9,6 +10,11 @@ import '../sd_context_v3/sd_context_v3.dart';
 /// `colorScheme.surface` was. `surface` in v3 is the *card*, one step above
 /// the page — a bare `Scaffold` therefore renders the page in the card colour
 /// and every card on it disappears.
+///
+/// **It does wrap its body in [SdKeyboardDismissV3]**, so a tap on anything
+/// that is not a control drops focus and closes the keyboard. Wired here
+/// rather than per screen because a form that forgot it is a form with no way
+/// out but the platform's own gesture.
 ///
 /// **It does not wrap its body in a `SafeArea`.** Insets are
 /// `SdContentPaddingV3`'s job, and a scaffold that padded too would double up
@@ -48,7 +54,7 @@ class SdScaffoldV3 extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
     backgroundColor: context.sdTheme3.background,
     appBar: appBar,
-    body: body,
+    body: SdKeyboardDismissV3(child: body),
     bottomNavigationBar: bottomNavigationBar,
     floatingActionButton: floatingActionButton,
     floatingActionButtonLocation: floatingActionButtonLocation,

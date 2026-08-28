@@ -275,8 +275,7 @@ class _SelectedCapsuleState extends State<_SelectedCapsule>
   double get _index => _from == _to
       ? _to
       : _from +
-            (_to - _from) *
-                SdMotionV3.emphasized.transform(_controller.value);
+            (_to - _from) * SdMotionV3.emphasized.transform(_controller.value);
 
   /// The squash-and-stretch envelope: nothing at either end, everything in
   /// the middle, scaled by how far this jump travels.
@@ -286,8 +285,8 @@ class _SelectedCapsuleState extends State<_SelectedCapsule>
   /// to keep in step with the first for no visible gain.
   double get _stretch {
     final double distance = (_to - _from).abs();
-    final double reach =
-        (distance / _SelectedCapsule.fullStretchDistance).clamp(0.0, 1.0);
+    final double reach = (distance / _SelectedCapsule.fullStretchDistance)
+        .clamp(0.0, 1.0);
 
     return math.sin(math.pi * _controller.value) * reach;
   }

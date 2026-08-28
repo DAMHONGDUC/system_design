@@ -111,8 +111,7 @@ class SdDialogV3 extends StatelessWidget {
                 action.onPressed();
               },
             ),
-            if (action != actions.last)
-              SizedBox(height: SdSpacingConstant.h8),
+            if (action != actions.last) SizedBox(height: SdSpacingConstant.h8),
           ],
         ],
       ),
