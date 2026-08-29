@@ -73,8 +73,10 @@ final class SdSpacingConstant {
   static double get r24 => 24.r;
   static double get r26 => 26.r;
   static double get r28 => 28.r;
+  static double get r32 => 32.r;
   static double get r36 => 36.r;
   static double get r44 => 44.r;
+  static double get r48 => 48.r;
   static double get r64 => 64.r;
   static double get r88 => 88.r;
   static double get r999 => 999.r;
