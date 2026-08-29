@@ -31,3 +31,7 @@ fi
 step() { printf '%s==> %s%s\n' "$C_STEP" "$1" "$C_OFF"; }
 warn() { printf '%s    %s%s\n' "$C_WARN" "$1" "$C_OFF"; }
 done_msg() { printf '%s%s%s\n' "$C_DONE" "$1" "$C_OFF"; }
+fail() {
+  printf '%s%s%s\n' "$C_WARN" "$1" "$C_OFF" >&2
+  exit 1
+}

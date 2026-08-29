@@ -51,6 +51,10 @@ for pair in $PAIRS; do
   printf '    %s -> %s\n' "$SRC_FILE" "$DST_FILE"
 done
 
+# The installed plist owns this environment's Google callback. Derive it only
+# after every source has landed so a later copy cannot overwrite the entry.
+sh "$SCRIPT_DIR/_url-scheme.sh"
+
 done_msg "Installed $TARGET config. Run with --dart-define-from-file=env/$TARGET.json."
 # functions/.env is read by the Firebase CLI at deploy time, not by the app.
 warn "functions/.env reaches the backend only on the next deploy-firebase-$TARGET."
