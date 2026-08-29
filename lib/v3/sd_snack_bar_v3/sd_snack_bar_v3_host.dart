@@ -77,7 +77,9 @@ class _SdSnackBarHostV3State extends State<_SdSnackBarHostV3>
       // inside a Scaffold body that already had it removed.
       top: fromBottom
           ? null
-          : SdContentPaddingV3.statusBarInset(context) + SdSpacingConstant.h12,
+          : SdContentPaddingV3.statusBarInset(context) +
+                kToolbarHeight +
+                SdSpacingConstant.h12,
       // The same call a tab screen makes for its own last row, so a message
       // rests exactly where the content it is about does.
       bottom: fromBottom
