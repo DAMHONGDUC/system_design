@@ -23,12 +23,22 @@ class SdBadgeV3 extends StatelessWidget {
   const SdBadgeV3({
     required this.label,
     this.tone = SdBadgeToneV3.neutral,
+    this.color,
     this.icon,
     super.key,
   });
 
   final String label;
   final SdBadgeToneV3 tone;
+
+  /// An exact colour, overriding [tone].
+  ///
+  /// **For a set the five tones cannot tell apart** — an app with seven
+  /// condition grades needs seven hues, and the same value shown as a badge
+  /// here and as an `SdTagV3` there has to come out the same colour. The app
+  /// maps its enum to one colour and hands it to both; the package still
+  /// learns nothing about what the value means.
+  final Color? color;
 
   /// An optional leading glyph, for a state worth recognising before it is
   /// read — a failed sync in a long list.
@@ -40,13 +50,15 @@ class SdBadgeV3 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color tint = switch (tone) {
-      SdBadgeToneV3.neutral => context.sdTheme3.textSecondary,
-      SdBadgeToneV3.success => context.sdTheme3.success,
-      SdBadgeToneV3.warning => context.sdTheme3.warning,
-      SdBadgeToneV3.danger => context.sdTheme3.danger,
-      SdBadgeToneV3.info => context.sdTheme3.info,
-    };
+    final Color tint =
+        color ??
+        switch (tone) {
+          SdBadgeToneV3.neutral => context.sdTheme3.textSecondary,
+          SdBadgeToneV3.success => context.sdTheme3.success,
+          SdBadgeToneV3.warning => context.sdTheme3.warning,
+          SdBadgeToneV3.danger => context.sdTheme3.danger,
+          SdBadgeToneV3.info => context.sdTheme3.info,
+        };
 
     return Container(
       padding: EdgeInsets.symmetric(
