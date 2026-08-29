@@ -29,6 +29,7 @@ class SdTagV3 extends StatelessWidget {
     required this.selected,
     required this.onSelected,
     this.icon,
+    this.showSelectionIndicator = true,
     super.key,
   });
 
@@ -45,6 +46,11 @@ class SdTagV3 extends StatelessWidget {
   /// recognised faster by shape than by a dot.
   final IconData? icon;
 
+  /// Whether a tag with no explicit [icon] draws its selected/unselected
+  /// radio. Display-only tags turn this off because they report a fact rather
+  /// than offering a choice.
+  final bool showSelectionIndicator;
+
   /// How much of [color] the chosen tag keeps behind it. Low enough that the
   /// label stays the loudest thing in it — the same strength `SdBadgeV3`
   /// fills with, so a chosen tag and the badge for the same value read as one
@@ -54,6 +60,13 @@ class SdTagV3 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Color foreground = selected ? color : context.sdTheme3.textSecondary;
+    final IconData? leadingIcon =
+        icon ??
+        (showSelectionIndicator
+            ? selected
+                  ? Icons.radio_button_checked_rounded
+                  : Icons.radio_button_unchecked_rounded
+            : null);
 
     return Material(
       color: Colors.transparent,
@@ -77,15 +90,14 @@ class SdTagV3 extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              SdIconV3(
-                icon ??
-                    (selected
-                        ? Icons.radio_button_checked_rounded
-                        : Icons.radio_button_unchecked_rounded),
-                size: SdIconV3.smallSize,
-                color: foreground,
-              ),
-              SizedBox(width: SdSpacingConstant.w6),
+              if (leadingIcon != null) ...<Widget>[
+                SdIconV3(
+                  leadingIcon,
+                  size: SdIconV3.smallSize,
+                  color: foreground,
+                ),
+                SizedBox(width: SdSpacingConstant.w6),
+              ],
               Text(
                 label,
                 style: context.textTheme3.bodySmall!.semiBold3.copyWith(
