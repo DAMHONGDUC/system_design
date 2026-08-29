@@ -10,6 +10,24 @@ import '../sd_text_style_v3/sd_text_style_v3.dart';
 /// means — the app maps `ItemStatus.stale` to [warning] and hands it over.
 enum SdBadgeToneV3 { neutral, success, warning, danger, info }
 
+/// How much room a badge takes around its label.
+///
+/// **[compact] is the presentation for read-only metadata on a card** — a list
+/// row carries three or four of these beside a photo, a title and a price, so
+/// the padding is what has to give. It scales the inset, the glyph and the gap
+/// together, exactly as `SdButtonSizeV3` does: the same shape smaller, never
+/// differently proportioned. The label keeps its size, because the word is the
+/// signal and shrinking it is what makes a dense row unreadable.
+enum SdBadgeSizeV3 {
+  regular,
+  compact;
+
+  double get scale => switch (this) {
+    SdBadgeSizeV3.regular => 1,
+    SdBadgeSizeV3.compact => 0.75,
+  };
+}
+
 /// A small status marker: an item's `Listed`, an order's `To Ship`, a
 /// listing's `Draft`.
 ///
@@ -25,6 +43,7 @@ class SdBadgeV3 extends StatelessWidget {
     this.tone = SdBadgeToneV3.neutral,
     this.color,
     this.icon,
+    this.size = SdBadgeSizeV3.regular,
     super.key,
   });
 
@@ -44,12 +63,16 @@ class SdBadgeV3 extends StatelessWidget {
   /// read — a failed sync in a long list.
   final IconData? icon;
 
+  /// How tightly the badge is padded. See [SdBadgeSizeV3].
+  final SdBadgeSizeV3 size;
+
   /// How much of the tone colour the fill keeps. Low enough that the label
   /// stays the loudest thing in the badge.
   static const double fillOpacity = 0.12;
 
   @override
   Widget build(BuildContext context) {
+    final double scale = size.scale;
     final Color tint =
         color ??
         switch (tone) {
@@ -62,8 +85,8 @@ class SdBadgeV3 extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: SdSpacingConstant.w8,
-        vertical: SdSpacingConstant.h4,
+        horizontal: SdSpacingConstant.w8 * scale,
+        vertical: SdSpacingConstant.h4 * scale,
       ),
       decoration: BoxDecoration(
         color: tint.withValues(alpha: fillOpacity),
@@ -73,8 +96,8 @@ class SdBadgeV3 extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           if (icon != null) ...<Widget>[
-            SdIconV3(icon!, size: SdIconV3.smallSize, color: tint),
-            SizedBox(width: SdSpacingConstant.w4),
+            SdIconV3(icon!, size: SdIconV3.smallSize * scale, color: tint),
+            SizedBox(width: SdSpacingConstant.w4 * scale),
           ],
           Text(
             label,
