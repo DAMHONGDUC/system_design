@@ -212,25 +212,10 @@ class _HeaderActions extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         for (final SdAppBarActionV3 action in actions)
-          IconButton(
-            onPressed: action.onPressed,
+          SdAppBarActionButtonV3(
+            icon: action.icon,
             tooltip: action.tooltip,
-            padding: EdgeInsets.zero,
-            // shrinkWrap or the button silently reserves a 48pt tap target
-            // whatever `constraints` says — taller than the bar row on any
-            // device shorter than the design canvas, which overflows the row.
-            style: IconButton.styleFrom(
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            constraints: BoxConstraints.tightFor(
-              width: SdAppBarActionV3.slot,
-              height: SdAppBarActionV3.slot,
-            ),
-            icon: SdIconV3(
-              action.icon,
-              color: context.sdTheme3.textPrimary,
-              semanticLabel: action.tooltip,
-            ),
+            onPressed: action.onPressed,
           ),
       ],
     ),

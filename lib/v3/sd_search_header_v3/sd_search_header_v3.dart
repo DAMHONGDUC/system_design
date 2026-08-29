@@ -3,43 +3,14 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
+import '../sd_app_bar_action_button_v3/sd_app_bar_action_button_v3.dart';
 import '../sd_app_bar_v3/sd_app_bar_v3.dart';
 import '../sd_content_padding_v3/sd_content_padding_v3.dart';
 import '../sd_context_v3/sd_context_v3.dart';
-import '../sd_icon_v3/sd_icon_v3.dart';
 import '../sd_search_field_v3/sd_search_field_v3.dart';
 import '../sd_text_style_v3/sd_text_style_v3.dart';
 
 part 'sd_search_header_v3_delegate.dart';
-
-/// One icon action in a header's trailing slot.
-///
-/// A value type rather than a widget, for the same reason
-/// `SdNavDestinationV3` is one: the header reserves an exact width for the
-/// trailing slot and subtracts it from the search field beside it. An action
-/// that brought its own widget would size itself, and the field would either
-/// overlap it or stop short of it by a number nobody could predict.
-@immutable
-class SdAppBarActionV3 {
-  const SdAppBarActionV3({
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-  });
-
-  final IconData icon;
-
-  /// Tooltip and semantics label. A parameter because this package holds no
-  /// strings.
-  final String tooltip;
-
-  final VoidCallback onPressed;
-
-  /// The width one action occupies, and its tap target. Square, so the row of
-  /// them is `count × slot` and the header can do that arithmetic without
-  /// laying anything out.
-  static double get slot => SdSpacingConstant.w44;
-}
 
 /// The header's own internal spacing, kept off `SdContentPaddingV3`.
 ///

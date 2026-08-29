@@ -14,6 +14,7 @@
 /// in the package changes. See `WIDGET_RULES.md`, which is the authority.
 library;
 
+export 'sd_app_bar_action_button_v3/sd_app_bar_action_button_v3.dart';
 export 'sd_app_bar_v3/sd_app_bar_v3.dart';
 export 'sd_badge_v3/sd_badge_v3.dart';
 export 'sd_bottom_navigation_v3/sd_bottom_navigation_v3.dart';
