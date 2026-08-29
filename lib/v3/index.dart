@@ -44,6 +44,7 @@ export 'sd_search_header_v3/sd_search_header_v3.dart';
 export 'sd_section_header_v3/sd_section_header_v3.dart';
 export 'sd_snack_bar_v3/sd_snack_bar_v3.dart';
 export 'sd_stat_tile_v3/sd_stat_tile_v3.dart';
+export 'sd_tag_v3/sd_tag_v3.dart';
 export 'sd_text_field_v3/sd_text_field_v3.dart';
 export 'sd_text_style_v3/sd_text_style_v3.dart';
 export 'sd_theme_v3/sd_theme_v3.dart';
