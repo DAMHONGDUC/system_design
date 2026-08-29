@@ -1,5 +1,5 @@
 #!/bin/sh
-# Everything that must be true before a build is worth uploading.
+# Everything iOS and Android need before a build is worth starting.
 #
 # The release blockers live in RELEASE_ACTIONS.md, but a document does not
 # fail. This does: each check is one line of output, and the exit code is
@@ -109,6 +109,29 @@ blocker "the entitlement declares Sign in with Apple" "$?"
 [ "$(grep -c 'CODE_SIGN_ENTITLEMENTS' ios/Runner.xcodeproj/project.pbxproj)" = "3" ]
 blocker "CODE_SIGN_ENTITLEMENTS on Debug, Release and Profile" "$?"
 
+step "6b   Android build settings"
+ANDROID_GRADLE=android/app/build.gradle.kts
+ANDROID_MANIFEST=android/app/src/main/AndroidManifest.xml
+blocker "$ANDROID_GRADLE" "$(exists "$ANDROID_GRADLE")"
+blocker "$ANDROID_MANIFEST" "$(exists "$ANDROID_MANIFEST")"
+
+grep -q 'id("com.google.gms.google-services")' "$ANDROID_GRADLE" 2>/dev/null
+blocker "the Google Services Gradle plugin is applied" "$?"
+grep -q 'applicationId = "com.dd.reseller.studio"' "$ANDROID_GRADLE" 2>/dev/null
+blocker "the Android application id is com.dd.reseller.studio" "$?"
+
+grep -q 'android.permission.CAMERA' "$ANDROID_MANIFEST" 2>/dev/null
+blocker "Android declares CAMERA for the scanner" "$?"
+grep -q 'android:scheme="selleros"' "$ANDROID_MANIFEST" 2>/dev/null
+blocker "Android declares the selleros deep-link scheme" "$?"
+grep -q 'android:name="flutter_deeplinking_enabled"' "$ANDROID_MANIFEST" 2>/dev/null &&
+  grep -q 'android:value="true"' "$ANDROID_MANIFEST" 2>/dev/null
+blocker "Flutter deep linking is enabled on Android" "$?"
+
+grep -q 'signingConfig' "$ANDROID_GRADLE" 2>/dev/null &&
+  ! grep -q 'signingConfig = signingConfigs.getByName("debug")' "$ANDROID_GRADLE" 2>/dev/null
+blocker "Android release signing does not use the debug key" "$?"
+
 step "7    Listing and legal"
 # Guideline 3.1.2 wants both links reachable from inside the binary, so the
 # paywall and About read them from env. Empty means the rows are not drawn.
@@ -138,7 +161,7 @@ blocker "melos run analyze is clean" "$?"
 
 echo ""
 if [ "$FAILED" -eq 0 ]; then
-  done_msg "preflight clean — nothing here blocks an upload"
+  done_msg "pre-build clean — iOS and Android are ready to build"
 else
   fail "$FAILED blocker(s) unmet — see RELEASE_ACTIONS.md"
 fi

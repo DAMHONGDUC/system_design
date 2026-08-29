@@ -1,5 +1,5 @@
 #!/bin/sh
-# One environment, end to end: install config, preflight, deploy, then TestFlight.
+# One environment, end to end: install config, pre-build, deploy, then TestFlight.
 set -eu
 . "$(dirname "$0")/_common.sh"
 
@@ -22,8 +22,8 @@ fi
 step "release $TARGET — 1/4 env config"
 sh "$SCRIPT_DIR/prepare-env.sh" "$TARGET"
 
-step "release $TARGET — 2/4 preflight"
-sh "$SCRIPT_DIR/preflight.sh"
+step "release $TARGET — 2/4 pre-build"
+sh "$SCRIPT_DIR/pre-build.sh"
 
 step "release $TARGET — 3/4 firebase"
 sh "$SCRIPT_DIR/deploy-firebase.sh" "$TARGET"
