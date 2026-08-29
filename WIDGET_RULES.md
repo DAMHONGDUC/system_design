@@ -159,6 +159,19 @@ Nothing in this package hardcodes a colour, a font size, or a dimension.
 | semi-bold, muted | `.semiBold`, `.muted(context)` on `TextStyle` |
 | any dimension | `SdSpacingConstant` — `w*` horizontal, `h*` vertical, `r*` square/radius, `sp*` font |
 | screen/content insets | `SdContentPaddingV2` |
+| a chrome glyph | `Symbols.*_rounded` (`material_symbols_icons`) |
+
+**Chrome glyphs are Material Symbols Rounded**, and that is why the package
+depends on `material_symbols_icons`. A handful of widgets have to draw a glyph
+nobody passes them — a sheet's close cross, a back arrow, a filter pill's
+funnel, a radio dot — and the host app draws Symbols everywhere else, so a
+sheet whose cross came from Material Icons put two icon families on one
+screen. It is a font dependency like `flutter_svg`, not a look: the host still
+owns every colour.
+
+**`SdIconV2` takes a `fill`** (0 outline, 1 solid), because Symbols is a
+variable font: a selected tab and an unselected one are the same glyph at two
+fill values, not two glyph names.
 
 The host app owns the palette: it builds an `SdThemeV2` from whatever its own
 colours are and registers it on `ThemeData.extensions`. A widget that reads
