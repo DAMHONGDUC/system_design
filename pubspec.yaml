@@ -15,6 +15,10 @@ dependencies:
   flutter_svg: ^2.3.0
   liquid_glass_renderer: ^0.2.0-dev.4
   logger: ^2.5.0
+  # The icon font every generation draws. A design system that hardcodes a
+  # close cross and a back arrow has to draw them from the same family the
+  # host app does, or one screen carries two icon families.
+  material_symbols_icons: ^4.2960.0
 
 dev_dependencies:
   flutter_lints: ^6.0.0

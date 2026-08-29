@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../core/sd_spacing_constant.dart';
 import '../sd_app_bar_button_v2/sd_app_bar_button_v2.dart';
@@ -76,7 +77,7 @@ class SdSheetHeaderV2 extends StatelessWidget {
       child: Row(
         children: <Widget>[
           SdAppBarButtonV2(
-            icon: Icons.close,
+            icon: Symbols.close_rounded,
             tooltip: closeTooltip,
             onPressed: () => Navigator.of(context).pop(),
           ),
@@ -94,8 +95,8 @@ class SdSheetHeaderV2 extends StatelessWidget {
           else
             SdAppBarButtonV2(
               icon: switch (action) {
-                SdSheetActionV2.confirm => Icons.check,
-                SdSheetActionV2.edit => Icons.edit,
+                SdSheetActionV2.confirm => Symbols.check_rounded,
+                SdSheetActionV2.edit => Symbols.edit_rounded,
               },
               // Same glass disc as the X; the tinted glyph marks this as the action that writes something.
               color: context.colorScheme.secondary,

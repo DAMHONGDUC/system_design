@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../core/sd_spacing_constant.dart';
 import '../sd_card_v2/sd_card_v2.dart';
@@ -67,7 +68,7 @@ class SdBannerV2 extends StatelessWidget {
             ),
             SizedBox(width: SdSpacingConstant.w8),
             SdIconV2(
-              icon: Icons.chevron_right,
+              icon: Symbols.chevron_right_rounded,
               size: SdSpacingConstant.r20,
               color: context.colorScheme.onSurfaceVariant,
             ),

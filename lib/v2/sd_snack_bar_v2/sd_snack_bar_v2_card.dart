@@ -17,15 +17,15 @@ class SdSnackBarCardV2 extends StatelessWidget {
   ({IconData icon, Color accent}) _style(BuildContext context) =>
       switch (kind) {
         SdSnackBarKindV2.success => (
-          icon: Icons.check_circle_outline,
+          icon: Symbols.check_circle_rounded,
           accent: context.colorScheme.secondary,
         ),
         SdSnackBarKindV2.error => (
-          icon: Icons.error_outline,
+          icon: Symbols.error_rounded,
           accent: context.colorScheme.error,
         ),
         SdSnackBarKindV2.info => (
-          icon: Icons.info_outline,
+          icon: Symbols.info_rounded,
           accent: context.colorScheme.primary,
         ),
       };

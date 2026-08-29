@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
@@ -42,7 +43,7 @@ class SdFilterPillV2 extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               SdIconV2(
-                icon: Icons.filter_list,
+                icon: Symbols.filter_list_rounded,
                 size: SdSpacingConstant.r16,
                 color: scheme.primary,
               ),
@@ -50,7 +51,7 @@ class SdFilterPillV2 extends StatelessWidget {
               Text(label, style: context.textTheme.labelLarge!),
               SizedBox(width: SdSpacingConstant.w2),
               SdIconV2(
-                icon: Icons.expand_more,
+                icon: Symbols.expand_more_rounded,
                 size: SdSpacingConstant.r18,
                 color: scheme.onSurfaceVariant,
               ),

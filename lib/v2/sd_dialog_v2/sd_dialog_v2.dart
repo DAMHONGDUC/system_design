@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../core/sd_spacing_constant.dart';
 import '../sd_content_padding_v2/sd_content_padding_v2.dart';
@@ -136,8 +137,8 @@ class SdDialogOptionV2 extends StatelessWidget {
             if (selected != null)
               SdIconV2(
                 icon: selected!
-                    ? Icons.radio_button_checked
-                    : Icons.radio_button_off,
+                    ? Symbols.radio_button_checked_rounded
+                    : Symbols.radio_button_unchecked_rounded,
                 size: SdSpacingConstant.r20,
                 color: selected! ? scheme.primary : scheme.onSurfaceVariant,
               ),

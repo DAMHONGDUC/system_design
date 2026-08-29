@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../core/sd_spacing_constant.dart';
 import '../sd_bottom_sheet_v2/sd_bottom_sheet_v2.dart';
@@ -147,8 +148,8 @@ class _FilterSheet<T> extends StatelessWidget {
                   ListTile(
                     leading: SdIconV2(
                       icon: option == selected
-                          ? Icons.radio_button_checked
-                          : Icons.radio_button_off,
+                          ? Symbols.radio_button_checked_rounded
+                          : Symbols.radio_button_unchecked_rounded,
                       color: option == selected
                           ? scheme.primary
                           : scheme.onSurfaceVariant,

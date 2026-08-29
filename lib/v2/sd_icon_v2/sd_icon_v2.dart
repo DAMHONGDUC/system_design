@@ -31,6 +31,12 @@ enum SdIconVariantV2 {
 /// falls back to the surrounding [IconTheme] when null (ignored for raster
 /// images unless [applyColorToImage] is true).
 ///
+/// [fill] drives the fill axis of a variable icon font (Material Symbols),
+/// where a filled and an outlined glyph are one icon at two fill values
+/// rather than two icons. 0 is the outline, 1 is solid, and anything between
+/// is how a selected tab animates. Ignored by static fonts and by every
+/// image variant.
+///
 /// [hasPadding] wraps the rendered icon with [SdSpacingConstant.r8] padding
 /// on all sides — useful for giving tappable icons a larger hit area without
 /// affecting the visual icon size itself.
@@ -41,6 +47,7 @@ class SdIconV2 extends StatelessWidget {
     this.bytes,
     this.size,
     this.color,
+    this.fill,
     this.applyColorToImage = false,
     this.variant = SdIconVariantV2.icon,
     this.hasPadding = false,
@@ -62,6 +69,9 @@ class SdIconV2 extends StatelessWidget {
 
   final double? size;
   final Color? color;
+
+  /// Fill axis of a variable icon font, 0 (outline) to 1 (solid).
+  final double? fill;
 
   /// Whether to tint raster images (asset/network/memory) with [color].
   /// SVG and [Icon] are always tinted when [color] is set.
@@ -89,7 +99,12 @@ class SdIconV2 extends StatelessWidget {
           icon != null,
           'SdIconV2: `icon` is required for SdIconVariantV2.icon',
         );
-        child = Icon(icon, size: resolvedSize, color: resolvedColor);
+        child = Icon(
+          icon,
+          size: resolvedSize,
+          color: resolvedColor,
+          fill: fill,
+        );
 
       case SdIconVariantV2.svgAsset:
         assert(

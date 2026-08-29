@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../core/sd_spacing_constant.dart';
 import '../sd_glass_circle_v2/sd_glass_circle_v2.dart';
@@ -57,8 +58,8 @@ class SdAppBarButtonV2 extends StatelessWidget {
   /// Platform-native back arrow, for whoever needs to spell out a leading
   /// button rather than let `SdAppBarV2` insert one.
   static IconData get backIcon => switch (defaultTargetPlatform) {
-    TargetPlatform.iOS || TargetPlatform.macOS => Icons.arrow_back_ios_new,
-    _ => Icons.arrow_back,
+    TargetPlatform.iOS || TargetPlatform.macOS => Symbols.arrow_back_ios_new_rounded,
+    _ => Symbols.arrow_back_rounded,
   };
 
   final IconData icon;
