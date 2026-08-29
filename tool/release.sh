@@ -1,5 +1,5 @@
 #!/bin/sh
-# One environment, end to end: install its config, deploy its backend, ship its build to TestFlight.
+# One environment, end to end: install config, preflight, deploy, then TestFlight.
 set -eu
 . "$(dirname "$0")/_common.sh"
 
@@ -19,16 +19,19 @@ if ! command -v bundle >/dev/null 2>&1; then
 fi
 
 # The order is the point: the native config has to be in the tree before the backend deploy reads functions/.env, and before fastlane's verify_flavor_config compares it against the flavor.
-step "release $TARGET — 1/3 env config"
+step "release $TARGET — 1/4 env config"
 sh "$SCRIPT_DIR/prepare-env.sh" "$TARGET"
 
-step "release $TARGET — 2/3 firebase"
+step "release $TARGET — 2/4 preflight"
+sh "$SCRIPT_DIR/preflight.sh"
+
+step "release $TARGET — 3/4 firebase"
 sh "$SCRIPT_DIR/deploy-firebase.sh" "$TARGET"
 
 # `notes:` is the flavour line testers see; the lane prefixes it with "<flavor> - <version> (<build>)" either way.
-step "release $TARGET — 3/3 testflight"
+step "release $TARGET — 4/4 testflight"
 (cd ios && bundle exec fastlane beta flavor:"$TARGET" bump:true notes:"$TARGET")
 
-done_msg "Released $TARGET: config installed, backend deployed, build uploaded."
+done_msg "Released $TARGET: config checked, backend deployed, build uploaded."
 # bump:true rewrites pubspec.yaml locally but only CI commits it (`if bump && is_ci`).
 warn "Commit the bumped build number in pubspec.yaml — a local run does not."
