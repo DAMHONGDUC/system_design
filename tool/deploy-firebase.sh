@@ -39,7 +39,7 @@ if [ -n "$DEV_ID" ] && [ "$DEV_ID" = "$PROD_ID" ]; then
   warn "dev and prod are the SAME project — this reaches real users"
 fi
 
-printf '    deploy %s to %s? [y/N] ' "$TARGET" "$ENV_ID"
+ask "deploy $TARGET to $ENV_ID? [y/N] "
 # Melos hands the script a piped stdout but leaves stdin alone; /dev/tty is the one that survives a `sh tool/... < something`, so try it and fall back.
 REPLY=''
 # stderr is redirected BEFORE /dev/tty: redirections apply left to right, so the other order reports the failure to the original stderr anyway.

@@ -20,7 +20,10 @@ ls "$IPA_DIR"/*.ipa >/dev/null 2>&1 || fail "no .ipa in $IPA_DIR — run: melos 
 command -v bundle >/dev/null 2>&1 || fail "bundler not found — cd ios && bundle install"
 
 step "upload $TARGET"
-info "$(ls "$IPA_DIR"/*.ipa)"
+# One line each: the glob can match more than one, and a multi-line message inside a single line breaks the column every other line keeps.
+for ipa in "$IPA_DIR"/*.ipa; do
+  item "$ipa"
+done
 (cd ios && bundle exec fastlane upload flavor:"$TARGET" notes:"$TARGET")
 
 done_msg "uploaded $TARGET to TestFlight"

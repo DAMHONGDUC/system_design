@@ -30,7 +30,7 @@ if [ -n "${MELOS_CLEAN_DERIVED:-}" ] && [ "$(uname)" = "Darwin" ] &&
       case "$workspace" in
         "$REPO"/*)
           rm -rf "$dir"
-          echo "    removed $(basename "$dir")"
+          item "removed $(basename "$dir")"
           ;;
       esac
     done

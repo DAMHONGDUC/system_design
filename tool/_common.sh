@@ -13,6 +13,8 @@ if [ -z "${NO_COLOR:-}" ]; then
   C_WARN=$(printf '\033[1;33m')
   C_OK=$(printf '\033[1;32m')
   C_BAD=$(printf '\033[1;31m')
+  C_ASK=$(printf '\033[1;35m')
+  C_DIM=$(printf '\033[2m')
   C_OFF=$(printf '\033[0m')
 else
   C_STEP=''
@@ -20,8 +22,13 @@ else
   C_WARN=''
   C_OK=''
   C_BAD=''
+  C_ASK=''
+  C_DIM=''
   C_OFF=''
 fi
+
+# Exported because `git submodule foreach` runs its body in a shell of its own: the environment crosses over, the functions below do not, so a line printed in there has to build itself out of these.
+export C_STEP C_INFO C_WARN C_OK C_BAD C_ASK C_DIM C_OFF
 
 # `flutter` is a shell alias for `fvm flutter` on a dev machine, and aliases do not exist inside a script — resolve it or we run the wrong SDK.
 if [ -f .fvmrc ] && command -v fvm >/dev/null 2>&1; then
@@ -32,18 +39,56 @@ else
   DT="dart"
 fi
 
+# Every line is the same three columns — TIME, a three-wide gutter holding the
+# mark, then the message — so the times read down one column and the messages
+# down another however long the line above was:
+#
+#   10:04:31 ==> config — dev                  a step, flush left in the gutter
+#   10:04:31   i installing 6 files            a line inside that step
+#   10:04:31   · env_assets/dev.json -> env/…  an entry in a list under it
+#   10:04:32 ✔   dev config installed          the script's own verdict, flush left again
+#
+# The nesting IS the mark's position in the gutter: flush left is the script
+# talking about itself (a step opening, the run ending), right is one line
+# inside the step above it. Indenting the message instead would put the marks
+# in a ragged column, which is the one column the eye scans.
+#
 # One meaning per colour: cyan opens an action, blue informs, yellow warns,
-# green passed, red failed. Owner's rule: THE MARK CARRIES THE COLOUR AND THE MESSAGE STAYS
-# PLAIN — a wall of coloured sentences is a wall, and the eye scanning for the
-# ✗ has to read it instead of finding it. `step` is the one exception: it has
-# no mark, so the title is the mark.
-step() { printf '%s==> %s%s\n' "$C_STEP" "$1" "$C_OFF"; }
-info() { printf '    %si%s %s\n' "$C_INFO" "$C_OFF" "$1"; }
-warn() { printf '    %s⚠%s %s\n' "$C_WARN" "$C_OFF" "$1"; }
-ok() { printf '    %s✔%s %s\n' "$C_OK" "$C_OFF" "$1"; }
-bad() { printf '    %s✘%s %s\n' "$C_BAD" "$C_OFF" "$1"; }
-done_msg() { printf '%s✔%s %s\n' "$C_OK" "$C_OFF" "$1"; }
+# green passed, red failed, magenta is waiting for an answer. Owner's rule: THE
+# MARK CARRIES THE COLOUR AND THE MESSAGE STAYS PLAIN — a wall of coloured
+# sentences is a wall, and the eye scanning for the ✘ has to read it instead of
+# finding it. `step` is the one exception: it has no mark, so the title is the
+# mark. The time is the rule upside down: it is on EVERY line, so it is dimmed
+# to get out of the way rather than coloured to be found.
+_ts() { date '+%H:%M:%S'; }
+
+# $1 gutter (three columns, mark included), $2 its colour, $3 the message.
+_line() {
+  printf '%s%s%s %s%s%s %s\n' "$C_DIM" "$(_ts)" "$C_OFF" "$2" "$1" "$C_OFF" "$3"
+}
+
+step() { printf '%s%s%s %s==> %s%s\n' "$C_DIM" "$(_ts)" "$C_OFF" "$C_STEP" "$1" "$C_OFF"; }
+info() { _line '  i' "$C_INFO" "$1"; }
+warn() { _line '  ⚠' "$C_WARN" "$1"; }
+ok() { _line '  ✔' "$C_OK" "$1"; }
+bad() { _line '  ✘' "$C_BAD" "$1"; }
+# An entry in a list under the line above — dim on purpose: six copied paths are
+# one fact, and six blue `i` marks claim they are six.
+item() { _line '  ·' "$C_DIM" "$1"; }
+done_msg() { _line '✔  ' "$C_OK" "$1"; }
+# No newline: the answer is typed on the line the question is asked on.
+ask() { printf '%s%s%s %s  ?%s %s' "$C_DIM" "$(_ts)" "$C_OFF" "$C_ASK" "$C_OFF" "$1"; }
 fail() {
-  printf '%s✘%s %s\n' "$C_BAD" "$C_OFF" "$1" >&2
+  _line '✘  ' "$C_BAD" "$1" >&2
   exit 1
+}
+
+# Pad $1 out to $2 columns, so the second column of a list lines up under itself. POSIX sh has no `local`, hence the underscore: the name is a promise not to read it, not a scope.
+pad() {
+  _pad_text="$1"
+  while [ "${#_pad_text}" -lt "$2" ]; do
+    _pad_text="$_pad_text "
+  done
+
+  printf '%s' "$_pad_text"
 }

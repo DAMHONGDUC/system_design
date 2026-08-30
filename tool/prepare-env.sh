@@ -32,16 +32,28 @@ for pair in $PAIRS; do
 done
 
 if [ -n "$MISSING" ]; then
-  warn "missing in $SRC/:$MISSING"
+  warn "missing in $SRC/:"
+  for f in $MISSING; do
+    item "$f"
+  done
   fail "nothing was copied"
 fi
+
+# Widest source path first, so every destination starts in the same column: the list is read down the arrow, and a ragged one has to be read across each line instead.
+WIDTH=0
+for pair in $PAIRS; do
+  SRC_FILE="$SRC/${pair%%|*}"
+  if [ "${#SRC_FILE}" -gt "$WIDTH" ]; then
+    WIDTH="${#SRC_FILE}"
+  fi
+done
 
 step "config — $TARGET"
 for pair in $PAIRS; do
   SRC_FILE="$SRC/${pair%%|*}"
   DST_FILE="${pair#*|}"
   cp "$SRC_FILE" "$DST_FILE"
-  info "$SRC_FILE -> $DST_FILE"
+  item "$(pad "$SRC_FILE" "$WIDTH") -> $DST_FILE"
 done
 
 done_msg "$TARGET config installed"

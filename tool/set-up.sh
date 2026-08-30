@@ -9,13 +9,15 @@ sh "$SCRIPT_DIR/_clean.sh"
 step "submodules"
 git submodule update --init --recursive
 git submodule foreach --quiet --recursive '
+  # foreach runs this body in a shell of its own, where _common.sh’s helpers do not exist — only its exported colours crossed over. So the line is printed by hand, in the same three columns `item` uses; a bare echo here is the one line in a run that does not carry a time.
+  entry() { printf "%s%s%s %s  ·%s %s\n" "$C_DIM" "$(date +%H:%M:%S)" "$C_OFF" "$C_DIM" "$C_OFF" "$1"; }
   branch=$(git config -f "$toplevel/.gitmodules" "submodule.$name.branch" || echo main)
   if ! git checkout -q "$branch" 2>/dev/null; then
-    echo "    $name: cannot switch to $branch, left as is"
+    entry "$name: cannot switch to $branch, left as is"
   elif ! git pull -q --ff-only origin "$branch" 2>/dev/null; then
-    echo "    $name: on $branch, not fast-forwardable — pull it by hand"
+    entry "$name: on $branch, not fast-forwardable — pull it by hand"
   else
-    echo "    $name -> $branch"
+    entry "$name -> $branch"
   fi
 '
 
@@ -67,6 +69,10 @@ fi
 
 if [ -n "$MISSING" ]; then
   printf '\n'
-  warn "created from templates:$MISSING"
+  warn "created from templates:"
+  # One per line rather than one blob: the list is what has to be acted on, and a run that ends with three paths run together reads as one.
+  for f in $MISSING; do
+    item "$f"
+  done
   warn "fill in the Firebase and RevenueCat keys before running"
 fi
