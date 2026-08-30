@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../sd_glass_surface_v4/sd_glass_surface_v4.dart';
+import '../../core/sd_spacing_constant.dart';
 
 class SdCardV4 extends StatelessWidget {
   const SdCardV4({
@@ -16,10 +16,25 @@ class SdCardV4 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SdGlassSurfaceV4(
-      onTap: onTap,
-      semanticLabel: semanticLabel,
+    final BorderRadius radius = BorderRadius.circular(SdSpacingConstant.r16);
+    final Widget content = Padding(
+      padding: EdgeInsets.all(SdSpacingConstant.r16),
       child: child,
+    );
+
+    return Semantics(
+      button: onTap != null,
+      label: semanticLabel,
+      child: Material(
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+        ),
+        child: onTap == null
+            ? content
+            : InkWell(onTap: onTap, borderRadius: radius, child: content),
+      ),
     );
   }
 }

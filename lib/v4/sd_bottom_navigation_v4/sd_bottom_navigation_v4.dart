@@ -1,6 +1,7 @@
-import 'dart:ui' show ImageFilter;
-
 import 'package:flutter/material.dart';
+
+import '../../core/sd_spacing_constant.dart';
+import '../sd_glass_surface_v4/sd_glass_surface_v4.dart';
 
 class SdNavigationDestinationV4 {
   const SdNavigationDestinationV4({
@@ -28,13 +29,20 @@ class SdBottomNavigationV4 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        SdSpacingConstant.w12,
+        SdSpacingConstant.h8,
+        SdSpacingConstant.w12,
+        SdSpacingConstant.h8,
+      ),
+      child: SdGlassSurfaceV4(
+        padding: EdgeInsets.zero,
+        radius: SdSpacingConstant.r24,
         child: NavigationBar(
-          backgroundColor: Theme.of(
-            context,
-          ).colorScheme.surface.withValues(alpha: 0.78),
+          height: SdSpacingConstant.h68,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
           selectedIndex: currentIndex,
           onDestinationSelected: onSelected,
           destinations: destinations
