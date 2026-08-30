@@ -100,6 +100,7 @@ class SdButtonV2 extends StatelessWidget {
     this.iconPlacement = SdButtonIconPlacementV2.inline,
     this.iconSize,
     this.compact = false,
+    this.loading = false,
     this.size = SdButtonSizeV2.medium,
     this.labelStyle,
     super.key,
@@ -139,6 +140,19 @@ class SdButtonV2 extends StatelessWidget {
   /// is small by definition, not a size its call site chooses, so this
   /// overrides whatever [size] is passed alongside it.
   final bool compact;
+
+  /// Swaps the content for a spinner and stops accepting taps, for the wait a
+  /// store call or an upload puts between the tap and the result.
+  ///
+  /// The content stays in the tree at zero opacity rather than being replaced,
+  /// so the button keeps the exact width it had. A button that shrinks while
+  /// it works moves every row under it, and the row under a primary button is
+  /// usually the one the user is reaching for next.
+  ///
+  /// It disables the button on its own — a call site that passes `loading`
+  /// never has to null its own [onPressed] as well, which is the version of
+  /// this that gets forgotten.
+  final bool loading;
 
   /// Scales the shared padding, icon and icon gap. Defaults to
   /// [SdButtonSizeV2.medium], the baseline every button used before this
@@ -228,6 +242,29 @@ class SdButtonV2 extends StatelessWidget {
       Text(label, style: labelStyle, textAlign: align);
 
   Widget _child() {
+    final Widget content = _content();
+
+    if (!loading) return content;
+
+    return Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        Opacity(opacity: 0, child: content),
+        Builder(
+          // Built below the button, so the indicator inherits the variant's own foreground colour instead of being told one per variant.
+          builder: (BuildContext context) => SizedBox.square(
+            dimension: _iconSize,
+            child: CircularProgressIndicator(
+              strokeWidth: SdSpacingConstant.w2,
+              color: DefaultTextStyle.of(context).style.color,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _content() {
     if (icon == null) return _label(TextAlign.center);
     return switch (iconPlacement) {
       SdButtonIconPlacementV2.inline => Row(
@@ -267,6 +304,7 @@ class SdButtonV2 extends StatelessWidget {
   Widget build(BuildContext context) {
     final ButtonStyle style = _style(context);
     final Widget child = _child();
+    final VoidCallback? onPressed = loading ? null : this.onPressed;
 
     return switch (variant) {
       SdButtonVariantV2.primary ||
