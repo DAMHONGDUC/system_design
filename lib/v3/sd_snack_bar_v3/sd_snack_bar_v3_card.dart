@@ -43,11 +43,16 @@ class SdSnackBarCardV3 extends StatelessWidget {
           SdIconV3(glyph, size: SdIconV3.smallSize, color: accent),
           SizedBox(width: SdSpacingConstant.w12),
           Expanded(
+            // Capped for the same reason as the v2 card: a message built from
+            // an exception is as long as the SDK made it, and the card grew
+            // until it ran off the screen.
             child: Text(
               message,
               style: context.textTheme3.bodyMedium!.copyWith(
                 color: context.sdTheme3.textPrimary,
               ),
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

@@ -60,7 +60,18 @@ class SdSnackBarCardV2 extends StatelessWidget {
             color: style.accent,
           ),
           SizedBox(width: SdSpacingConstant.w12),
-          Expanded(child: Text(message, style: context.textTheme.bodyMedium!)),
+          // Capped, because the caller is not always the author of the text: a
+          // message built from an exception runs to whatever length the SDK
+          // felt like, and the card grew with it until it ran off the screen.
+          // The full text belongs in the log; a snackbar is a glance.
+          Expanded(
+            child: Text(
+              message,
+              style: context.textTheme.bodyMedium!,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );
