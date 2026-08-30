@@ -31,7 +31,7 @@ step "release $TARGET — 3/4 firebase"
 sh "$SCRIPT_DIR/deploy-firebase.sh" "$TARGET"
 
 step "release $TARGET — 4/4 testflight"
-(cd ios && bundle exec fastlane beta flavor:"$TARGET" bump:true notes:"$TARGET")
+(cd ios && bundle exec fastlane beta flavor:"$TARGET" bump:true)
 
 done_msg "released $TARGET"
 # bump:true rewrites pubspec.yaml locally but only CI commits it (`if bump && is_ci`).
