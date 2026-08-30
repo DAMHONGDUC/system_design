@@ -58,7 +58,18 @@ fi
 if [ "$TARGET" = "all" ] || [ "$TARGET" = "functions" ]; then
   # Deploying a build that fails its own tests costs a second deploy to undo.
   step "functions tests"
-  (cd functions && npm run build && npm test)
+  # Both scripts are optional: these tools are shared with backends that define neither, where `npm test` fails with "Missing script: test" — a message that reads as a broken checkout rather than as a check that does not apply.
+  if has_npm_script functions build; then
+    (cd functions && npm run build)
+  else
+    info "no build script in functions/package.json, nothing to compile"
+  fi
+
+  if has_npm_script functions test; then
+    (cd functions && npm test)
+  else
+    info "no test script in functions/package.json, nothing to run"
+  fi
 
   step "functions"
   firebase deploy --project "$ENV_NAME" --only functions
