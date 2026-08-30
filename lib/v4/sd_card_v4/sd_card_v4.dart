@@ -27,7 +27,10 @@ class SdCardV4 extends StatelessWidget {
       label: semanticLabel,
       child: Material(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: radius,
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+        ),
         child: onTap == null
             ? content
             : InkWell(onTap: onTap, borderRadius: radius, child: content),

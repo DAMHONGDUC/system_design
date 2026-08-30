@@ -30,6 +30,11 @@ class SdButtonV4 extends StatelessWidget {
       padding: WidgetStatePropertyAll<EdgeInsets>(
         EdgeInsets.symmetric(horizontal: SdSpacingConstant.w20),
       ),
+      shape: WidgetStatePropertyAll<OutlinedBorder>(
+        RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(SdSpacingConstant.r12),
+        ),
+      ),
     );
     final Widget button = variant == SdButtonVariantV4.primary
         ? FilledButton(onPressed: onPressed, style: style, child: Text(label))
