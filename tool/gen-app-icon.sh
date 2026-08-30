@@ -12,13 +12,16 @@ ROUNDER="$SCRIPT_DIR/round_icon_corners.dart"
 [ -f "$SOURCE" ] ||
   fail "no $SOURCE — the generated original goes there (docs/setup/APP_ICON.md)"
 
+# `--verbosity=error` on every `dart run` of ours: Dart 3.9 prints "Running build hooks..." to STDERR, and melos labels every stderr line ERROR — three real-looking errors in a run that worked. Compilation errors still print.
+QUIET="run --verbosity=error"
+
 # $1 = pixel size, $2 = file name. The launch storyboard's image view cannot clip, so the corners are baked into the alpha here.
 launch_icon() {
-  $DT run "$ROUNDER" "$FINAL" "$LAUNCH_DIR/$2" "$1"
+  $DT $QUIET "$ROUNDER" "$FINAL" "$LAUNCH_DIR/$2" "$1"
 }
 
 step "strip the watermark"
-$DT run "$SCRIPT_DIR/strip_icon_marker.dart" "$SOURCE" "$FINAL"
+$DT $QUIET "$SCRIPT_DIR/strip_icon_marker.dart" "$SOURCE" "$FINAL"
 
 step "launcher icons"
 # Config is the `flutter_launcher_icons:` block at the bottom of pubspec.yaml.
