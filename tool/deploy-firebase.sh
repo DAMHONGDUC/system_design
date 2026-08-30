@@ -15,8 +15,13 @@ case "$TARGET" in
   *) fail "unknown target '$TARGET' — expected: rules, functions, or nothing" ;;
 esac
 
-command -v firebase >/dev/null 2>&1 ||
-  fail "firebase CLI not found — https://firebase.google.com/docs/cli"
+# The CLI is resolved rather than assumed, and the repo's own copy wins: the standalone binary installed on PATH runs every predeploy hook through the npm 8 bundled inside it, which dies on `npm run lint` with "Cannot read properties of undefined (reading 'stdin')" before eslint or tsc ever start. The one in functions/node_modules runs on the machine's real node and npm, so the hooks behave the way they do in a plain shell.
+FIREBASE="$PWD/functions/node_modules/.bin/firebase"
+if [ ! -x "$FIREBASE" ]; then
+  command -v firebase >/dev/null 2>&1 ||
+    fail "firebase CLI not found — npm --prefix functions install, or https://firebase.google.com/docs/cli"
+  FIREBASE=firebase
+fi
 
 # `.firebaserc` is read here rather than left to the CLI so the prompt can name the project *before* anything is sent, and so a missing alias fails.
 project_id() {
@@ -31,6 +36,7 @@ fi
 
 step "firebase — $ENV_NAME"
 info "project: $ENV_ID"
+info "cli: $FIREBASE"
 
 # Until prod is its own project both aliases resolve to the same id, and then `deploy-firebase-dev` is a production deploy wearing another name.
 DEV_ID=$(project_id dev)
@@ -52,7 +58,7 @@ esac
 # Every deploy passes `--project` rather than running `firebase use` first.
 if [ "$TARGET" = "all" ] || [ "$TARGET" = "rules" ]; then
   step "rules and indexes"
-  firebase deploy --project "$ENV_NAME" --only firestore:rules,firestore:indexes
+  "$FIREBASE" deploy --project "$ENV_NAME" --only firestore:rules,firestore:indexes
 fi
 
 if [ "$TARGET" = "all" ] || [ "$TARGET" = "functions" ]; then
@@ -72,7 +78,7 @@ if [ "$TARGET" = "all" ] || [ "$TARGET" = "functions" ]; then
   fi
 
   step "functions"
-  firebase deploy --project "$ENV_NAME" --only functions
+  "$FIREBASE" deploy --project "$ENV_NAME" --only functions
 fi
 
 done_msg "deployed $TARGET to $ENV_NAME"
