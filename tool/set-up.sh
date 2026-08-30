@@ -28,9 +28,13 @@ $FL pub get
 step "localizations"
 $FL gen-l10n
 
-step "code generation"
-# build_runner 2.15 removed --delete-conflicting-outputs; it deletes them by default now, and passing it warns on every run.
-$DT run build_runner build
+if has_dep build_runner; then
+  step "code generation"
+  # build_runner 2.15 removed --delete-conflicting-outputs; it deletes them by default now, and passing it warns on every run.
+  $DT run build_runner build
+else
+  info "no build_runner in pubspec.yaml, nothing to generate"
+fi
 
 # env/*.json is gitignored (Firebase + RevenueCat keys), so a fresh clone has none. Lay down the key-only templates and say so loudly.
 step "env config"

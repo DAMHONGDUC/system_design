@@ -91,6 +91,9 @@ fail() {
   exit 1
 }
 
+# True when the app declares $1 in its pubspec.yaml, under any section. Codegen is a choice an app makes, and these scripts are shared with apps that made it the other way: no `build_runner` there means there is nothing to generate, and running it anyway fails with "could not find package build_runner", which reads as a broken checkout rather than as a step that does not apply.
+has_dep() { grep -q "^[[:space:]]*$1:" pubspec.yaml; }
+
 # Pad $1 out to $2 columns, so the second column of a list lines up under itself. POSIX sh has no `local`, hence the underscore: the name is a promise not to read it, not a scope.
 pad() {
   _pad_text="$1"
