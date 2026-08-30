@@ -40,10 +40,11 @@ generation and take no suffix. A widget is never renamed to `V3` on its own —
 a whole new generation gets a new folder next to `v2/`, and both ship at once while an
 app migrates.
 
-### There are two generations now, and they never import each other
+### There are three generations now, and they never import each other
 
 `v2/` is what **BaroEase** renders. `v3/` is what **Reseller Studio** renders. Both
-are exported from `lib/index.dart` and both are live — this is the situation
+are frozen for their products. `v4/` is what **Finances Calculator** renders.
+All three are exported from `lib/index.dart` and live — this is the situation
 the paragraph above describes, not a migration in progress.
 
 **`v3` is not a port of `v2`.** It repeats several widget names because both
@@ -51,7 +52,7 @@ products need a button and a card, and it repeats several *token* names
 because both need a background colour. That is convergence, and it stops
 there:
 
-- **No file under `v3/` may import from `v2/`, or the reverse.** The two are
+- **No generation may import from another generation.** v2 and v3 are
   built on incompatible premises — v2 is dark-only with frosted-glass chrome
   that the body scrolls behind; v3 ships light and dark with opaque chrome
   that takes real layout space. `SdContentPaddingV3` is a fifth the size of
