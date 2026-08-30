@@ -10,12 +10,14 @@ cd "${MELOS_ROOT_PATH:-$(CDPATH= cd -- "$SCRIPT_DIR/../../.." && pwd)}"
 if [ -z "${NO_COLOR:-}" ]; then
   C_STEP=$(printf '\033[1;36m')
   C_WARN=$(printf '\033[1;33m')
-  C_DONE=$(printf '\033[1;32m')
+  C_OK=$(printf '\033[1;32m')
+  C_BAD=$(printf '\033[1;31m')
   C_OFF=$(printf '\033[0m')
 else
   C_STEP=''
   C_WARN=''
-  C_DONE=''
+  C_OK=''
+  C_BAD=''
   C_OFF=''
 fi
 
@@ -28,10 +30,16 @@ else
   DT="dart"
 fi
 
+# One meaning per colour, and only the part that carries it is coloured: cyan
+# opens an action, yellow warns, green passed, red failed. Ordinary output
+# stays plain — colour everything and none of it means anything.
 step() { printf '%s==> %s%s\n' "$C_STEP" "$1" "$C_OFF"; }
+info() { printf '    %s\n' "$1"; }
 warn() { printf '%s    %s%s\n' "$C_WARN" "$1" "$C_OFF"; }
-done_msg() { printf '%s%s%s\n' "$C_DONE" "$1" "$C_OFF"; }
+ok() { printf '    %s✓%s %s\n' "$C_OK" "$C_OFF" "$1"; }
+bad() { printf '    %s✗%s %s\n' "$C_BAD" "$C_OFF" "$1"; }
+done_msg() { printf '%s✓%s %s\n' "$C_OK" "$C_OFF" "$1"; }
 fail() {
-  printf '%s%s%s\n' "$C_WARN" "$1" "$C_OFF" >&2
+  printf '%s✗%s %s\n' "$C_BAD" "$C_OFF" "$1" >&2
   exit 1
 }

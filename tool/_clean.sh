@@ -3,7 +3,7 @@
 set -eu
 . "$(dirname "$0")/_common.sh"
 
-step "flutter clean"
+step "clean"
 $FL clean
 
 step "android"

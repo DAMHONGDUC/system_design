@@ -11,9 +11,9 @@ git submodule update --init --recursive
 git submodule foreach --quiet --recursive '
   branch=$(git config -f "$toplevel/.gitmodules" "submodule.$name.branch" || echo main)
   if ! git checkout -q "$branch" 2>/dev/null; then
-    echo "    $name: cannot switch to $branch (uncommitted changes?), left as is"
+    echo "    $name: cannot switch to $branch, left as is"
   elif ! git pull -q --ff-only origin "$branch" 2>/dev/null; then
-    echo "    $name: on $branch, but not fast-forwardable — pull it by hand"
+    echo "    $name: on $branch, not fast-forwardable — pull it by hand"
   else
     echo "    $name -> $branch"
   fi
@@ -67,6 +67,6 @@ fi
 
 if [ -n "$MISSING" ]; then
   printf '\n'
-  warn "Created from templates:$MISSING"
-  warn "Fill in the Firebase and RevenueCat keys before running."
+  warn "created from templates:$MISSING"
+  warn "fill in the Firebase and RevenueCat keys before running"
 fi

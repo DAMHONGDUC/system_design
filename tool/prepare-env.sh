@@ -8,17 +8,11 @@ SRC="env_assets"
 TARGET="${1:-}"
 case "$TARGET" in
   dev | prod) ;;
-  *)
-    warn "usage: prepare-env.sh <dev|prod>"
-    exit 1
-    ;;
+  *) fail "usage: prepare-env.sh <dev|prod>" ;;
 esac
 
-if [ ! -d "$SRC" ]; then
-  warn "$SRC/ is missing. It is gitignored, so a clone never has it —"
-  warn "restore your own copy before running this."
-  exit 1
-fi
+# Gitignored, so a clone never has it.
+[ -d "$SRC" ] || fail "$SRC/ is missing — restore your own copy"
 
 # `<source under env_assets>|<destination>`, newline separated so the default IFS splits it; no path here has a space.
 PAIRS="
@@ -38,19 +32,18 @@ for pair in $PAIRS; do
 done
 
 if [ -n "$MISSING" ]; then
-  warn "Missing in $SRC/:$MISSING"
-  warn "Nothing was copied."
-  exit 1
+  warn "missing in $SRC/:$MISSING"
+  fail "nothing was copied"
 fi
 
-step "env config — $TARGET, from $SRC/"
+step "config — $TARGET"
 for pair in $PAIRS; do
   SRC_FILE="$SRC/${pair%%|*}"
   DST_FILE="${pair#*|}"
   cp "$SRC_FILE" "$DST_FILE"
-  printf '    %s -> %s\n' "$SRC_FILE" "$DST_FILE"
+  info "$SRC_FILE -> $DST_FILE"
 done
 
-done_msg "Installed $TARGET config. Run with --dart-define-from-file=env/$TARGET.json."
+done_msg "$TARGET config installed"
 # functions/.env is read by the Firebase CLI at deploy time, not by the app.
-warn "functions/.env reaches the backend only on the next deploy-firebase-$TARGET."
+warn "functions/.env reaches the backend only on the next deploy"

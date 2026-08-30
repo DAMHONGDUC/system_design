@@ -14,10 +14,7 @@ case "$TARGET" in
   prod)
     ENV_FILE="env/prod.json"
     ;;
-  *)
-    warn "usage: build-ipa.sh <dev|prod> [flutter build ipa args...]"
-    exit 1
-    ;;
+  *) fail "usage: build-ipa.sh <dev|prod> [flutter build ipa args...]" ;;
 esac
 
 EXPORT_METHOD="app-store"
@@ -37,18 +34,12 @@ else
 fi
 
 # Existence only — never the contents (hard rule 13).
-if [ ! -f "$ENV_FILE" ]; then
-  warn "$ENV_FILE is missing. Run: melos run set-up"
-  exit 1
-fi
+[ -f "$ENV_FILE" ] || fail "$ENV_FILE is missing — run: melos run set-up"
 
 # Gitignored, and a build input of the Runner target rather than a runtime lookup.
 GSP="ios/Runner/GoogleService-Info.plist"
-if [ ! -f "$GSP" ]; then
-  warn "$GSP is missing — download it from the Firebase console (iOS app)."
-  warn "On CI it is written from the GOOGLE_SERVICE_INFO_PLIST secret."
-  exit 1
-fi
+# On CI it is written from the GOOGLE_SERVICE_INFO_PLIST secret.
+[ -f "$GSP" ] || fail "$GSP is missing — download it from the Firebase console"
 
 # Both environments write to the same folder under the same filename, so a stale IPA from the other one is indistinguishable from this build's.
 IPA_DIR="build/ios/ipa"
@@ -57,13 +48,12 @@ rm -rf "$IPA_DIR"
 # Version and build number are edited in pubspec.yaml, never passed as a flag: `--build-number` ships a build whose version exists nowhere in git.
 VERSION=$(grep '^version:' pubspec.yaml | head -1 | cut -d' ' -f2)
 
-step "ios release archive — $TARGET ($ENV_FILE), version $VERSION, export $EXPORT_METHOD"
+step "build ipa — $TARGET $VERSION"
 $FL build ipa \
   --release \
   --dart-define-from-file="$ENV_FILE" \
   "$@"
 
-done_msg "Built $TARGET $VERSION from $ENV_FILE into $IPA_DIR."
-done_msg "Upload the .ipa there with Transporter, or from Xcode Organizer."
+done_msg "built $TARGET $VERSION into $IPA_DIR"
 # Both environments share one bundle id, so both land in the SAME TestFlight app and the build number is the only thing telling them apart.
-warn "Bump version: in pubspec.yaml before the next build — App Store Connect refuses a build number it has already seen."
+warn "bump version: in pubspec.yaml before the next build — App Store Connect refuses a number it has seen"
