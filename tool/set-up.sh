@@ -10,7 +10,7 @@ step "submodules"
 git submodule update --init --recursive
 git submodule foreach --quiet --recursive '
   # foreach runs this body in a shell of its own, where _common.sh’s helpers do not exist — only its exported colours crossed over. So the line is printed by hand, in the same three columns `item` uses; a bare echo here is the one line in a run that does not carry a time.
-  entry() { printf "%s%s%s %s  ·%s %s\n" "$C_DIM" "$(date +%H:%M:%S)" "$C_OFF" "$C_DIM" "$C_OFF" "$1"; }
+  entry() { printf "%s[%s]:%s %s  ·%s %s\n" "$C_TIME" "$(date +%H:%M:%S)" "$C_OFF" "$C_DIM" "$C_OFF" "$1"; }
   branch=$(git config -f "$toplevel/.gitmodules" "submodule.$name.branch" || echo main)
   if ! git checkout -q "$branch" 2>/dev/null; then
     entry "$name: cannot switch to $branch, left as is"
