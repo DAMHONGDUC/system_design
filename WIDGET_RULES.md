@@ -241,6 +241,11 @@ pure dimensions stay parameterless (`SdChartStyleV2.plotHeight`).
   `ExcludeSemantics`. A chart without that label is unreadable to VoiceOver.
 - **A widget owns only its own intrinsic size.** Anything another widget pads
   by is a static on `SdContentPaddingV2`, never a number typed at a call site.
+- **Text the caller did not write gets a `maxLines`.** Both snackbar cards cap
+  at 4 and ellipsize: a message built from an exception is as long as the SDK
+  chose, and an uncapped `Text` grew the card until it ran off the screen. The
+  full text belongs in the log; the card is a glance. Same rule anywhere a
+  widget renders a string it did not author.
 
 ## 7. Before you commit
 
