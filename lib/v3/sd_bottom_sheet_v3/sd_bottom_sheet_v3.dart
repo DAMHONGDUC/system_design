@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../core/sd_spacing_constant.dart';
+import '../sd_app_bar_action_button_v3/sd_app_bar_action_button_v3.dart';
 import '../sd_content_padding_v3/sd_content_padding_v3.dart';
 import '../sd_context_v3/sd_context_v3.dart';
 import '../sd_keyboard_dismiss_v3/sd_keyboard_dismiss_v3.dart';
@@ -26,12 +28,17 @@ import '../sd_text_style_v3/sd_text_style_v3.dart';
 class SdBottomSheetV3 extends StatelessWidget {
   const SdBottomSheetV3({
     required this.title,
+    required this.closeTooltip,
     required this.child,
     this.heightFactor,
     super.key,
   });
 
   final String title;
+
+  /// Already-localized tooltip and semantics label for the close button.
+  final String closeTooltip;
+
   final Widget child;
 
   /// How much of the screen the sheet takes, as a fraction.
@@ -97,11 +104,22 @@ class SdBottomSheetV3 extends StatelessWidget {
               ),
             ),
             SizedBox(height: SdSpacingConstant.h16),
-            Text(
-              title,
-              style: context.textTheme3.titleMedium!.semiBold3.copyWith(
-                color: context.sdTheme3.textPrimary,
-              ),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    title,
+                    style: context.textTheme3.titleMedium!.semiBold3.copyWith(
+                      color: context.sdTheme3.textPrimary,
+                    ),
+                  ),
+                ),
+                SdAppBarActionButtonV3(
+                  icon: Symbols.close_rounded,
+                  tooltip: closeTooltip,
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
             ),
             SizedBox(height: SdSpacingConstant.h16),
             // Expanded only when a height was asked for: a min-sized Column has
