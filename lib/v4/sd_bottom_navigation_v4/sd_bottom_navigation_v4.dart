@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 
 class SdNavigationDestinationV4 {
@@ -26,18 +28,26 @@ class SdBottomNavigationV4 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return NavigationBar(
-      selectedIndex: currentIndex,
-      onDestinationSelected: onSelected,
-      destinations: destinations
-          .map(
-            (SdNavigationDestinationV4 item) => NavigationDestination(
-              icon: Icon(item.icon),
-              selectedIcon: Icon(item.selectedIcon),
-              label: item.label,
-            ),
-          )
-          .toList(growable: false),
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+        child: NavigationBar(
+          backgroundColor: Theme.of(
+            context,
+          ).colorScheme.surface.withValues(alpha: 0.78),
+          selectedIndex: currentIndex,
+          onDestinationSelected: onSelected,
+          destinations: destinations
+              .map(
+                (SdNavigationDestinationV4 item) => NavigationDestination(
+                  icon: Icon(item.icon),
+                  selectedIcon: Icon(item.selectedIcon),
+                  label: item.label,
+                ),
+              )
+              .toList(growable: false),
+        ),
+      ),
     );
   }
 }
