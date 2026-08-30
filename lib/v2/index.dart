@@ -16,6 +16,7 @@ export 'sd_badge_v2/sd_badge_v2.dart';
 export 'sd_banner_v2/sd_banner_v2.dart';
 export 'sd_bar_chart_v2/sd_bar_chart_v2.dart';
 export 'sd_benefit_row_v2/sd_benefit_row_v2.dart';
+export 'sd_bottom_navigation_v2/sd_bottom_navigation_v2.dart';
 export 'sd_bottom_sheet_v2/sd_bottom_sheet_v2.dart';
 export 'sd_button_v2/sd_button_v2.dart';
 export 'sd_card_v2/sd_card_v2.dart';
