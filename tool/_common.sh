@@ -30,12 +30,14 @@ else
   DT="dart"
 fi
 
-# One meaning per colour, and only the part that carries it is coloured: cyan
-# opens an action, yellow warns, green passed, red failed. Ordinary output
-# stays plain — colour everything and none of it means anything.
+# One meaning per colour: cyan opens an action, green passed, red failed,
+# yellow warns. Owner's rule: THE MARK CARRIES THE COLOUR AND THE MESSAGE STAYS
+# PLAIN — a wall of coloured sentences is a wall, and the eye scanning for the
+# ✗ has to read it instead of finding it. `step` is the one exception: it has
+# no mark, so the title is the mark.
 step() { printf '%s==> %s%s\n' "$C_STEP" "$1" "$C_OFF"; }
 info() { printf '    %s\n' "$1"; }
-warn() { printf '%s    %s%s\n' "$C_WARN" "$1" "$C_OFF"; }
+warn() { printf '    %s!%s %s\n' "$C_WARN" "$C_OFF" "$1"; }
 ok() { printf '    %s✓%s %s\n' "$C_OK" "$C_OFF" "$1"; }
 bad() { printf '    %s✗%s %s\n' "$C_BAD" "$C_OFF" "$1"; }
 done_msg() { printf '%s✓%s %s\n' "$C_OK" "$C_OFF" "$1"; }
