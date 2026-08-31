@@ -43,6 +43,7 @@ export 'sd_icon_button_v2/sd_icon_button_v2.dart';
 export 'sd_icon_v2/sd_icon_v2.dart';
 export 'sd_liquid_glass_theme_v2/sd_liquid_glass_theme_v2.dart';
 export 'sd_list_skeleton_v2/sd_list_skeleton_v2.dart';
+export 'sd_outline_v2/sd_outline_v2.dart';
 export 'sd_pinned_filter_bar_v2/sd_pinned_filter_bar_v2.dart';
 export 'sd_pop_scale_v2/sd_pop_scale_v2.dart';
 export 'sd_pressable_scale_v2/sd_pressable_scale_v2.dart';
