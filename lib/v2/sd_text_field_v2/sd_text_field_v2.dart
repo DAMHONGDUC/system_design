@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
@@ -34,6 +35,7 @@ class SdTextFieldV2 extends StatelessWidget {
     this.maxLines = 1,
     this.textCapitalization = TextCapitalization.sentences,
     this.keyboardType,
+    this.inputFormatters,
     this.textInputAction,
     this.onChanged,
     this.onSubmitted,
@@ -65,6 +67,12 @@ class SdTextFieldV2 extends StatelessWidget {
 
   /// Trailing widget inside the box — a clear button, a unit, a spinner.
   final Widget? suffix;
+
+  /// What the field will accept at all. A key that does nothing says "not
+  /// here" better than an error under a field does — use this for the shape
+  /// of the input (digits only), and [errorText] for its meaning (out of
+  /// range).
+  final List<TextInputFormatter>? inputFormatters;
 
   final FocusNode? focusNode;
   final bool autofocus;
@@ -101,6 +109,7 @@ class SdTextFieldV2 extends StatelessWidget {
           maxLines: maxLines,
           textCapitalization: textCapitalization,
           keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
           textInputAction: textInputAction,
           onChanged: onChanged,
           onSubmitted: onSubmitted,
