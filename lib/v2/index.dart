@@ -52,6 +52,7 @@ export 'sd_refresh_indicator_v2/sd_refresh_indicator_v2.dart';
 export 'sd_scaffold_v2/sd_scaffold_v2.dart';
 export 'sd_section_header_v2/sd_section_header_v2.dart';
 export 'sd_segmented_tabs_v2/sd_segmented_tabs_v2.dart';
+export 'sd_selectable_chip_v2/sd_selectable_chip_v2.dart';
 export 'sd_sheet_content_v2/sd_sheet_content_v2.dart';
 export 'sd_sheet_header_v2/sd_sheet_header_v2.dart';
 export 'sd_skeleton_v2/sd_skeleton_v2.dart';
