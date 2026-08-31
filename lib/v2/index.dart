@@ -56,6 +56,7 @@ export 'sd_sheet_header_v2/sd_sheet_header_v2.dart';
 export 'sd_skeleton_v2/sd_skeleton_v2.dart';
 export 'sd_snack_bar_v2/sd_snack_bar_v2.dart';
 export 'sd_switcher_v2/sd_switcher_v2.dart';
+export 'sd_tag_v2/sd_tag_v2.dart';
 export 'sd_text_action_v2/sd_text_action_v2.dart';
 export 'sd_text_field_v2/sd_text_field_v2.dart';
 export 'sd_text_style_v2/sd_text_style_v2.dart';
