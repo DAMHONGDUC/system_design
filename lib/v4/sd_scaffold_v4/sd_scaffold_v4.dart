@@ -15,7 +15,11 @@ class SdScaffoldV4 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: showAppBar ? AppBar(title: Text(title)) : null,
+      appBar: showAppBar
+          ? AppBar(
+              title: Text(title, style: Theme.of(context).textTheme.titleLarge),
+            )
+          : null,
       body: body,
     );
   }

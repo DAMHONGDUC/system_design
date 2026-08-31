@@ -12,6 +12,10 @@ class SdTextFieldV4 extends StatelessWidget {
     this.errorText,
     this.inputFormatters,
     this.textInputAction,
+    this.keyboardType = const TextInputType.numberWithOptions(decimal: true),
+    this.onChanged,
+    this.prefixIcon,
+    this.suffixIcon,
     super.key,
   });
 
@@ -22,6 +26,10 @@ class SdTextFieldV4 extends StatelessWidget {
   final String? errorText;
   final List<TextInputFormatter>? inputFormatters;
   final TextInputAction? textInputAction;
+  final TextInputType keyboardType;
+  final ValueChanged<String>? onChanged;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +46,16 @@ class SdTextFieldV4 extends StatelessWidget {
           SizedBox(height: SdSpacingConstant.h8),
           TextField(
             controller: controller,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            keyboardType: keyboardType,
             inputFormatters: inputFormatters,
             textInputAction: textInputAction,
+            onChanged: onChanged,
+            onTapOutside: (PointerDownEvent event) =>
+                FocusManager.instance.primaryFocus?.unfocus(),
             style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             decoration: InputDecoration(
+              prefixIcon: prefixIcon,
+              suffixIcon: suffixIcon,
               suffixText: suffix,
               suffixStyle: textTheme.labelLarge?.copyWith(
                 color: colors.primary,

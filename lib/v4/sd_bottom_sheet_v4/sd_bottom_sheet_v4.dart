@@ -77,7 +77,7 @@ Future<T?> showSdBottomSheetV4<T>({
     useRootNavigator: true,
     isScrollControlled: true,
     backgroundColor: colorScheme.surface,
-    barrierColor: colorScheme.scrim,
+    barrierColor: colorScheme.scrim.withValues(alpha: 0.32),
     shape: RoundedRectangleBorder(borderRadius: SdRadiusV4.modalTop),
   );
 }

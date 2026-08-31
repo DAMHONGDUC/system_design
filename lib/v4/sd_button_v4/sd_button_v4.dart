@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
 
-enum SdButtonVariantV4 { primary, secondary }
+enum SdButtonVariantV4 { primary, secondary, tertiary, destructive }
 
 class SdButtonV4 extends StatelessWidget {
   const SdButtonV4({
@@ -20,6 +20,7 @@ class SdButtonV4 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final TextStyle? labelStyle = Theme.of(context).textTheme.labelLarge;
     final ButtonStyle style = ButtonStyle(
       minimumSize: WidgetStatePropertyAll<Size>(
         Size(
@@ -36,13 +37,35 @@ class SdButtonV4 extends StatelessWidget {
         ),
       ),
     );
-    final Widget button = variant == SdButtonVariantV4.primary
-        ? FilledButton(onPressed: onPressed, style: style, child: Text(label))
-        : OutlinedButton(
-            onPressed: onPressed,
-            style: style,
-            child: Text(label),
-          );
+    final Widget button = switch (variant) {
+      SdButtonVariantV4.primary => FilledButton(
+        onPressed: onPressed,
+        style: style,
+        child: Text(label, style: labelStyle),
+      ),
+      SdButtonVariantV4.secondary => OutlinedButton(
+        onPressed: onPressed,
+        style: style,
+        child: Text(label, style: labelStyle),
+      ),
+      SdButtonVariantV4.tertiary => TextButton(
+        onPressed: onPressed,
+        style: style,
+        child: Text(label, style: labelStyle),
+      ),
+      SdButtonVariantV4.destructive => FilledButton(
+        onPressed: onPressed,
+        style: style.copyWith(
+          backgroundColor: WidgetStatePropertyAll<Color>(
+            Theme.of(context).colorScheme.error,
+          ),
+          foregroundColor: WidgetStatePropertyAll<Color>(
+            Theme.of(context).colorScheme.onError,
+          ),
+        ),
+        child: Text(label, style: labelStyle),
+      ),
+    };
 
     return Semantics(button: true, label: label, child: button);
   }
