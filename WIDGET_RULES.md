@@ -11,9 +11,10 @@ in this package.
 A widget may live here only if **both** are true. There is no third case.
 
 1. **It takes every user-facing string as a parameter.** No `AppLocalizations`,
-   no ARB, no `context.l10n`, no hardcoded English. Tooltips and semantics
-   labels are user-facing strings too — `SdSheetHeaderV2` takes
-   `closeTooltip` and `confirmTooltip` for exactly this reason.
+   no ARB, no `context.l10n`, no hardcoded English. Tooltips, button labels
+   and semantics labels are user-facing strings too — `SdSheetHeaderV2` takes
+   `closeTooltip` and `SdSheetContentV2` takes `confirmLabel` for exactly this
+   reason.
 2. **It imports nothing from a host app.** No repository, no provider, no
    router, no domain entity, no analytics, no logger. If a widget needs to
    know a domain concept to render, the app keeps that widget and passes this
