@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
+import '../sd_button_v2/sd_button_v2.dart';
 import '../sd_content_padding_v2/sd_content_padding_v2.dart';
 import '../sd_sheet_header_v2/sd_sheet_header_v2.dart';
 
@@ -8,10 +9,16 @@ import '../sd_sheet_header_v2/sd_sheet_header_v2.dart';
 /// scrolls when it has to, under a ceiling of [maxHeightFraction] of the
 /// screen.
 ///
-/// The header carries the sheet's two answers — leave on the left, commit on
-/// the right. That pairing is what lets a picker mark a choice without
-/// committing it: tapping a tile only moves the highlight, and nothing leaves
-/// the sheet until the commit.
+/// **A sheet that updates or adds anything commits from [confirmLabel]'s
+/// button, pinned along the bottom edge** (owner's rule). The header keeps
+/// only the X. That pairing — leave up in the corner, commit under the thumb
+/// — is what lets a picker mark a choice without committing it: tapping a
+/// tile only moves the highlight, and nothing leaves the sheet until the
+/// button is pressed.
+///
+/// The button is pinned, never scrolled: a commit that has to be scrolled to
+/// is a commit the user has to go looking for, and on a sheet at its 85%
+/// ceiling it would sit below the fold on every open.
 ///
 /// The ceiling is what keeps a sheet reading as a layer over the page — a
 /// tall picker that grew to the status bar would just be a screen with a
@@ -30,8 +37,7 @@ class SdSheetContentV2 extends StatelessWidget {
     required this.closeTooltip,
     required this.child,
     this.onConfirm,
-    this.confirmTooltip,
-    this.action = SdSheetActionV2.confirm,
+    this.confirmLabel,
     this.footer,
     super.key,
   });
@@ -46,19 +52,20 @@ class SdSheetContentV2 extends StatelessWidget {
 
   final Widget child;
 
-  /// Applies whatever the sheet is collecting. Null hides the commit icon —
-  /// for a sheet with nothing to confirm, or one that confirms in its
-  /// [footer].
+  /// Applies whatever the sheet is collecting. **Null with a [confirmLabel]
+  /// disables the button rather than removing it** — a commit that appears
+  /// and disappears as the selection changes moves everything under the
+  /// thumb, and a disabled button still says what the sheet is for.
   final VoidCallback? onConfirm;
 
-  /// Already-localized tooltip for the commit button.
-  final String? confirmTooltip;
+  /// Already-localized label of that button — "Save" for an answer being
+  /// given for the first time, "Update" for one being overwritten. **Null is
+  /// what says a sheet has no commit**: a menu whose tap on a row IS the
+  /// answer has nothing left to press.
+  final String? confirmLabel;
 
-  /// Whether that commit adds something or overwrites something (see
-  /// [SdSheetHeaderV2]).
-  final SdSheetActionV2 action;
-
-  /// Pinned under the scroll area, below the content.
+  /// Pinned under the scroll area, above the commit button. For the answers
+  /// that are neither commit nor leave — a "clear", a "not recorded".
   final Widget? footer;
 
   @override
@@ -71,26 +78,23 @@ class SdSheetContentV2 extends StatelessWidget {
         MediaQuery.paddingOf(context).bottom +
         SdSpacingConstant.h16;
 
+    final bool hasPinned = footer != null || confirmLabel != null;
+
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: maxHeight),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          SdSheetHeaderV2(
-            title: title,
-            closeTooltip: closeTooltip,
-            onConfirm: onConfirm,
-            confirmTooltip: confirmTooltip,
-            action: action,
-          ),
+          SdSheetHeaderV2(title: title, closeTooltip: closeTooltip),
           Flexible(
             child: SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(
                 SdContentPaddingV2.horizontal,
                 0,
                 SdContentPaddingV2.horizontal,
-                footer == null ? safeBottom : SdSpacingConstant.h16,
+                // Only the last pinned thing carries the safe area; anything above it just needs a gap.
+                hasPinned ? SdSpacingConstant.h16 : safeBottom,
               ),
               child: child,
             ),
@@ -101,9 +105,23 @@ class SdSheetContentV2 extends StatelessWidget {
                 SdContentPaddingV2.horizontal,
                 0,
                 SdContentPaddingV2.horizontal,
-                safeBottom,
+                confirmLabel == null ? safeBottom : SdSpacingConstant.h8,
               ),
               child: footer,
+            ),
+          if (confirmLabel != null)
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                SdContentPaddingV2.horizontal,
+                0,
+                SdContentPaddingV2.horizontal,
+                safeBottom,
+              ),
+              child: SdButtonV2(
+                variant: SdButtonVariantV2.primary,
+                label: confirmLabel!,
+                onPressed: onConfirm,
+              ),
             ),
         ],
       ),
