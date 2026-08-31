@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
+import '../sd_outline_v2/sd_outline_v2.dart';
 import '../sd_text_style_v2/sd_text_style_v2.dart';
 
 part 'sd_text_field_v2_label.dart';
@@ -34,6 +36,7 @@ class SdTextFieldV2 extends StatelessWidget {
     this.maxLines = 1,
     this.textCapitalization = TextCapitalization.sentences,
     this.keyboardType,
+    this.inputFormatters,
     this.textInputAction,
     this.onChanged,
     this.onSubmitted,
@@ -44,7 +47,7 @@ class SdTextFieldV2 extends StatelessWidget {
   /// Height of the outline while idle, and while focused. Two values rather
   /// than a colour change alone: focus has to be legible without relying on
   /// hue (WIDGET_RULES § 6).
-  static const double idleBorderWidth = 1;
+  static const double idleBorderWidth = SdOutlineV2.width;
   static const double focusedBorderWidth = 2;
 
   final TextEditingController controller;
@@ -66,6 +69,12 @@ class SdTextFieldV2 extends StatelessWidget {
   /// Trailing widget inside the box — a clear button, a unit, a spinner.
   final Widget? suffix;
 
+  /// What the field will accept at all. A key that does nothing says "not
+  /// here" better than an error under a field does — use this for the shape
+  /// of the input (digits only), and [errorText] for its meaning (out of
+  /// range).
+  final List<TextInputFormatter>? inputFormatters;
+
   final FocusNode? focusNode;
   final bool autofocus;
   final bool enabled;
@@ -82,7 +91,7 @@ class SdTextFieldV2 extends StatelessWidget {
     final Color accent = errorText != null
         ? context.colorScheme.error
         : context.colorScheme.primary;
-    final Color idle = context.sdTheme.textSecondary.withValues(alpha: 0.28);
+    final Color idle = SdOutlineV2.color(context);
     final TextStyle textStyle = context.textTheme.bodyLarge!.copyWith(
       color: enabled
           ? context.sdTheme.textPrimary
@@ -101,6 +110,7 @@ class SdTextFieldV2 extends StatelessWidget {
           maxLines: maxLines,
           textCapitalization: textCapitalization,
           keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
           textInputAction: textInputAction,
           onChanged: onChanged,
           onSubmitted: onSubmitted,
@@ -163,7 +173,7 @@ class SdTextFieldV2 extends StatelessWidget {
 
   OutlineInputBorder _border(Color color, {double width = idleBorderWidth}) =>
       OutlineInputBorder(
-        borderRadius: BorderRadius.circular(SdSpacingConstant.r12),
+        borderRadius: SdOutlineV2.borderRadius,
         borderSide: BorderSide(color: color, width: width),
       );
 }

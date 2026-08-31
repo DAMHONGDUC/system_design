@@ -48,6 +48,7 @@ class SdFilterChipV2<T> extends StatelessWidget {
     required this.optionLabelBuilder,
     required this.onSelected,
     required this.sheetTitle,
+    this.active = false,
     this.count,
     this.countLabelBuilder,
     super.key,
@@ -79,6 +80,11 @@ class SdFilterChipV2<T> extends StatelessWidget {
   /// chip's own accessibility label context.
   final String sheetTitle;
 
+  /// True while this axis is narrowing the list — anything but its "all".
+  /// Drawn by [SdFilterPillV2]; the caller decides, because only it knows
+  /// which value in [options] means "no filter".
+  final bool active;
+
   /// How many items the current selection matches — appended to the label
   /// via [countLabelBuilder] when non-null (e.g. "All (10)").
   final int? count;
@@ -105,6 +111,7 @@ class SdFilterChipV2<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return SdFilterPillV2(
       label: count == null ? label : countLabelBuilder!(label, count!),
+      active: active,
       onTap: () => _open(context),
     );
   }

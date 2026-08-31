@@ -23,7 +23,7 @@ if [ ! -x "$FIREBASE" ]; then
   FIREBASE=firebase
 fi
 
-# `.firebaserc` is read here rather than left to the CLI so the prompt can name the project *before* anything is sent, and so a missing alias fails.
+# `.firebaserc` is read here rather than left to the CLI so the run can print the project *before* anything is sent, and so a missing alias fails.
 project_id() {
   sed -n 's/.*"'"$1"'"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' .firebaserc
 }
@@ -45,15 +45,18 @@ if [ -n "$DEV_ID" ] && [ "$DEV_ID" = "$PROD_ID" ]; then
   warn "dev and prod are the SAME project — this reaches real users"
 fi
 
-ask "deploy $TARGET to $ENV_ID? [y/N] "
-# Melos hands the script a piped stdout but leaves stdin alone; /dev/tty is the one that survives a `sh tool/... < something`, so try it and fall back.
-REPLY=''
-# stderr is redirected BEFORE /dev/tty: redirections apply left to right, so the other order reports the failure to the original stderr anyway.
-read -r REPLY 2>/dev/null </dev/tty || read -r REPLY || true
-case "$REPLY" in
-  y | Y) ;;
-  *) fail "aborted" ;;
-esac
+# No confirmation, deliberately (owner's rule, docs/rules/COMMANDS.md). Typing
+# the environment IS the decision: `deploy-firebase-prod` and `release-prod` are
+# separate commands from their dev twins precisely so the destination is chosen
+# by what you type, never by a flag or by whatever `firebase use` was left on. A
+# second question the same hand answers every time protects nothing, and it
+# breaks every unattended run — `release.sh` calls this in the middle of a
+# 25-minute pipeline, where a prompt is a job hanging until it times out.
+#
+# What replaces it is the two lines above: the resolved project id is printed
+# before anything is sent, and a `dev` alias pointing at prod's project is
+# warned about by name. Those make a wrong destination visible; the prompt only
+# made it interruptible.
 
 # Every deploy passes `--project` rather than running `firebase use` first.
 if [ "$TARGET" = "all" ] || [ "$TARGET" = "rules" ]; then
