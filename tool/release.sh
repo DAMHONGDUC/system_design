@@ -1,5 +1,5 @@
 #!/bin/sh
-# One environment, end to end: set up, install config, deploy, ship.
+# One environment, end to end: install config, deploy, ship.
 #
 # Nothing in here names an app: the flavour is an argument, the paths are the
 # ones every app embedding this design system uses, and the app-specific part
@@ -16,21 +16,21 @@ esac
 # Here rather than 25 minutes in, with the config installed and the backend already deployed.
 command -v bundle >/dev/null 2>&1 || fail "bundler not found — cd ios && bundle install"
 
-# The order is the whole point of the command. set-up wipes and regenerates, so
-# it runs BEFORE the config it would otherwise build against; the config has to
-# be in the tree before the deploy reads functions/.env and before the lane
-# compares GoogleService-Info.plist with the flavor. Run by hand in another
-# order, the build ships against the wrong Firebase project and says nothing.
-step "release $TARGET — 1/4 set up"
-sh "$SCRIPT_DIR/set-up.sh"
-
-step "release $TARGET — 2/4 config"
+# The order is the whole point of the command: the config has to be in the tree
+# before the deploy reads functions/.env and before the lane compares
+# GoogleService-Info.plist with the flavor. Run by hand in another order, the
+# build ships against the wrong Firebase project and says nothing.
+#
+# set-up is NOT part of this (owner's rule). A release builds the tree as it
+# stands; a tree that needs restoring is restored by `melos run set-up` first,
+# on purpose, rather than paying a cold wipe-and-regenerate on every release.
+step "release $TARGET — 1/3 config"
 sh "$SCRIPT_DIR/prepare-env.sh" "$TARGET"
 
-step "release $TARGET — 3/4 firebase"
+step "release $TARGET — 2/3 firebase"
 sh "$SCRIPT_DIR/deploy-firebase.sh" "$TARGET"
 
-step "release $TARGET — 4/4 testflight"
+step "release $TARGET — 3/3 testflight"
 (cd ios && bundle exec fastlane beta flavor:"$TARGET" bump:true)
 
 done_msg "released $TARGET"
