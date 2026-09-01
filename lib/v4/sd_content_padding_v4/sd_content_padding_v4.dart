@@ -9,6 +9,9 @@ final class SdContentPaddingV4 {
 
   static double get horizontal => SdSpacingConstant.w16;
 
+  static double statusBarInset(BuildContext context) =>
+      MediaQueryData.fromView(View.of(context)).viewPadding.top;
+
   static double get listItemGap => SdSpacingConstant.h12;
 
   static double catalogCardMaxExtent(BuildContext context) {
@@ -34,6 +37,29 @@ final class SdContentPaddingV4 {
     final MediaQueryData viewData = MediaQueryData.fromView(View.of(context));
 
     return math.max(viewData.viewPadding.bottom, SdSpacingConstant.h24);
+  }
+
+  static double navBarOffset(BuildContext context) {
+    final double safeBottom = _viewBottom(context);
+
+    return math.min(
+      math.max(safeBottom, minNavBarOffset),
+      maxNavBarOffset,
+    );
+  }
+
+  /// The floor under [navBarOffset]. Below this the bar reads as stuck to the
+  /// bottom edge, whatever the device claims it needs.
+  static double get minNavBarOffset => SdSpacingConstant.h16;
+
+  /// The ceiling over [navBarOffset]. Above this the bar reads as floating
+  /// away from the bottom rather than sitting at it.
+  static double get maxNavBarOffset => SdSpacingConstant.h20;
+
+  static double _viewBottom(BuildContext context) {
+    final MediaQueryData viewData = MediaQueryData.fromView(View.of(context));
+
+    return viewData.viewPadding.bottom;
   }
 
   static double keyboardInset(BuildContext context) =>
