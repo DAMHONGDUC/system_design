@@ -33,13 +33,27 @@ else
   EXPORT_METHOD="caller's --export-options-plist"
 fi
 
-# Existence only — never the contents (hard rule 13).
-[ -f "$ENV_FILE" ] || fail "$ENV_FILE is missing — run: melos run set-up"
+# The example is the app's declaration that it HAS dart-define config: set-up.sh
+# copies `env/<flavor>.example.json` into place, so an app that keeps one wants
+# the real file and a missing one is an error. An app with no example never
+# passes --dart-define-from-file at all — these tools are shared with apps whose
+# every value is compiled in, and there a demand for env/dev.json reads as a
+# broken checkout rather than as a step that does not apply.
+if [ -f "env/$TARGET.example.json" ]; then
+  # Existence only — never the contents (hard rule 13).
+  [ -f "$ENV_FILE" ] || fail "$ENV_FILE is missing — run: melos run set-up"
+  set -- --dart-define-from-file="$ENV_FILE" "$@"
+else
+  ENV_FILE=""
+  info "no env/$TARGET.example.json — this app compiles its config in, no dart-defines"
+fi
 
 # Gitignored, and a build input of the Runner target rather than a runtime lookup.
 GSP="ios/Runner/GoogleService-Info.plist"
-# On CI it is written from the GOOGLE_SERVICE_INFO_PLIST secret.
-[ -f "$GSP" ] || fail "$GSP is missing — download it from the Firebase console"
+if has_firebase; then
+  # On CI it is written from the GOOGLE_SERVICE_INFO_PLIST secret.
+  [ -f "$GSP" ] || fail "$GSP is missing — download it from the Firebase console"
+fi
 
 # Both environments write to the same folder under the same filename, so a stale IPA from the other one is indistinguishable from this build's.
 IPA_DIR="build/ios/ipa"
@@ -51,7 +65,6 @@ VERSION=$(grep '^version:' pubspec.yaml | head -1 | cut -d' ' -f2)
 step "build ipa — $TARGET $VERSION"
 $FL build ipa \
   --release \
-  --dart-define-from-file="$ENV_FILE" \
   "$@"
 
 done_msg "built $TARGET $VERSION into $IPA_DIR"
