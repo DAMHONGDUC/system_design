@@ -11,4 +11,5 @@ export 'sd_icon_v4/sd_icon_v4.dart';
 export 'sd_radius_v4/sd_radius_v4.dart';
 export 'sd_result_tile_v4/sd_result_tile_v4.dart';
 export 'sd_scaffold_v4/sd_scaffold_v4.dart';
+export 'sd_search_header_v4/sd_search_header_v4.dart';
 export 'sd_text_field_v4/sd_text_field_v4.dart';

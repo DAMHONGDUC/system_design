@@ -9,6 +9,9 @@ final class SdContentPaddingV4 {
 
   static double get horizontal => SdSpacingConstant.w16;
 
+  static double statusBarInset(BuildContext context) =>
+      MediaQueryData.fromView(View.of(context)).viewPadding.top;
+
   static double get listItemGap => SdSpacingConstant.h12;
 
   static double catalogCardMaxExtent(BuildContext context) {
