@@ -91,6 +91,9 @@ fail() {
   exit 1
 }
 
+# True when the app owns a Firebase backend. `.firebaserc` is the file the CLI reads its project aliases out of, so an app without one has no rules, no functions and no flavored GoogleService plist to keep in step — these tools are shared with apps that ship no Firebase at all, and there a missing plist fails a release that was never going to reach Firebase.
+has_firebase() { [ -f .firebaserc ]; }
+
 # True when the app declares $1 in its pubspec.yaml, under any section. Codegen is a choice an app makes, and these scripts are shared with apps that made it the other way: no `build_runner` there means there is nothing to generate, and running it anyway fails with "could not find package build_runner", which reads as a broken checkout rather than as a step that does not apply.
 has_dep() { grep -q "^[[:space:]]*$1:" pubspec.yaml; }
 
