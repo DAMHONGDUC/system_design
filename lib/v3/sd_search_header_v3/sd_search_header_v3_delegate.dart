@@ -139,7 +139,9 @@ class _SdSearchHeaderDelegateV3 extends SliverPersistentHeaderDelegate {
       oldDelegate.controller != controller ||
       oldDelegate.hint != hint ||
       oldDelegate.clearTooltip != clearTooltip ||
-      oldDelegate.actions.length != actions.length;
+      // The actions themselves, never their count: an action that changes
+      // state — a filter glyph lighting up — is the same number of actions.
+      !listEquals(oldDelegate.actions, actions);
 }
 
 /// The screen title, shown only while the header is expanded.
@@ -216,6 +218,7 @@ class _HeaderActions extends StatelessWidget {
             icon: action.icon,
             tooltip: action.tooltip,
             onPressed: action.onPressed,
+            isActive: action.isActive,
           ),
       ],
     ),

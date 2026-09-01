@@ -17,6 +17,7 @@ class SdAppBarActionV3 {
     required this.icon,
     required this.tooltip,
     required this.onPressed,
+    this.isActive = false,
   });
 
   final IconData icon;
@@ -27,10 +28,32 @@ class SdAppBarActionV3 {
 
   final VoidCallback onPressed;
 
+  /// Whether what this action controls is currently on — see
+  /// [SdAppBarActionButtonV3.isActive], which is what draws it.
+  final bool isActive;
+
   /// The width one action occupies, and its tap target. Square, so the row of
   /// them is `count × slot` and the header can do that arithmetic without
   /// laying anything out.
   static double get slot => SdSpacingConstant.w44;
+
+  /// Equality is what the action *draws*, and [onPressed] is deliberately
+  /// left out of it: a callback is a new closure on every build, so an action
+  /// would never equal itself and a header comparing its list would rebuild
+  /// on every frame of a scroll.
+  ///
+  /// A header that compared only the count instead never noticed an action
+  /// changing state — which is how a lit filter glyph stayed unlit until
+  /// something else happened to rebuild the header.
+  @override
+  bool operator ==(Object other) =>
+      other is SdAppBarActionV3 &&
+      other.icon == icon &&
+      other.tooltip == tooltip &&
+      other.isActive == isActive;
+
+  @override
+  int get hashCode => Object.hash(icon, tooltip, isActive);
 }
 
 /// The one icon-only action in a v3 app bar — a screen never builds its own
@@ -51,6 +74,7 @@ class SdAppBarActionButtonV3 extends StatelessWidget {
     required this.icon,
     required this.tooltip,
     required this.onPressed,
+    this.isActive = false,
     this.tint,
     this.dotColor,
     super.key,
@@ -65,6 +89,17 @@ class SdAppBarActionButtonV3 extends StatelessWidget {
   /// Null disables the action rather than removing it — a delete refused
   /// while a save is in flight would otherwise move every action beside it.
   final VoidCallback? onPressed;
+
+  /// Whether what this action opens is currently on — a filter sheet whose
+  /// filters are applied, on a list that is showing fewer rows because of it.
+  ///
+  /// **The glyph fills as well as changing colour.** A state told by colour
+  /// alone is one a colour-blind user has to open the sheet to read; the
+  /// `FILL` axis is how the nav bar already marks the current destination, and
+  /// it costs nothing but a variable font this package already ships. An
+  /// explicit [tint] still wins the colour — the fill is the half that cannot
+  /// be argued with.
+  final bool isActive;
 
   /// Overrides [SdThemeV3.textPrimary] — for an action that carries a colour
   /// of its own, a destructive one above all.
@@ -109,7 +144,14 @@ class SdAppBarActionButtonV3 extends StatelessWidget {
           SdIconV3(
             icon,
             size: glyphSize,
-            color: tint ?? context.sdTheme3.textPrimary,
+            // Null rather than 0 when it is off: the font's own default is
+            // what every other glyph in the bar draws at.
+            fill: isActive ? 1 : null,
+            color:
+                tint ??
+                (isActive
+                    ? context.colorScheme3.primary
+                    : context.sdTheme3.textPrimary),
             semanticLabel: tooltip,
           ),
           if (mark != null)
