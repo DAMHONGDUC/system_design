@@ -17,6 +17,11 @@ import '../sd_text_style_v3/sd_text_style_v3.dart';
 ///
 /// A null [count] renders the label alone — right for a filter whose total is
 /// not known yet, which is not the same as a filter whose total is zero.
+///
+/// **The label ellipsizes, the count never does.** A chip laid out in a wrap
+/// is bounded by the row it sits in, and its label may be text a user typed —
+/// a category name, a place. The number is what the chip is scanned for, so it
+/// keeps its width and the words give theirs up.
 class SdFilterChipV3 extends StatelessWidget {
   const SdFilterChipV3({
     required this.label,
@@ -79,10 +84,18 @@ class SdFilterChipV3 extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(
-                    label,
-                    style: context.textTheme3.labelMedium!.semiBold3.copyWith(
-                      color: foreground,
+                  // - loose and inside a `min` row, so a chip in an unbounded
+                  //   strip still sizes to its label
+                  // - ellipsized where the width IS bounded: a chip in a wrap
+                  //   carries whatever the seller named a category
+                  Flexible(
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: context.textTheme3.labelMedium!.semiBold3.copyWith(
+                        color: foreground,
+                      ),
                     ),
                   ),
                   if (count != null) ...<Widget>[
