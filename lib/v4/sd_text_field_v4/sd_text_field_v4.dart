@@ -14,6 +14,7 @@ class SdTextFieldV4 extends StatelessWidget {
     this.textInputAction,
     this.keyboardType = const TextInputType.numberWithOptions(decimal: true),
     this.onChanged,
+    this.onSubmitted,
     this.prefixIcon,
     this.suffixIcon,
     super.key,
@@ -28,6 +29,7 @@ class SdTextFieldV4 extends StatelessWidget {
   final TextInputAction? textInputAction;
   final TextInputType keyboardType;
   final ValueChanged<String>? onChanged;
+  final VoidCallback? onSubmitted;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
 
@@ -50,6 +52,9 @@ class SdTextFieldV4 extends StatelessWidget {
             inputFormatters: inputFormatters,
             textInputAction: textInputAction,
             onChanged: onChanged,
+            onSubmitted: onSubmitted == null
+                ? null
+                : (String _) => onSubmitted!(),
             onTapOutside: (PointerDownEvent event) =>
                 FocusManager.instance.primaryFocus?.unfocus(),
             style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),

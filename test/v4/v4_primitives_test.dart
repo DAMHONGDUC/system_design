@@ -4,6 +4,48 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:system_design/index.dart';
 
 void main() {
+  testWidgets('v4 bottom navigation labels every destination', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      ScreenUtilInit(
+        designSize: const Size(390, 844),
+        builder: (BuildContext context, Widget? child) => MaterialApp(
+          home: Scaffold(
+            body: const SizedBox.expand(key: Key('body')),
+            bottomNavigationBar: SdBottomNavigationV4(
+              currentIndex: 0,
+              onSelected: (int index) {},
+              destinations: const <SdNavigationDestinationV4>[
+                SdNavigationDestinationV4(
+                  icon: Icons.home_outlined,
+                  selectedIcon: Icons.home,
+                  label: 'Home',
+                ),
+                SdNavigationDestinationV4(
+                  icon: Icons.settings_outlined,
+                  selectedIcon: Icons.settings,
+                  label: 'Settings',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget);
+
+    final double barHeight = tester
+        .getRect(find.byType(SdGlassSurfaceV4))
+        .height;
+    final double bodyHeight = tester.getRect(find.byKey(const Key('body'))).height;
+
+    expect(barHeight, lessThan(SdSpacingConstant.h96));
+    expect(bodyHeight, greaterThan(SdSpacingConstant.h200));
+  });
+
   testWidgets('v4 card and button expose their labels', (
     WidgetTester tester,
   ) async {
