@@ -73,6 +73,18 @@ abstract final class SdContentPaddingV3 {
     vertical: SdSpacingConstant.h12,
   );
 
+  /// A row inside something that already carries the gutter — a card, or a
+  /// sheet whose content is padded.
+  ///
+  /// Only the vertical rhythm is left. Paying [horizontal] a second time sets
+  /// the row's own text 16 further in than the heading above it, which reads
+  /// as a stray indent rather than as a nested group.
+  ///
+  /// **Derived from [row], never typed again**: the two must not drift, and a
+  /// call site writing `row.copyWith(left: 0, right: 0)` for itself is the
+  /// number-at-a-call-site the token exists to stop.
+  static EdgeInsets get rowNoGutter => row.copyWith(left: 0, right: 0);
+
   /// Gap between two items of the same list — items, orders, listings,
   /// anything drawn as a stack of cards. One number for every list in the
   /// app, so two screens showing the same kind of thing cannot come out
@@ -95,12 +107,19 @@ abstract final class SdContentPaddingV3 {
   /// [first] drops the top gap — the screen's [topGap] has already placed the
   /// first heading, and adding the separator on top of it makes a screen
   /// start noticeably lower than its neighbours.
-  static EdgeInsets sectionHeader({bool first = false}) => EdgeInsets.fromLTRB(
-    horizontal,
-    first ? 0 : SdSpacingConstant.h24,
-    horizontal,
-    SdSpacingConstant.h8,
-  );
+  ///
+  /// [gutter] drops the side inset, for a heading inside something that
+  /// already carries it — a card, or a block the screen has padded. The
+  /// vertical rhythm is kept either way, so a flush heading still sits the
+  /// same distance from the group above it as every other heading on the
+  /// screen.
+  static EdgeInsets sectionHeader({bool first = false, bool gutter = true}) =>
+      EdgeInsets.fromLTRB(
+        gutter ? horizontal : 0,
+        first ? 0 : SdSpacingConstant.h24,
+        gutter ? horizontal : 0,
+        SdSpacingConstant.h8,
+      );
 
   // --- The floating glass tab bar ---
   //

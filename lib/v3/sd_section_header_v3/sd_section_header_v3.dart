@@ -24,6 +24,7 @@ class SdSectionHeaderV3 extends StatelessWidget {
     this.leading,
     this.action,
     this.first = false,
+    this.gutter = true,
     super.key,
   });
 
@@ -40,9 +41,18 @@ class SdSectionHeaderV3 extends StatelessWidget {
   /// screen's own top padding has already placed it.
   final bool first;
 
+  /// Whether the heading carries the screen's side inset.
+  ///
+  /// **A flag, not a padding the caller passes.** A heading inside a card or
+  /// a padded block wants the gutter dropped and the vertical rhythm kept,
+  /// which is one answer rather than an open question — and a widget owns
+  /// only its own intrinsic size (`WIDGET_RULES.md` §6), so what it is padded
+  /// by comes from `SdContentPaddingV3` and never from a call site.
+  final bool gutter;
+
   @override
   Widget build(BuildContext context) => Padding(
-    padding: SdContentPaddingV3.sectionHeader(first: first),
+    padding: SdContentPaddingV3.sectionHeader(first: first, gutter: gutter),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
