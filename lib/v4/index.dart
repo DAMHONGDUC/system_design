@@ -3,6 +3,7 @@ export 'sd_bottom_navigation_v4/sd_bottom_navigation_v4.dart';
 export 'sd_bottom_sheet_v4/sd_bottom_sheet_v4.dart';
 export 'sd_button_v4/sd_button_v4.dart';
 export 'sd_card_v4/sd_card_v4.dart';
+export 'sd_checkbox_v4/sd_checkbox_v4.dart';
 export 'sd_choice_chip_v4/sd_choice_chip_v4.dart';
 export 'sd_content_padding_v4/sd_content_padding_v4.dart';
 export 'sd_empty_state_v4/sd_empty_state_v4.dart';

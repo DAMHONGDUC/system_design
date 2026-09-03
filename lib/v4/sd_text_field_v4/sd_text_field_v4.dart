@@ -12,6 +12,7 @@ class SdTextFieldV4 extends StatelessWidget {
     this.errorText,
     this.inputFormatters,
     this.textInputAction,
+    this.enabled = true,
     this.keyboardType = const TextInputType.numberWithOptions(decimal: true),
     this.onChanged,
     this.onSubmitted,
@@ -27,6 +28,7 @@ class SdTextFieldV4 extends StatelessWidget {
   final String? errorText;
   final List<TextInputFormatter>? inputFormatters;
   final TextInputAction? textInputAction;
+  final bool enabled;
   final TextInputType keyboardType;
   final ValueChanged<String>? onChanged;
   final VoidCallback? onSubmitted;
@@ -37,6 +39,9 @@ class SdTextFieldV4 extends StatelessWidget {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final ColorScheme colors = Theme.of(context).colorScheme;
+    final Color contentColor = enabled
+        ? colors.onSurface
+        : colors.onSurfaceVariant;
 
     return Semantics(
       textField: true,
@@ -44,35 +49,48 @@ class SdTextFieldV4 extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Text(label, style: textTheme.labelLarge),
+          Text(
+            label,
+            style: textTheme.labelLarge?.copyWith(color: contentColor),
+          ),
           SizedBox(height: SdSpacingConstant.h8),
           TextField(
             controller: controller,
             keyboardType: keyboardType,
             inputFormatters: inputFormatters,
             textInputAction: textInputAction,
+            enabled: enabled,
             onChanged: onChanged,
             onSubmitted: onSubmitted == null
                 ? null
                 : (String _) => onSubmitted!(),
             onTapOutside: (PointerDownEvent event) =>
                 FocusManager.instance.primaryFocus?.unfocus(),
-            style: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            style: textTheme.titleMedium?.copyWith(
+              color: contentColor,
+              fontWeight: FontWeight.w600,
+            ),
             decoration: InputDecoration(
               prefixIcon: prefixIcon,
               suffixIcon: suffixIcon,
               suffixText: suffix,
               suffixStyle: textTheme.labelLarge?.copyWith(
-                color: colors.primary,
+                color: enabled ? colors.primary : contentColor,
               ),
               errorText: errorText,
               helperText: helperText,
+              filled: !enabled,
+              fillColor: colors.surfaceContainerHighest,
               contentPadding: EdgeInsets.symmetric(
                 horizontal: SdSpacingConstant.w16,
                 vertical: SdSpacingConstant.h16,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(SdSpacingConstant.r12),
+              ),
+              disabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(SdSpacingConstant.r12),
+                borderSide: BorderSide(color: colors.outlineVariant),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(SdSpacingConstant.r12),
