@@ -100,6 +100,14 @@ abstract final class SdContentPaddingV3 {
   /// the content scrolled to and the button holding the bottom edge.
   static double get pinnedActionsGap => SdSpacingConstant.h16;
 
+  /// Gap between two stacked bottom actions.
+  ///
+  /// Tighter than [pinnedActionsGap]: that one separates the buttons from the
+  /// content above, while these two are one control group and have to read as
+  /// a pair — but never as one button, which is what no gap at all looked
+  /// like on the screens that forgot to draw their own.
+  static double get stackedActionsGap => SdSpacingConstant.h12;
+
   /// Padding for a section heading (`SdSectionHeaderV3`): the gap that
   /// separates it from the group above, the gutter, and the small gap down to
   /// its own rows.
