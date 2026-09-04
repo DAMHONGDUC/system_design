@@ -77,8 +77,7 @@ main() {
   fi
 
   # fastlane is Ruby, and Ruby without a UTF-8 locale prints a warning on every
-  # line of a 25-minute run and reads a non-ASCII path as ASCII-8BIT. set-up.sh
-  # does the same for CocoaPods, for the same reason.
+  # line of a 25-minute run and reads a non-ASCII path as ASCII-8BIT.
   case "${LANG:-}" in
     *UTF-8 | *utf8) ;;
     *) LANG=en_US.UTF-8 ;;

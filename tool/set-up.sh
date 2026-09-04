@@ -57,19 +57,7 @@ if [ -d functions ] && command -v npm >/dev/null 2>&1; then
   (cd functions && npm ci --silent)
 fi
 
-# `health` pins an old device_info with no Swift Package, so iOS still needs CocoaPods for that one plugin. See CLAUDE.md.
-if [ "$(uname)" = "Darwin" ] && [ -f ios/Podfile ] && command -v pod >/dev/null 2>&1; then
-  step "ios pods"
-  # CocoaPods is Ruby, and Ruby without a UTF-8 locale reads the Podfile as ASCII-8BIT and dies inside its own error reporter.
-  case "${LANG:-}" in
-    *UTF-8 | *utf8) ;;
-    *) LANG=en_US.UTF-8 ;;
-  esac
-  export LANG
-  $FL precache --ios
-  # - Warnings on stderr, and melos labels every stderr line "ERROR:", which makes a clean run read as a failed one.
-  (cd ios && pod install 2>&1)
-fi
+# iOS resolves every plugin as a Swift Package now, and Xcode does that itself on the first build — there is no install step to run here. See docs/rules/TECH_STACK.md.
 
 if [ -n "$MISSING" ]; then
   printf '\n'

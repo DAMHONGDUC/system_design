@@ -13,7 +13,7 @@ fi
 rm -rf android/.gradle android/build android/app/build
 
 step "ios"
-rm -rf ios/.symlinks ios/Flutter/ephemeral ios/Pods ios/Podfile.lock
+rm -rf ios/.symlinks ios/Flutter/ephemeral
 
 # Only for `melos run deep-set-up`, which sets this.
 if [ -n "${MELOS_CLEAN_DERIVED:-}" ] && [ "$(uname)" = "Darwin" ] &&
