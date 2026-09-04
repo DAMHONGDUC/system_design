@@ -220,13 +220,19 @@ pure dimensions stay parameterless (`SdChartStyleV2.plotHeight`).
     for lines and card radii for cards had every skeleton impersonating a
     different component, which is how a placeholder starts being mistaken for
     content. No circles, avatar or not.
-  - **This is why `SdSkeletonV2` is a still block.** Every other design
-    system's skeleton shimmers, and the gentle breathing fade looks like the
-    safe compromise — it is not. A placeholder animating on a loop is a light
-    source moving in the user's periphery for as long as the network takes,
-    which is the rule above with a longer duration. The shape was the useful
-    half anyway: it reserves the right space so nothing reflows when the data
-    lands, and the surface's spinner is what says the app is still working.
+  - **`SdSkeletonV2` shimmers, and it is the one loop this system allows**
+    (owner's call, 2026-09-04 — it used to be a still block for the reason
+    above). A placeholder that never moves reads as content the app drew
+    badly rather than as content on its way, and the sweep says "still
+    working" without a spinner sitting on top of the shape. What keeps it
+    inside the rule: 1400ms per pass, a single band 8% lighter than
+    `surfaceElevated` — grey over grey, never white and never an opacity
+    flash — travelling one way, off both edges, so there is no jump at the
+    wrap and no rocking. **Reduce Motion wins**: `MediaQuery`'s
+    `disableAnimations` renders the still block and stops the controller, so
+    the user who turned motion off in iOS Settings is not asked to find a
+    second switch here. Anything else that wants to loop still may not —
+    this is the exception, argued and lost once already, not the new bar.
 - **A control's tap target is the whole cell it looks like, never the ink
   inside it.** `SdSegmentedTabsV2` centred each segment's `GestureDetector`
   on its own line of text, so ~20 of the track's 42 was live and a tap near
