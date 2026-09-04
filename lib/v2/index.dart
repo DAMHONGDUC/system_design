@@ -50,6 +50,7 @@ export 'sd_pressable_scale_v2/sd_pressable_scale_v2.dart';
 export 'sd_progress_row_v2/sd_progress_row_v2.dart';
 export 'sd_refresh_indicator_v2/sd_refresh_indicator_v2.dart';
 export 'sd_scaffold_v2/sd_scaffold_v2.dart';
+export 'sd_scroll_chrome_v2/sd_scroll_chrome_v2.dart';
 export 'sd_section_header_v2/sd_section_header_v2.dart';
 export 'sd_segmented_tabs_v2/sd_segmented_tabs_v2.dart';
 export 'sd_sheet_content_v2/sd_sheet_content_v2.dart';
