@@ -12,19 +12,19 @@ import '../sd_context_v2/sd_context_v2.dart';
 /// list of rows, a chart) and keep the spinner for a wait whose result has no
 /// shape yet, or for an action the user just started.
 ///
-/// **It does not move. Not a shimmer, and not a pulse either.** Rule 6 of
-/// this package: nothing flashes, strobes or pulses, because the product this
-/// generation renders is for photophobic users. That rules out the shimmer
-/// every other design system reaches for — a specular band sweeping across
-/// the screen is the clearest possible case of it — and it rules out the
-/// gentle breathing fade that looks like the safe compromise, because a
-/// placeholder animating on a slow loop is a light source moving in the
-/// user's periphery for as long as the network takes.
+/// **It shimmers** (owner's call, replacing the still block this used to be).
+/// A block that never moves reads as content the app has finished drawing
+/// badly, not as content on its way; the sweep is what says the wait is still
+/// running without a second spinner on top of the shape. It is the one
+/// looping animation rule 6 of this package allows, and it is kept as quiet
+/// as a sweep can be: [_sweep] long, one band at [_highlightAlpha] over
+/// [SdThemeV2.surfaceElevated], no white and no opacity flash — the band is a
+/// lighter grey crossing a dark one.
 ///
-/// What it has instead is the shape, which was the useful half all along: a
-/// still block at [SdThemeV2.surfaceElevated] reserves the right space and
-/// reads as "not yet", and the spinner the surface may also carry is what
-/// says the app is still working.
+/// **The OS switch wins.** With "Reduce Motion" on, [MediaQuery]'s
+/// `disableAnimations` is true and this renders the still block instead — the
+/// photophobic user who turned motion off in Settings does not have to find a
+/// second switch in this app.
 ///
 /// **Every skeleton is a rectangle at [radius] (8), and there is no way to
 /// ask for another one** (owner's rule). One shape means a screen's
@@ -33,7 +33,7 @@ import '../sd_context_v2/sd_context_v2.dart';
 /// pill for a line and a card radius for a card had every skeleton quietly
 /// impersonating a different component, which is how a placeholder starts
 /// being mistaken for content. Not a circle either, avatar or not.
-class SdSkeletonV2 extends StatelessWidget {
+class SdSkeletonV2 extends StatefulWidget {
   const SdSkeletonV2({required this.height, this.width, super.key});
 
   /// One line of body text, at [fraction] of the available width.
@@ -53,21 +53,115 @@ class SdSkeletonV2 extends StatelessWidget {
   /// The one corner every skeleton wears. Not a prop — see the class doc.
   static double get radius => SdSpacingConstant.r8;
 
+  /// One pass of the band across the block.
+  ///
+  /// Longer than the 400ms rule 6 caps a micro-interaction at, and on purpose:
+  /// that cap exists so a transition cannot flash, and a sweep this slow is
+  /// the opposite failure mode — under ~1s the band starts reading as a
+  /// blink.
+  static const Duration _sweep = Duration(milliseconds: 1400);
+
+  /// How much lighter the band is than the block it crosses. Small enough
+  /// that the block still reads as one surface, large enough to see on an OLED
+  /// panel at low brightness — which is the screen this system is drawn for.
+  static const double _highlightAlpha = 0.08;
+
   final double height;
 
   /// Null fills whatever width the parent gives.
   final double? width;
 
   @override
+  State<SdSkeletonV2> createState() => _SdSkeletonV2State();
+}
+
+class _SdSkeletonV2State extends State<SdSkeletonV2>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: SdSkeletonV2._sweep,
+  );
+
+  /// Reduce Motion, read once per dependency change rather than per frame.
+  bool _still = false;
+
+  /// Started here rather than in `initState`, because whether it should run at
+  /// all is a MediaQuery answer — and stopped rather than left ticking, so a
+  /// user who turned motion off is not paying for a repaint a frame.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _still = MediaQuery.disableAnimationsOf(context);
+
+    if (_still) {
+      _controller.stop();
+    } else if (!_controller.isAnimating) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: context.sdTheme.surfaceElevated,
-        borderRadius: BorderRadius.circular(radius),
+    final Color base = context.sdTheme.surfaceElevated;
+    final BorderRadius corner = BorderRadius.circular(SdSkeletonV2.radius);
+    final Widget box = SizedBox(height: widget.height, width: widget.width);
+
+    if (_still) {
+      return DecoratedBox(
+        decoration: BoxDecoration(color: base, borderRadius: corner),
+        child: box,
+      );
+    }
+
+    // Blended rather than laid over: a translucent white band would lighten
+    // whatever sits behind a skeleton with a transparent parent, and the band
+    // has to be one flat colour for the gradient to stay a gradient.
+    final Color highlight = Color.alphaBlend(
+      Colors.white.withValues(alpha: SdSkeletonV2._highlightAlpha),
+      base,
+    );
+
+    return AnimatedBuilder(
+      animation: _controller,
+      // Built once and passed through: the size never changes, only the paint.
+      child: box,
+      builder: (BuildContext context, Widget? child) => DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: corner,
+          gradient: LinearGradient(
+            colors: <Color>[base, highlight, base],
+            transform: _SdSkeletonSweepV2(_controller.value),
+          ),
+        ),
+        child: child,
       ),
-      child: SizedBox(height: height, width: width),
     );
   }
+}
+
+/// Slides the whole gradient across the block, from fully off one edge to
+/// fully off the other.
+///
+/// The band is off-screen at both ends of the travel, which is what lets the
+/// controller `repeat()` without a visible jump at the wrap — a reversing
+/// sweep would instead run the band back the way it came, and a placeholder
+/// that rocks left and right is the "pulse" this system does not do.
+@immutable
+class _SdSkeletonSweepV2 extends GradientTransform {
+  const _SdSkeletonSweepV2(this.progress);
+
+  /// 0 → the gradient sits one full width to the left, 1 → one to the right.
+  final double progress;
+
+  @override
+  Matrix4 transform(Rect bounds, {TextDirection? textDirection}) =>
+      Matrix4.translationValues(bounds.width * (progress * 2 - 1), 0, 0);
 }
 
 /// One placeholder line at a fraction of its parent's width. Reached through
