@@ -4,6 +4,7 @@ import '../../core/sd_spacing_constant.dart';
 import '../sd_content_padding_v2/sd_content_padding_v2.dart';
 import '../sd_pinned_filter_bar_v2/sd_pinned_filter_bar_v2.dart';
 import '../sd_scaffold_v2/sd_scaffold_v2.dart';
+import '../sd_scroll_chrome_v2/sd_scroll_chrome_v2.dart';
 
 /// A screen that is "a filter plus a scrolling list", where the filter follows
 /// the reading direction: read on down the list and the whole filter row lifts
@@ -31,6 +32,7 @@ class SdCollapsingFilterScaffoldV2 extends StatefulWidget {
     this.leading,
     this.filter,
     this.collapsible = true,
+    this.pinnedChrome = false,
     super.key,
   });
 
@@ -57,6 +59,11 @@ class SdCollapsingFilterScaffoldV2 extends StatefulWidget {
   /// false while its search field owns the bar: collapsing the field away
   /// mid-typing would take the search with it.
   final bool collapsible;
+
+  /// Forwarded to [SdScaffoldV2.pinnedChrome], and it holds the strip in place
+  /// too: the strip continues the bar, so one leaving without the other would
+  /// leave a frosted band floating under nothing.
+  final bool pinnedChrome;
 
   /// The scrollable. See the note above about its top padding.
   final Widget body;
@@ -127,6 +134,7 @@ class _CollapsingFilterScaffoldState
     final bool collapsed = filter != null && widget.collapsible && _collapsed;
 
     return SdScaffoldV2(
+      pinnedChrome: widget.pinnedChrome,
       title: AnimatedSwitcher(
         duration: _duration,
         switchInCurve: Curves.easeOutCubic,
@@ -147,20 +155,26 @@ class _CollapsingFilterScaffoldState
                   top: 0,
                   left: 0,
                   right: 0,
-                  // Still laid out while collapsed (its height is what the body padded for), just invisible and untappable.
-                  child: IgnorePointer(
-                    ignoring: collapsed,
-                    child: AnimatedSlide(
-                      offset: collapsed ? _liftOffset : Offset.zero,
-                      duration: _duration,
-                      curve: Curves.easeOutCubic,
-                      child: AnimatedOpacity(
-                        opacity: collapsed ? 0 : 1,
+                  // Leaves with the app bar while the list is moving — the two
+                  // are one continuous strip of chrome and read as one.
+                  child: SdScrollChromeSlideV2(
+                    edge: SdScrollChromeEdgeV2.top,
+                    pinned: widget.pinnedChrome,
+                    // Still laid out while collapsed (its height is what the body padded for), just invisible and untappable.
+                    child: IgnorePointer(
+                      ignoring: collapsed,
+                      child: AnimatedSlide(
+                        offset: collapsed ? _liftOffset : Offset.zero,
                         duration: _duration,
                         curve: Curves.easeOutCubic,
-                        child: SdPinnedFilterBarV2(
-                          topInset: SdContentPaddingV2.appBarInset(context),
-                          child: filter,
+                        child: AnimatedOpacity(
+                          opacity: collapsed ? 0 : 1,
+                          duration: _duration,
+                          curve: Curves.easeOutCubic,
+                          child: SdPinnedFilterBarV2(
+                            topInset: SdContentPaddingV2.appBarInset(context),
+                            child: filter,
+                          ),
                         ),
                       ),
                     ),

@@ -24,6 +24,7 @@ class SdScaffoldV2 extends StatelessWidget {
     this.appBarBottom,
     this.floatingActionButton,
     this.bottomNavigationBar,
+    this.pinnedChrome = false,
     super.key,
   });
 
@@ -40,6 +41,11 @@ class SdScaffoldV2 extends StatelessWidget {
   /// clears it.
   final Widget? bottomNavigationBar;
 
+  /// True keeps the app bar still while the body scrolls, instead of letting
+  /// it step out of the way with the rest of the chrome (`SdScrollChromeV2`).
+  /// For a bar the user is working *in* — the medications tab's search field.
+  final bool pinnedChrome;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,6 +57,7 @@ class SdScaffoldV2 extends StatelessWidget {
         actions: actions,
         leading: leading,
         bottom: appBarBottom,
+        pinned: pinnedChrome,
       ),
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,

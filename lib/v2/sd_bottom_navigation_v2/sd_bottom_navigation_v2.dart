@@ -8,6 +8,7 @@ import '../sd_floating_bar_scope_v2/sd_floating_bar_scope_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
 import '../sd_liquid_glass_theme_v2/sd_liquid_glass_theme_v2.dart';
 import '../sd_pop_scale_v2/sd_pop_scale_v2.dart';
+import '../sd_scroll_chrome_v2/sd_scroll_chrome_v2.dart';
 
 part 'sd_bottom_navigation_v2_bar.dart';
 part 'sd_bottom_navigation_v2_segment.dart';
@@ -107,30 +108,40 @@ class _SdBottomNavigationV2State extends State<SdBottomNavigationV2> {
     widget.onSelected(nextIndex);
   }
 
+  // The chrome scope wraps the whole scaffold, not just the body: the pill
+  // lives in the bottom slot, outside the body's subtree, and has to hear the
+  // same answer the tab screen's app bar does.
   @override
-  Widget build(BuildContext context) => Scaffold(
-    // Lets the body flow behind the pill so it refracts through the glass.
-    extendBody: true,
-    // Tells anything drawn over the app — a snackbar goes into the root
-    // overlay, above the shell — that the pill is down there to clear.
-    body: SdFloatingBarScopeV2(
-      child: GestureDetector(
-        key: SdBottomNavigationV2.swipeSurfaceKey,
-        // Translucent so a scrollable, a slider or a chart underneath claims
-        // its own horizontal drag first; only the misses reach this.
-        behavior: HitTestBehavior.translucent,
-        excludeFromSemantics: true,
-        onHorizontalDragStart: _startSwipe,
-        onHorizontalDragUpdate: _updateSwipe,
-        onHorizontalDragCancel: _cancelSwipe,
-        onHorizontalDragEnd: _finishSwipe,
-        child: widget.body,
+  Widget build(BuildContext context) => SdScrollChromeV2(
+    child: Scaffold(
+      // Lets the body flow behind the pill so it refracts through the glass.
+      extendBody: true,
+      // Tells anything drawn over the app — a snackbar goes into the root
+      // overlay, above the shell — that the pill is down there to clear.
+      body: SdFloatingBarScopeV2(
+        child: GestureDetector(
+          key: SdBottomNavigationV2.swipeSurfaceKey,
+          // Translucent so a scrollable, a slider or a chart underneath claims
+          // its own horizontal drag first; only the misses reach this.
+          behavior: HitTestBehavior.translucent,
+          excludeFromSemantics: true,
+          onHorizontalDragStart: _startSwipe,
+          onHorizontalDragUpdate: _updateSwipe,
+          onHorizontalDragCancel: _cancelSwipe,
+          onHorizontalDragEnd: _finishSwipe,
+          child: widget.body,
+        ),
       ),
-    ),
-    bottomNavigationBar: _GlassNavBar(
-      destinations: widget.destinations,
-      selectedIndex: widget.selectedIndex,
-      onSelected: widget.onSelected,
+      // Outside the pill's own padding, so the slide carries the bottom
+      // offset with it and the bar clears the screen entirely.
+      bottomNavigationBar: SdScrollChromeSlideV2(
+        edge: SdScrollChromeEdgeV2.bottom,
+        child: _GlassNavBar(
+          destinations: widget.destinations,
+          selectedIndex: widget.selectedIndex,
+          onSelected: widget.onSelected,
+        ),
+      ),
     ),
   );
 }

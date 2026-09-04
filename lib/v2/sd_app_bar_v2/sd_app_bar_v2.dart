@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../sd_app_bar_button_v2/sd_app_bar_button_v2.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_liquid_glass_theme_v2/sd_liquid_glass_theme_v2.dart';
+import '../sd_scroll_chrome_v2/sd_scroll_chrome_v2.dart';
 
 /// The app's single [AppBar]. Every screen gets it via [SdScaffoldV2] rather
 /// than constructing an [AppBar] directly.
@@ -23,6 +24,7 @@ class SdAppBarV2 extends StatelessWidget implements PreferredSizeWidget {
     this.actions,
     this.leading,
     this.bottom,
+    this.pinned = false,
     super.key,
   });
 
@@ -30,6 +32,10 @@ class SdAppBarV2 extends StatelessWidget implements PreferredSizeWidget {
   final List<Widget>? actions;
   final Widget? leading;
   final PreferredSizeWidget? bottom;
+
+  /// True keeps the bar on screen while the body scrolls — see
+  /// [SdScrollChromeSlideV2.pinned] for the one screen that asks for it.
+  final bool pinned;
 
   @override
   Size get preferredSize =>
@@ -68,25 +74,32 @@ class SdAppBarV2 extends StatelessWidget implements PreferredSizeWidget {
       resolvedLeading = Center(child: resolvedLeading);
     }
 
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: kChromeGlass.blur,
-          sigmaY: kChromeGlass.blur,
-        ),
-        // Same colour as the app background — no divider, no distinct slab; translucency lets content glow through.
-        child: ColoredBox(
-          color: context.sdTheme.background.withValues(alpha: 0.65),
-          child: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            scrolledUnderElevation: 0,
-            surfaceTintColor: Colors.transparent,
-            title: title,
-            leading: resolvedLeading,
-            automaticallyImplyLeading: false,
-            actions: actions,
-            bottom: bottom,
+    // Slides off the top while the body is moving. Only in this branch: it is
+    // the one where the body passes behind the bar, so a bar that leaves
+    // reveals content rather than a strip of empty background.
+    return SdScrollChromeSlideV2(
+      edge: SdScrollChromeEdgeV2.top,
+      pinned: pinned,
+      child: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: kChromeGlass.blur,
+            sigmaY: kChromeGlass.blur,
+          ),
+          // Same colour as the app background — no divider, no distinct slab; translucency lets content glow through.
+          child: ColoredBox(
+            color: context.sdTheme.background.withValues(alpha: 0.65),
+            child: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              surfaceTintColor: Colors.transparent,
+              title: title,
+              leading: resolvedLeading,
+              automaticallyImplyLeading: false,
+              actions: actions,
+              bottom: bottom,
+            ),
           ),
         ),
       ),
