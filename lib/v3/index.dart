@@ -31,6 +31,7 @@ export 'sd_fab_v3/sd_fab_v3.dart';
 export 'sd_field_label_v3/sd_field_label_v3.dart';
 export 'sd_filter_chip_v3/sd_filter_chip_v3.dart';
 export 'sd_floating_bar_scope_v3/sd_floating_bar_scope_v3.dart';
+export 'sd_free_limit_progress_v3/sd_free_limit_progress_v3.dart';
 export 'sd_glass_nav_bar_v3/sd_glass_nav_bar_v3.dart';
 export 'sd_hero_stat_v3/sd_hero_stat_v3.dart';
 export 'sd_icon_tile_v3/sd_icon_tile_v3.dart';
