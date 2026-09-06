@@ -91,44 +91,48 @@ cheaper than the coupling.
 
 Everything above is about rendering. `core/common/` is the one place in this
 package that is not: it holds the plumbing every app of ours stands up
-identically — `SdLogger`, the `SdCrashReporter` contract, `SdReinstallGuard`,
-`SdFreshInstall` and `SdDeviceWipe` today.
+identically — `SdLogger`, the `SdCrashReporter` contract, `SdFreshInstall` and
+`SdDeviceWipe` today.
 
-`SdReinstallGuard` is the one that was called `SdFreshInstallGuard` and is not
-any more. The name now belongs to a different class entirely: `SdFreshInstallGuard`
-is a **widget** that wipes a device when the build's environment moves, and a
-widget cannot live in a folder whose first rule is no Flutter. It sits in
-`core/sd_fresh_install_guard/` and ships from `index.dart`. Two unrelated
-guards, two folders, two entrypoints — which is what the rename bought.
+**`SdFreshInstall` is one class, and it used to be three.** Owner's rule. A
+reinstall guard, an environment guard and a widget holding the first frame all
+asked the same question — *does the state on this device belong to the app that
+is now running?* — so they are one stamp and one comparison:
 
-`SdFreshInstall` is that widget's other half, and it is common rather than a
-widget's: `SdFreshInstallGuard` decides *whether* the environment moved, and
-`SdFreshInstall` records the env name and asks for the wipe that follows.
-Reading and recording go through `SdFreshInstallStore`, so the host supplies
-only its plugin, exactly as `SdReinstallGuard` takes its two stores and a
-`signOut`. `SdFreshInstallPolicy` lives here with it, since three function
-fields need no Flutter and the widget is what imports them.
+```text
+stamp == buildStamp ......................... normal launch, nothing to do
+stamp is a different value .................. environment changed  → wipe
+stamp absent, other keys present ............ update from an older build
+stamp absent, device-scoped store not empty . reinstall            → wipe
+stamp absent, nothing anywhere .............. first install
+```
 
-**`SdDeviceWipe` is the wipe, and it is written once.** Owner's rule. Two
-guards here reach it — `SdReinstallGuard` when the app was deleted and
-installed again, `SdFreshInstall` when the build now talks to a different
-environment — and they detect completely different things but then do the
-same list of vendor calls in the same order. It was written twice and drifted
-twice.
-
-- **The steps are the host's.** Signing out, clearing a cache and emptying a
-  store all arrive as `SdDeviceWipeStep`s, because this package imports no
-  storage plugin and no Firebase SDK. Each carries its own name for the log
-  and an optional `when`, so a build with no Firebase skips the sign-out
-  rather than guarding it at the call site.
-- **Each step is guarded on its own.** A wipe runs after something has already
-  gone wrong and before the app's first frame, where a throw is not an error
-  screen but an app that never starts — and a device that lost its cache but
-  kept its session is a worse state than one where both went.
-- **`SdDeviceWipeFailure.halt` is the exception**, for a step the rest of the
-  wipe means nothing without: it rethrows, so the caller does not record the
-  wipe as done and the next launch tries again. `SdReinstallGuard` marks its
-  device-scoped clear that way and nothing else does.
+- **The stamp is the build's environment name**, written into the store the OS
+  deletes with the app. It replaces the separate "has this install run before"
+  marker, which is what lets one comparison answer both questions.
+- **The update row is what makes the merge safe.** An install that predates the
+  stamp is recognised by its own keys, whatever they are called, so shipping
+  this never reads as a reinstall and never wipes a real user's session. A host
+  can also pass its existing key as `stampKey` and skip the row entirely.
+- **Two stores, and which one a value is in is the whole diagnosis.** iOS keeps
+  the Keychain when an app is deleted, so a session came back on the next
+  install and the user was still signed in; the install-scoped store is the
+  opposite, which is why the stamp lives there. A host with nothing that
+  survives a delete passes no `SdDeviceScopedStore` and the reinstall row
+  cannot fire.
+- **There is no widget, and there must not be one again.** The host awaits it
+  before `runApp`. It signs out and clears a database cache, and Firestore's
+  `clearPersistence` throws `failed-precondition` once its client is running —
+  so the work has to finish before the first screen can read, which a widget
+  in the tree cannot promise.
+- **`SdDeviceWipe` is the wipe, and it is written once.** The steps are the
+  host's — signing out, clearing a cache — because this package imports no
+  storage plugin and no Firebase SDK. Each step is guarded on its own: a wipe
+  runs before the first frame, where a throw is not an error screen but an app
+  that never starts, and a device that lost its cache but kept its session is
+  worse than one where both went. `SdDeviceWipeFailure.halt` is the exception,
+  for a step the rest means nothing without — it rethrows, so the stamp is not
+  written and the next launch tries again.
 
 - **Pure Dart, no Flutter, ever.** It is exported from `common.dart`, a second
   entrypoint next to `index.dart`, precisely so a feature's `domain/` can log
