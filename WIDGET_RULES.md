@@ -92,7 +92,7 @@ cheaper than the coupling.
 Everything above is about rendering. `core/common/` is the one place in this
 package that is not: it holds the plumbing every app of ours stands up
 identically — `SdLogger`, the `SdCrashReporter` contract and
-`SdFreshInstallGuard` today.
+`SdReinstallGuard` today.
 
 - **Pure Dart, no Flutter, ever.** It is exported from `common.dart`, a second
   entrypoint next to `index.dart`, precisely so a feature's `domain/` can log
@@ -126,7 +126,7 @@ lib/
     common/
       sd_logger.dart          # app infrastructure, not rendering
       sd_crash_reporter.dart  # the contract only — never a vendor SDK
-      sd_fresh_install_guard.dart  # reinstall = first install, over two app-supplied stores
+      sd_reinstall_guard.dart      # reinstall = first install, over two app-supplied stores
   v2/
     index.dart                # exports every folder below
     sd_banner_v2/
