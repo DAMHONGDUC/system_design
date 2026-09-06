@@ -8,7 +8,7 @@ abstract interface class SdInstallScopedStore {
   /// Every key held right now, the guard's own marker included.
   Iterable<String> getKeys();
 
-  /// The raw value in whatever type it was written as — [SdFreshInstallGuard] carries a legacy value over by matching on that type.
+  /// The raw value in whatever type it was written as — [SdReinstallGuard] carries a legacy value over by matching on that type.
   Object? get(String key);
 
   bool? getBool(String key);
@@ -36,6 +36,8 @@ abstract interface class SdDeviceScopedStore {
 
 /// Makes deleting the app and installing it again behave like a first install (owner's rule).
 ///
+/// Named for what it detects — a reinstall — rather than the fresh install it produces, so it does not read as a guard over every first launch.
+///
 /// iOS keeps the Keychain when an app is deleted, so the auth session — and everything else in the [SdDeviceScopedStore] — came back on the next install and the user was still signed in. The [SdInstallScopedStore] is the opposite: iOS deletes it with the app, which is exactly why the marker below lives there and nowhere else.
 ///
 /// ```text
@@ -45,8 +47,8 @@ abstract interface class SdDeviceScopedStore {
 ///        ▼                            ▼
 /// purge: signOut + deleteAll   adopt: copy the 2 keys across, then drop them
 /// ```
-final class SdFreshInstallGuard {
-  const SdFreshInstallGuard._();
+final class SdReinstallGuard {
+  const SdReinstallGuard._();
 
   /// The one install-scoped key the app should keep. True = this install has run before; absent (which reads as false) = the device-scoped store is speaking for an install that no longer exists, because a delete takes the install-scoped one with it.
   static const String isInstalledKey = 'is_installed';
