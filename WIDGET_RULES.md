@@ -94,6 +94,13 @@ package that is not: it holds the plumbing every app of ours stands up
 identically — `SdLogger`, the `SdCrashReporter` contract and
 `SdReinstallGuard` today.
 
+`SdReinstallGuard` is the one that was called `SdFreshInstallGuard` and is not
+any more. The name now belongs to a different class entirely: `SdFreshInstallGuard`
+is a **widget** that wipes a device when the build's environment moves, and a
+widget cannot live in a folder whose first rule is no Flutter. It sits in
+`core/sd_fresh_install_guard/` and ships from `index.dart`. Two unrelated
+guards, two folders, two entrypoints — which is what the rename bought.
+
 - **Pure Dart, no Flutter, ever.** It is exported from `common.dart`, a second
   entrypoint next to `index.dart`, precisely so a feature's `domain/` can log
   without importing a widget library. A `package:flutter/*` import in here
