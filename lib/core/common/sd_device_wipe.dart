@@ -44,13 +44,12 @@ class SdDeviceWipeStep {
 /// Taking a device back to what a fresh install would have had — signed out,
 /// no preferences, no cached documents.
 ///
-/// **One wipe, several reasons to run it.** Two of ours reach it today and
-/// they detect completely different things — [SdReinstallGuard] finds that the
-/// app was deleted and installed again, [SdFreshInstall] finds that the build
-/// now talks to a different environment — but what they then have to *do* is
-/// the same list of vendor calls in the same order, each one guarded so that
-/// the step which fails does not cost the app the steps after it. Written
-/// twice, it drifted twice.
+/// **One wipe, several reasons to run it.** [SdFreshInstall] reaches it for
+/// two: the app was deleted and installed again, or the build now talks to a
+/// different environment. Those are found completely differently and then
+/// have to *do* the same list of vendor calls in the same order, each one
+/// guarded so that the step which fails does not cost the app the steps after
+/// it. Written twice, it drifted twice.
 ///
 /// **The steps are the host's and the ordering is the caller's.** This package
 /// imports no storage plugin and no Firebase SDK (`WIDGET_RULES.md`, "no

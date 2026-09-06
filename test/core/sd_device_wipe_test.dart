@@ -70,8 +70,8 @@ void main() {
     });
 
     test('a halting step stops the wipe and rethrows', () async {
-      // What `SdReinstallGuard` relies on: a device-scoped store that could
-      // not be emptied must leave the marker unwritten, so the next launch
+      // What the reinstall row relies on: a device-scoped store that could
+      // not be emptied must leave the stamp unwritten, so the next launch
       // tries again rather than trusting a store that is still full.
       final List<String> ran = <String>[];
 

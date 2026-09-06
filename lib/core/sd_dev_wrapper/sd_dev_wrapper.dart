@@ -1,8 +1,5 @@
 import 'package:flutter/widgets.dart';
 
-import '../common/sd_fresh_install.dart';
-import '../sd_fresh_install_guard/sd_fresh_install_guard.dart';
-
 part 'sd_dev_wrapper_tag.dart';
 
 /// Stamps a build tag down the right edge of everything the app draws, hung
@@ -24,13 +21,9 @@ part 'sd_dev_wrapper_tag.dart';
 /// from `kDebugMode`: a TestFlight build of the dev flavour is a release
 /// binary and is exactly the one nobody can otherwise identify.
 ///
-/// **It also carries [SdFreshInstallGuard], and that half runs whatever
-/// [visible] says.** The tag is about the build a screenshot came from; the
-/// guard is about the data underneath it, and the launch that needs wiping is
-/// as often the prod build started over a dev install as the other way round.
-/// A guard that only ran where the tag is drawn would clean up in one
-/// direction and leave a dev session signed in against the real project in
-/// the other.
+/// **It draws a tag and nothing else.** It used to carry the fresh-install
+/// check too; that is `SdFreshInstall`, the host awaits it before `runApp`,
+/// and it never belonged behind a widget whose job is decoration.
 class SdDevWrapper extends StatelessWidget {
   const SdDevWrapper({
     required this.child,
@@ -38,7 +31,6 @@ class SdDevWrapper extends StatelessWidget {
     this.buildName = '',
     this.buildNumber = '',
     this.visible = true,
-    this.freshInstall,
     super.key,
   });
 
@@ -55,27 +47,13 @@ class SdDevWrapper extends StatelessWidget {
   final String buildNumber;
 
   /// Whether to draw the tag at all. False leaves the tree with no extra
-  /// painting node, and does not switch off [freshInstall].
+  /// painting node.
   final bool visible;
-
-  /// How this host reads, records and wipes an environment change. Null skips
-  /// the check entirely — a build that shares its sandbox with nothing has
-  /// nothing to clean up.
-  final SdFreshInstallPolicy? freshInstall;
 
   @override
   Widget build(BuildContext context) {
-    final SdFreshInstallPolicy? policy = freshInstall;
-    final Widget guarded = policy == null
-        ? child
-        : SdFreshInstallGuard(
-            envName: envName,
-            policy: policy,
-            child: child,
-          );
-
     if (!visible) {
-      return guarded;
+      return child;
     }
 
     return Directionality(
@@ -83,7 +61,7 @@ class SdDevWrapper extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          guarded,
+          child,
           Positioned(
             // No MediaQuery above MaterialApp, so the status bar inset is read
             // off the view itself — otherwise the slab sits on the clock.

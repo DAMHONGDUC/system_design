@@ -1,146 +1,243 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:system_design/common.dart';
 
-/// A store that records what it was asked to do, in order.
-class _RecordingStore implements SdFreshInstallStore {
-  _RecordingStore({this.stored, this.throwOnRead = false});
+/// **One stamp answers both questions, and the update row is what makes that
+/// safe.**
+///
+/// A reinstall and an environment change were two classes asking the same
+/// thing — *does the state on this device belong to the app now running?* —
+/// and the merge only works if an install that predates the stamp reads as an
+/// update rather than a reinstall. Get that wrong and the first launch after
+/// shipping this wipes a real user's session.
+class _InstallScoped implements SdInstallScopedStore {
+  _InstallScoped([Map<String, Object>? values])
+    : values = values ?? <String, Object>{};
 
-  final List<String> calls = <String>[];
-  String? stored;
-  final bool throwOnRead;
-
-  @override
-  Future<String?> readString(String key) async {
-    if (throwOnRead) {
-      throw StateError('preferences unavailable');
-    }
-    calls.add('read:$key');
-
-    return stored;
-  }
+  final Map<String, Object> values;
+  bool cleared = false;
 
   @override
-  Future<void> writeString(String key, String value) async {
-    calls.add('write:$key=$value');
-    stored = value;
-  }
+  Future<Iterable<String>> getKeys() async => values.keys.toList();
+
+  @override
+  Future<Object?> get(String key) async => values[key];
+
+  @override
+  Future<String?> getString(String key) async => values[key] as String?;
+
+  @override
+  Future<void> setString(String key, String value) async =>
+      values[key] = value;
+
+  @override
+  Future<void> remove(String key) async => values.remove(key);
 
   @override
   Future<void> clear() async {
-    calls.add('clear');
-    stored = null;
+    cleared = true;
+    values.clear();
+  }
+}
+
+class _DeviceScoped implements SdDeviceScopedStore {
+  _DeviceScoped([Map<String, Object>? values])
+    : values = values ?? <String, Object>{};
+
+  final Map<String, Object> values;
+  bool cleared = false;
+
+  @override
+  Future<Iterable<String>> getKeys() async => values.keys.toList();
+
+  @override
+  Future<void> setBool(String key, bool value) async => values[key] = value;
+
+  @override
+  Future<void> setInt(String key, int value) async => values[key] = value;
+
+  @override
+  Future<void> setDouble(String key, double value) async => values[key] = value;
+
+  @override
+  Future<void> setString(String key, String value) async => values[key] = value;
+
+  @override
+  Future<void> deleteAll() async {
+    cleared = true;
+    values.clear();
   }
 }
 
 const String _logTag = 'Fresh Install';
-const String _envKey = 'last_env';
-
-SdFreshInstallPolicy _policy(
-  _RecordingStore store, {
-  List<SdDeviceWipeStep> steps = const <SdDeviceWipeStep>[],
-}) => SdFreshInstall.policy(
-  logTag: _logTag,
-  envKey: _envKey,
-  store: store,
-  steps: steps,
-);
+const String _stamp = SdFreshInstall.defaultStampKey;
 
 void main() {
-  setUp(() => SdLogger.enabled = false);
+  late List<String> wiped;
 
-  group('SdFreshInstall', () {
-    test('reads the recorded environment back', () async {
-      final _RecordingStore store = _RecordingStore(stored: 'dev');
+  setUp(() {
+    SdLogger.enabled = false;
+    wiped = <String>[];
+  });
 
-      expect(await _policy(store).readLastEnv(), 'dev');
-      expect(store.calls, <String>['read:$_envKey']);
+  Future<SdFreshInstallOutcome> run({
+    required String buildStamp,
+    required _InstallScoped installScoped,
+    _DeviceScoped? deviceScoped,
+  }) => SdFreshInstall.run(
+    logTag: _logTag,
+    buildStamp: buildStamp,
+    installScoped: installScoped,
+    deviceScoped: deviceScoped,
+    wipe: <SdDeviceWipeStep>[
+      SdDeviceWipeStep(name: 'Sign out', run: () async => wiped.add('signOut')),
+    ],
+  );
+
+  group('what a launch is', () {
+    test('a matching stamp is a normal launch and touches nothing', () async {
+      final _InstallScoped store = _InstallScoped(<String, Object>{
+        _stamp: 'dev',
+        'theme': 'dark',
+      });
+
+      expect(
+        await run(buildStamp: 'dev', installScoped: store),
+        SdFreshInstallOutcome.normalLaunch,
+      );
+      expect(wiped, isEmpty);
+      expect(store.values['theme'], 'dark');
     });
 
-    test('a store that cannot be read is a first launch, not a wipe', () async {
-      final _RecordingStore store = _RecordingStore(throwOnRead: true);
+    test('a different stamp is an environment change, and wipes', () async {
+      final _InstallScoped store = _InstallScoped(<String, Object>{
+        _stamp: 'dev',
+        'theme': 'dark',
+      });
 
-      expect(await _policy(store).readLastEnv(), isNull);
+      expect(
+        await run(buildStamp: 'prod', installScoped: store),
+        SdFreshInstallOutcome.environmentChanged,
+      );
+      expect(wiped, <String>['signOut']);
+      expect(store.cleared, isTrue);
+      // The stamp is written after the wipe, never before.
+      expect(store.values, <String, Object>{_stamp: 'prod'});
     });
 
-    test('records the environment under the key it was given', () async {
-      final _RecordingStore store = _RecordingStore();
+    test('nothing anywhere is a first install, and wipes nothing', () async {
+      final _InstallScoped store = _InstallScoped();
 
-      await _policy(store).writeEnv('prod');
-
-      expect(store.stored, 'prod');
-      expect(store.calls, <String>['write:$_envKey=prod']);
+      expect(
+        await run(
+          buildStamp: 'dev',
+          installScoped: store,
+          deviceScoped: _DeviceScoped(),
+        ),
+        SdFreshInstallOutcome.firstInstall,
+      );
+      expect(wiped, isEmpty);
+      expect(store.values[_stamp], 'dev');
     });
 
-    test('runs every step in order, then clears the store last', () async {
-      final _RecordingStore store = _RecordingStore(stored: 'dev');
-      final List<String> ran = <String>[];
+    test('state that outlived a delete is a reinstall, and wipes', () async {
+      final _DeviceScoped keychain = _DeviceScoped(<String, Object>{
+        'session': 'abc',
+      });
 
-      await _policy(
-        store,
-        steps: <SdDeviceWipeStep>[
-          SdDeviceWipeStep(
-            name: 'first',
-            run: () async => ran.add('first'),
-          ),
-          SdDeviceWipeStep(
-            name: 'second',
-            run: () async => ran.add('second'),
-          ),
-        ],
-      ).wipe('dev', 'prod');
-
-      expect(ran, <String>['first', 'second']);
-      expect(store.calls, <String>['clear']);
-      expect(store.stored, isNull);
+      expect(
+        await run(
+          buildStamp: 'dev',
+          installScoped: _InstallScoped(),
+          deviceScoped: keychain,
+        ),
+        SdFreshInstallOutcome.reinstall,
+      );
+      expect(wiped, <String>['signOut']);
+      expect(keychain.cleared, isTrue);
     });
 
-    test('a step that throws does not cost the steps after it', () async {
-      final _RecordingStore store = _RecordingStore();
-      final List<String> ran = <String>[];
+    test('no device-scoped store means a reinstall cannot fire', () async {
+      // A host with nothing that survives a delete: an empty install-scoped
+      // store is a first install and never a reinstall.
+      expect(
+        await run(buildStamp: 'dev', installScoped: _InstallScoped()),
+        SdFreshInstallOutcome.firstInstall,
+      );
+      expect(wiped, isEmpty);
+    });
+  });
 
-      await _policy(
-        store,
-        steps: <SdDeviceWipeStep>[
-          SdDeviceWipeStep(
-            name: 'throws',
-            run: () async => throw StateError('no Firebase app'),
-          ),
-          SdDeviceWipeStep(name: 'after', run: () async => ran.add('after')),
-        ],
-      ).wipe(null, 'prod');
+  group('an install that predates the stamp', () {
+    test('reads as an update, so shipping this wipes nobody', () async {
+      // The trap the merge has to avoid: these keys are a real user's
+      // settings and their session, not a reinstall.
+      final _InstallScoped store = _InstallScoped(<String, Object>{
+        'is_installed': true,
+        'last_env': 'dev',
+        'onboarding_seen': true,
+      });
 
-      expect(ran, <String>['after']);
-      expect(store.calls, <String>['clear']);
+      expect(
+        await run(
+          buildStamp: 'dev',
+          installScoped: store,
+          deviceScoped: _DeviceScoped(<String, Object>{'session': 'abc'}),
+        ),
+        SdFreshInstallOutcome.update,
+      );
+      expect(wiped, isEmpty);
+      expect(store.cleared, isFalse);
+      expect(store.values[_stamp], 'dev');
     });
 
-    test('a step whose `when` is false is skipped', () async {
-      final _RecordingStore store = _RecordingStore();
-      final List<String> ran = <String>[];
+    test('its settings move into the store that now owns them', () async {
+      final _InstallScoped store = _InstallScoped(<String, Object>{
+        'threshold': 7.0,
+        'onboarding_seen': true,
+      });
+      final _DeviceScoped keychain = _DeviceScoped();
 
-      await _policy(
-        store,
-        steps: <SdDeviceWipeStep>[
-          SdDeviceWipeStep(
-            name: 'skipped',
-            when: () => false,
-            run: () async => ran.add('skipped'),
-          ),
-        ],
-      ).wipe('dev', 'prod');
+      await run(
+        buildStamp: 'dev',
+        installScoped: store,
+        deviceScoped: keychain,
+      );
 
-      expect(ran, isEmpty);
-      expect(store.calls, <String>['clear']);
+      expect(keychain.values['threshold'], 7.0);
+      expect(keychain.values['onboarding_seen'], true);
+      // One owner per value — the copies left behind would outlive them.
+      expect(store.values.keys, <String>[_stamp]);
     });
 
-    test('a store that cannot be cleared does not throw the wipe', () async {
-      final _RecordingStore store = _ThrowingClearStore();
+    test('a host with nowhere to move them keeps its keys', () async {
+      final _InstallScoped store = _InstallScoped(<String, Object>{
+        'onboarding_seen': true,
+      });
 
-      await expectLater(_policy(store).wipe('dev', 'prod'), completes);
+      expect(
+        await run(buildStamp: 'dev', installScoped: store),
+        SdFreshInstallOutcome.update,
+      );
+      expect(store.values['onboarding_seen'], true);
+      expect(store.values[_stamp], 'dev');
     });
+  });
+
+  test('a store that throws still starts the app, unstamped', () async {
+    expect(
+      await SdFreshInstall.run(
+        logTag: _logTag,
+        buildStamp: 'dev',
+        installScoped: _ThrowingStore(),
+        wipe: const <SdDeviceWipeStep>[],
+      ),
+      SdFreshInstallOutcome.normalLaunch,
+    );
   });
 }
 
-class _ThrowingClearStore extends _RecordingStore {
+class _ThrowingStore extends _InstallScoped {
   @override
-  Future<void> clear() async => throw StateError('store unavailable');
+  Future<String?> getString(String key) async =>
+      throw StateError('preferences unavailable');
 }
