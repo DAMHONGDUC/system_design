@@ -4,7 +4,8 @@ import '../sd_fresh_install_guard/sd_fresh_install_guard.dart';
 
 part 'sd_dev_wrapper_tag.dart';
 
-/// Stamps a build tag down the left edge of everything the app draws.
+/// Stamps a build tag down the right edge of everything the app draws, hung
+/// from the top-right corner.
 ///
 /// **It wraps `MaterialApp`, it never sits inside one**, and that is the whole
 /// reason it looks the way it does: above the app there is no theme, no
@@ -83,12 +84,11 @@ class SdDevWrapper extends StatelessWidget {
         children: <Widget>[
           guarded,
           Positioned(
-            left: 0,
-            top: 0,
-            bottom: 0,
-            child: IgnorePointer(
-              child: Center(child: _SdDevWrapperTag(label: _label)),
-            ),
+            // No MediaQuery above MaterialApp, so the status bar inset is read
+            // off the view itself — otherwise the slab sits on the clock.
+            top: MediaQueryData.fromView(View.of(context)).padding.top,
+            right: 0,
+            child: IgnorePointer(child: _SdDevWrapperTag(label: _label)),
           ),
         ],
       ),
