@@ -9,6 +9,46 @@ import '../sd_keyboard_dismiss_v3/sd_keyboard_dismiss_v3.dart';
 import '../sd_radius_v3/sd_radius_v3.dart';
 import '../sd_text_style_v3/sd_text_style_v3.dart';
 
+/// How a sheet may be left — a prop, because it changes the chrome and the
+/// route together.
+enum SdBottomSheetExitV3 {
+  /// The default. A close button, a grab handle, a barrier tap and a back
+  /// gesture all dismiss it.
+  close,
+
+  /// Nothing dismisses it: no close button, no handle, no barrier tap, no
+  /// back. For a sheet that **is** the app's state rather than something
+  /// shown over it — a build too old to run.
+  ///
+  /// **It is the one exception to "every sheet carries a close icon"**
+  /// (`docs/rules/DESIGN_SYSTEM.md`). That rule exists so a seller always has
+  /// one exit nothing has to teach; here there deliberately is no exit, and a
+  /// close button that reopened itself a frame later would be worse than none.
+  blocked,
+}
+
+/// Carries the presenter's [SdBottomSheetExitV3] down to the sheet.
+///
+/// **One owner for the value.** The route's `isDismissible` and the chrome's
+/// close button are two halves of one decision, and passing the flag to both
+/// the presenter and the widget is how they end up disagreeing — a sheet with
+/// no close button that the barrier still dismisses.
+class _SdBottomSheetExitScopeV3 extends InheritedWidget {
+  const _SdBottomSheetExitScopeV3({required this.exit, required super.child});
+
+  final SdBottomSheetExitV3 exit;
+
+  static SdBottomSheetExitV3 of(BuildContext context) =>
+      context
+          .dependOnInheritedWidgetOfExactType<_SdBottomSheetExitScopeV3>()
+          ?.exit ??
+      SdBottomSheetExitV3.close;
+
+  @override
+  bool updateShouldNotify(_SdBottomSheetExitScopeV3 oldWidget) =>
+      oldWidget.exit != exit;
+}
+
 /// The chrome every bottom sheet in the app wears: a grab handle, a title,
 /// and the caller's content under it.
 ///
@@ -37,7 +77,12 @@ class SdBottomSheetV3 extends StatelessWidget {
   final String title;
 
   /// Already-localized tooltip and semantics label for the close button.
-  final String closeTooltip;
+  ///
+  /// **Null only for a sheet presented as [SdBottomSheetExitV3.blocked]**,
+  /// which draws no close button — asserted in [build], because the exit comes
+  /// from the presenter and is not known at construction. Every other sheet
+  /// still cannot ship without one.
+  final String? closeTooltip;
 
   final Widget child;
 
@@ -61,7 +106,19 @@ class SdBottomSheetV3 extends StatelessWidget {
   static double get handleHeight => SdSpacingConstant.h4;
 
   @override
-  Widget build(BuildContext context) => SdKeyboardDismissV3(
+  Widget build(BuildContext context) {
+    final SdBottomSheetExitV3 exit = _SdBottomSheetExitScopeV3.of(context);
+    final bool blocked = exit == SdBottomSheetExitV3.blocked;
+
+    assert(
+      blocked || closeTooltip != null,
+      'A dismissable sheet needs a close tooltip.',
+    );
+
+    return PopScope(canPop: !blocked, child: _chrome(context, blocked));
+  }
+
+  Widget _chrome(BuildContext context, bool blocked) => SdKeyboardDismissV3(
     child: SizedBox(
       height: heightFactor == null
           ? null
@@ -91,19 +148,23 @@ class SdBottomSheetV3 extends StatelessWidget {
               : MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Center(
-              child: ExcludeSemantics(
-                child: Container(
-                  width: handleWidth,
-                  height: handleHeight,
-                  decoration: BoxDecoration(
-                    color: context.sdTheme3.border,
-                    borderRadius: SdRadiusV3.fullAll,
+            // The handle says "drag me", so a sheet nothing dismisses does not
+            // draw one.
+            if (!blocked) ...<Widget>[
+              Center(
+                child: ExcludeSemantics(
+                  child: Container(
+                    width: handleWidth,
+                    height: handleHeight,
+                    decoration: BoxDecoration(
+                      color: context.sdTheme3.border,
+                      borderRadius: SdRadiusV3.fullAll,
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: SdSpacingConstant.h16),
+              SizedBox(height: SdSpacingConstant.h16),
+            ],
             Row(
               children: <Widget>[
                 Expanded(
@@ -114,11 +175,12 @@ class SdBottomSheetV3 extends StatelessWidget {
                     ),
                   ),
                 ),
-                SdAppBarActionButtonV3(
-                  icon: Symbols.close_rounded,
-                  tooltip: closeTooltip,
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
+                if (!blocked)
+                  SdAppBarActionButtonV3(
+                    icon: Symbols.close_rounded,
+                    tooltip: closeTooltip!,
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
               ],
             ),
             SizedBox(height: SdSpacingConstant.h16),
@@ -139,14 +201,31 @@ class SdBottomSheetV3 extends StatelessWidget {
 /// shell branch's own navigator slides *under* the floating glass tab bar,
 /// which reads as a rendering bug and puts the sheet's first action beneath
 /// it.
+///
+/// **[exit] is set here and nowhere else.** It reaches the sheet through an
+/// inherited scope, so the route's dismissability and the chrome's close
+/// button cannot disagree — see [_SdBottomSheetExitScopeV3].
 Future<T?> showSdBottomSheetV3<T>({
   required BuildContext context,
   required WidgetBuilder builder,
-}) => showModalBottomSheet<T>(
-  context: context,
-  useRootNavigator: true,
-  isScrollControlled: true,
-  backgroundColor: Colors.transparent,
-  barrierColor: context.sdTheme3.barrier,
-  builder: builder,
-);
+  SdBottomSheetExitV3 exit = SdBottomSheetExitV3.close,
+}) {
+  final bool dismissable = exit == SdBottomSheetExitV3.close;
+
+  return showModalBottomSheet<T>(
+    context: context,
+    useRootNavigator: true,
+    isScrollControlled: true,
+    isDismissible: dismissable,
+    enableDrag: dismissable,
+    backgroundColor: Colors.transparent,
+    barrierColor: context.sdTheme3.barrier,
+    // `Builder` so the sheet is built *below* the scope: passing
+    // `builder(context)` directly would construct it with the context above,
+    // where the scope is not visible.
+    builder: (BuildContext sheetContext) => _SdBottomSheetExitScopeV3(
+      exit: exit,
+      child: Builder(builder: builder),
+    ),
+  );
+}
