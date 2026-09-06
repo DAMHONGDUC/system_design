@@ -68,29 +68,44 @@ class _DeviceScoped implements SdDeviceScopedStore {
   }
 }
 
+/// A host that records the vendor calls instead of making them.
+class _Host implements SdFreshInstallHost {
+  _Host({this.isBackendReady = true});
+
+  final List<String> calls = <String>[];
+
+  @override
+  final bool isBackendReady;
+
+  @override
+  Future<void> signOut() async => calls.add('signOut');
+
+  @override
+  Future<void> clearCache() async => calls.add('clearCache');
+}
+
 const String _logTag = 'Fresh Install';
 const String _stamp = SdFreshInstall.defaultStampKey;
 
 void main() {
-  late List<String> wiped;
+  late _Host host;
 
   setUp(() {
     SdLogger.enabled = false;
-    wiped = <String>[];
+    host = _Host();
   });
 
   Future<SdFreshInstallOutcome> run({
     required String buildStamp,
     required _InstallScoped installScoped,
     _DeviceScoped? deviceScoped,
+    _Host? withHost,
   }) => SdFreshInstall.run(
     logTag: _logTag,
     buildStamp: buildStamp,
     installScoped: installScoped,
     deviceScoped: deviceScoped,
-    wipe: <SdDeviceWipeStep>[
-      SdDeviceWipeStep(name: 'Sign out', run: () async => wiped.add('signOut')),
-    ],
+    host: withHost ?? host,
   );
 
   group('what a launch is', () {
@@ -104,7 +119,7 @@ void main() {
         await run(buildStamp: 'dev', installScoped: store),
         SdFreshInstallOutcome.normalLaunch,
       );
-      expect(wiped, isEmpty);
+      expect(host.calls, isEmpty);
       expect(store.values['theme'], 'dark');
     });
 
@@ -118,7 +133,7 @@ void main() {
         await run(buildStamp: 'prod', installScoped: store),
         SdFreshInstallOutcome.environmentChanged,
       );
-      expect(wiped, <String>['signOut']);
+      expect(host.calls, <String>['signOut', 'clearCache']);
       expect(store.cleared, isTrue);
       // The stamp is written after the wipe, never before.
       expect(store.values, <String, Object>{_stamp: 'prod'});
@@ -135,7 +150,7 @@ void main() {
         ),
         SdFreshInstallOutcome.firstInstall,
       );
-      expect(wiped, isEmpty);
+      expect(host.calls, isEmpty);
       expect(store.values[_stamp], 'dev');
     });
 
@@ -152,7 +167,7 @@ void main() {
         ),
         SdFreshInstallOutcome.reinstall,
       );
-      expect(wiped, <String>['signOut']);
+      expect(host.calls, <String>['signOut', 'clearCache']);
       expect(keychain.cleared, isTrue);
     });
 
@@ -163,7 +178,7 @@ void main() {
         await run(buildStamp: 'dev', installScoped: _InstallScoped()),
         SdFreshInstallOutcome.firstInstall,
       );
-      expect(wiped, isEmpty);
+      expect(host.calls, isEmpty);
     });
   });
 
@@ -185,7 +200,7 @@ void main() {
         ),
         SdFreshInstallOutcome.update,
       );
-      expect(wiped, isEmpty);
+      expect(host.calls, isEmpty);
       expect(store.cleared, isFalse);
       expect(store.values[_stamp], 'dev');
     });
@@ -223,13 +238,27 @@ void main() {
     });
   });
 
+  test('a host with no backend skips the vendor calls, not the wipe', () async {
+    // A build with no backend configured never initialised one, so reaching
+    // for it would throw — but the stores still have to go.
+    final _Host offline = _Host(isBackendReady: false);
+    final _InstallScoped store = _InstallScoped(<String, Object>{
+      _stamp: 'dev',
+    });
+
+    await run(buildStamp: 'prod', installScoped: store, withHost: offline);
+
+    expect(offline.calls, isEmpty);
+    expect(store.cleared, isTrue);
+  });
+
   test('a store that throws still starts the app, unstamped', () async {
     expect(
       await SdFreshInstall.run(
         logTag: _logTag,
         buildStamp: 'dev',
         installScoped: _ThrowingStore(),
-        wipe: const <SdDeviceWipeStep>[],
+        host: _Host(),
       ),
       SdFreshInstallOutcome.normalLaunch,
     );

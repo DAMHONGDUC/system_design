@@ -43,6 +43,31 @@ abstract interface class SdDeviceScopedStore {
   Future<void> deleteAll();
 }
 
+/// The vendor calls a wipe is made of, supplied by the host.
+///
+/// **This is the contract half, and it is the whole point of it being here.**
+/// Every app of ours wipes the same way — drop the session, drop the cached
+/// documents, empty the stores — but the SDKs that do it are the host's, and
+/// this package imports none of them (`WIDGET_RULES.md`, "no vendor SDK,
+/// ever"). So the *shape and the order* live here, where a second app inherits
+/// them, and only the two calls are written per app. Same split as
+/// [SdCrashReporter]: the contract ships, the vendor does not.
+abstract interface class SdFreshInstallHost {
+  /// Whether the backend SDKs are up at all.
+  ///
+  /// False skips [signOut] and [clearCache] rather than guarding them at the
+  /// call site — a build with no backend configured never initialised one, and
+  /// reaching for it throws.
+  bool get isBackendReady;
+
+  /// End the session, everywhere it is held. A host with two sign-ins to make
+  /// makes both here.
+  Future<void> signOut();
+
+  /// Drop whatever the backend cached on this device.
+  Future<void> clearCache();
+}
+
 /// What [SdFreshInstall.run] found, and therefore what it did.
 enum SdFreshInstallOutcome {
   /// The stamp matches this build. Nothing to do, and the common case.
@@ -111,10 +136,8 @@ final class SdFreshInstall {
   /// Decide what this device is, act on it, and say which it was.
   ///
   /// [buildStamp] is what this binary is — `dev`, `staging`, `prod` — compared
-  /// verbatim against what the last launch recorded. [wipe] is what a wipe
-  /// does here: the host's own vendor calls, in the order they must run.
-  /// Emptying the stores is appended to that list, so the stamp is never
-  /// cleared before the work that depends on it.
+  /// verbatim against what the last launch recorded. [host] makes the vendor
+  /// calls; the order they run in is decided here, not there.
   ///
   /// **The stamp is written last.** A wipe clears the store the stamp lives
   /// in, so writing first would leave the device claiming an environment whose
@@ -124,7 +147,7 @@ final class SdFreshInstall {
     required String logTag,
     required String buildStamp,
     required SdInstallScopedStore installScoped,
-    required List<SdDeviceWipeStep> wipe,
+    required SdFreshInstallHost host,
     SdDeviceScopedStore? deviceScoped,
     String stampKey = defaultStampKey,
   }) async {
@@ -148,7 +171,7 @@ final class SdFreshInstall {
         buildStamp,
         installScoped,
         deviceScoped,
-        wipe,
+        host,
         stampKey,
       );
 
@@ -209,7 +232,7 @@ final class SdFreshInstall {
     String buildStamp,
     SdInstallScopedStore installScoped,
     SdDeviceScopedStore? deviceScoped,
-    List<SdDeviceWipeStep> wipe,
+    SdFreshInstallHost host,
     String stampKey,
   ) async {
     switch (outcome) {
@@ -220,7 +243,7 @@ final class SdFreshInstall {
         await SdDeviceWipe.run(
           logTag: logTag,
           reason: outcome.name,
-          steps: _stepsWithStores(wipe, installScoped, deviceScoped),
+          steps: _steps(host, installScoped, deviceScoped),
         );
       case SdFreshInstallOutcome.update:
         await _adopt(logTag, installScoped, deviceScoped, stampKey);
@@ -231,18 +254,30 @@ final class SdFreshInstall {
     await installScoped.setString(stampKey, buildStamp);
   }
 
-  /// The host's steps, then the stores — in that order, because a step that
-  /// reads a preference must run before the preferences go.
+  /// The whole wipe, in the order it has to run.
   ///
-  /// The device-scoped clear halts the wipe if it fails: it is the only thing
-  /// a reinstall has to remove, so leaving the stamp unwritten and trying
-  /// again next launch beats recording a wipe that did not happen.
-  static List<SdDeviceWipeStep> _stepsWithStores(
-    List<SdDeviceWipeStep> steps,
+  /// **Session first, then the caches, then the stores.** Signing out while a
+  /// database client is still writing is how a wipe races itself, and a step
+  /// that reads a preference has to run before the preferences go.
+  ///
+  /// The device-scoped clear halts the wipe if it fails: on a reinstall it is
+  /// the only thing there is to remove, so leaving the stamp unwritten and
+  /// trying again next launch beats recording a wipe that did not happen.
+  static List<SdDeviceWipeStep> _steps(
+    SdFreshInstallHost host,
     SdInstallScopedStore installScoped,
     SdDeviceScopedStore? deviceScoped,
   ) => <SdDeviceWipeStep>[
-    ...steps,
+    SdDeviceWipeStep(
+      name: 'Sign out',
+      when: () => host.isBackendReady,
+      run: host.signOut,
+    ),
+    SdDeviceWipeStep(
+      name: 'Clear the backend cache',
+      when: () => host.isBackendReady,
+      run: host.clearCache,
+    ),
     if (deviceScoped != null)
       SdDeviceWipeStep(
         name: 'Clear the device-scoped store',
