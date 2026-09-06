@@ -18,8 +18,23 @@ main() {
   TARGET="${1:-}"
   case "$TARGET" in
     dev | prod) ;;
-    *) fail "usage: release.sh <dev|prod>" ;;
+    *) fail "usage: release.sh <dev|prod> [release note]" ;;
   esac
+
+  # Every build reaches TestFlight with a note on it, and the free text is one
+  # optional argument. It travels as an environment variable, never as a
+  # fastlane argument: spaces would split into extra arguments and a backtick
+  # would run.
+  RELEASE_NOTES="${2:-${RELEASE_NOTES:-}}"
+  export RELEASE_NOTES
+
+  # The fallback is composed by the lane, not here: the build number is settled
+  # inside it, so a note written now would name the previous build.
+  if [ -n "$RELEASE_NOTES" ]; then
+    info "release note: $RELEASE_NOTES"
+  else
+    info "no note given — the lane attaches \"$TARGET - <version> (<build>)\""
+  fi
 
   # Here rather than 25 minutes in, with the config installed and the backend already deployed.
   command -v bundle >/dev/null 2>&1 || fail "bundler not found — cd ios && bundle install"
