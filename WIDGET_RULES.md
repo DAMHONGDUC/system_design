@@ -91,8 +91,8 @@ cheaper than the coupling.
 
 Everything above is about rendering. `core/common/` is the one place in this
 package that is not: it holds the plumbing every app of ours stands up
-identically — `SdLogger`, the `SdCrashReporter` contract and
-`SdReinstallGuard` today.
+identically — `SdLogger`, the `SdCrashReporter` contract, `SdReinstallGuard`
+and `SdFreshInstall` today.
 
 `SdReinstallGuard` is the one that was called `SdFreshInstallGuard` and is not
 any more. The name now belongs to a different class entirely: `SdFreshInstallGuard`
@@ -100,6 +100,15 @@ is a **widget** that wipes a device when the build's environment moves, and a
 widget cannot live in a folder whose first rule is no Flutter. It sits in
 `core/sd_fresh_install_guard/` and ships from `index.dart`. Two unrelated
 guards, two folders, two entrypoints — which is what the rename bought.
+
+`SdFreshInstall` is that widget's other half, and it is common rather than a
+widget's: `SdFreshInstallGuard` decides *whether* the environment moved, and
+`SdFreshInstall` runs the wipe that follows. Reading and recording the env
+name go through `SdFreshInstallStore`, the cleanups arrive as an ordered list
+of `SdFreshInstallStep`, and the store is cleared last — so the host supplies
+only its plugin and its vendor calls, exactly as `SdReinstallGuard` takes its
+two stores and a `signOut`. `SdFreshInstallPolicy` lives here with it, since
+three function fields need no Flutter and the widget is what imports them.
 
 - **Pure Dart, no Flutter, ever.** It is exported from `common.dart`, a second
   entrypoint next to `index.dart`, precisely so a feature's `domain/` can log
@@ -134,6 +143,7 @@ lib/
       sd_logger.dart          # app infrastructure, not rendering
       sd_crash_reporter.dart  # the contract only — never a vendor SDK
       sd_reinstall_guard.dart      # reinstall = first install, over two app-supplied stores
+      sd_fresh_install.dart        # the wipe a flavour change runs, over an app-supplied store
   v2/
     index.dart                # exports every folder below
     sd_banner_v2/
