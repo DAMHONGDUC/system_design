@@ -1,3 +1,4 @@
+import 'sd_device_wipe.dart';
 import 'sd_logger.dart';
 
 /// The store the OS deletes along with the app — `shared_preferences` on iOS.
@@ -96,29 +97,26 @@ final class SdReinstallGuard {
   }
 
   /// A reinstall: the device-scoped store is all that survived, so it is all there is to clear. The session is the auth SDK's own item rather than ours, and signing out is the only way to reach it — the caller opens a fresh one right after.
+  ///
+  /// **The wipe is [SdDeviceWipe], the same one an environment change runs.** What differs between the two is how they were detected, never what they then do.
+  ///
+  /// The session is best-effort — it is the half the user can see, and a device-scoped wipe that fails must not be what stops it — while the store clear halts, so a failure leaves the marker unwritten and the next launch tries again rather than trusting a store that is still full.
   static Future<void> _purge(
     String logTag,
     SdDeviceScopedStore deviceScoped,
     Future<void> Function() signOut,
-  ) async {
-    // The session first, and in its own try: it is the half the user can see, and a device-scoped wipe that fails must not be what stops it.
-    try {
-      await signOut();
-      SdLogger.info(logTag, 'Reinstall: signed out');
-    } catch (error, stackTrace) {
-      SdLogger.error(
-        logTag,
-        'Reinstall: sign-out failed',
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-    await deviceScoped.deleteAll();
-    SdLogger.info(
-      logTag,
-      'Reinstall: device-scoped store cleared and the session signed out',
-    );
-  }
+  ) => SdDeviceWipe.run(
+    logTag: logTag,
+    reason: 'Reinstall',
+    steps: <SdDeviceWipeStep>[
+      SdDeviceWipeStep(name: 'Sign out', run: signOut),
+      SdDeviceWipeStep(
+        name: 'Clear the device-scoped store',
+        run: deviceScoped.deleteAll,
+        onFailure: SdDeviceWipeFailure.halt,
+      ),
+    ],
+  );
 
   /// An update from a build that kept its settings in the install-scoped store: the same values, moved into the store that now owns them. Idempotent, because a crash before the marker is written repeats it.
   static Future<void> _adopt(

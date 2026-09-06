@@ -1,3 +1,4 @@
+import 'sd_device_wipe.dart';
 import 'sd_logger.dart';
 
 /// The key-value store the environment record lives in — `shared_preferences`
@@ -14,24 +15,6 @@ abstract interface class SdFreshInstallStore {
   /// Everything, including the environment record itself — a fresh install has
   /// no preferences, and that is what this is pretending to be.
   Future<void> clear();
-}
-
-/// One named step of a wipe.
-///
-/// The name is what the log line says, so it reads as the sentence a person
-/// would write: `Sign out`, `Clear Firestore cache`.
-class SdFreshInstallStep {
-  const SdFreshInstallStep({required this.name, required this.run, this.when});
-
-  /// What this step is, for the log.
-  final String name;
-
-  /// The work itself. A throw is caught and logged, never rethrown.
-  final Future<void> Function() run;
-
-  /// Whether the step applies to this launch — a build with no Firebase has
-  /// nothing to sign out of. Absent means always.
-  final bool Function()? when;
 }
 
 /// Everything [SdFreshInstall] cannot do for itself.
@@ -68,11 +51,12 @@ class SdFreshInstallPolicy {
 /// supplies only the vendor calls its own wipe needs.
 ///
 /// The shape was written twice before it moved here: read one string, write
-/// one string, and run an ordered list of cleanups where a failure in any of
-/// them must not take the launch with it. What differs per app is the plugin
+/// one string, and wipe when they differ. What differs per app is the plugin
 /// behind the store and which SDKs have a session to drop — those arrive as
-/// [SdFreshInstallStore] and [SdFreshInstallStep], the same way
-/// [SdReinstallGuard] takes its two stores.
+/// [SdFreshInstallStore] and [SdDeviceWipeStep].
+///
+/// **The wipe itself is [SdDeviceWipe] and is not written here.**
+/// [SdReinstallGuard] runs the same one for a different reason.
 ///
 /// **The store is cleared last, after every step, and that is not
 /// configurable.** It holds the environment record, so clearing it first would
@@ -80,11 +64,6 @@ class SdFreshInstallPolicy {
 /// `SdFreshInstallGuard` writes the record only once the whole wipe returns,
 /// so a wipe interrupted half way is repeated on the next launch rather than
 /// skipped.
-///
-/// **Nothing here throws.** The wipe runs before the app's first frame, where
-/// an uncaught throw is not an error screen but an app that never starts — and
-/// a device that lost its cache but kept its session is a worse state than one
-/// where both went.
 final class SdFreshInstall {
   const SdFreshInstall._();
 
@@ -95,7 +74,7 @@ final class SdFreshInstall {
     required String logTag,
     required String envKey,
     required SdFreshInstallStore store,
-    required List<SdFreshInstallStep> steps,
+    required List<SdDeviceWipeStep> steps,
   }) => SdFreshInstallPolicy(
     readLastEnv: () => _readLastEnv(logTag, envKey, store),
     writeEnv: (String envName) => _writeEnv(logTag, envKey, store, envName),
@@ -152,67 +131,15 @@ final class SdFreshInstall {
   static Future<void> _wipe(
     String logTag,
     SdFreshInstallStore store,
-    List<SdFreshInstallStep> steps,
+    List<SdDeviceWipeStep> steps,
     String? previous,
     String current,
-  ) async {
-    SdLogger.action(
-      logTag,
-      'Wipe device for environment change',
-      <String, String>{'previous': previous ?? '—', 'current': current},
-    );
-
-    for (final SdFreshInstallStep step in steps) {
-      await _runStep(logTag, step);
-    }
-
-    await _clearStore(logTag, store);
-  }
-
-  /// Each step guards itself, so the one that fails does not cost the app the
-  /// ones after it.
-  static Future<void> _runStep(String logTag, SdFreshInstallStep step) async {
-    final bool Function()? when = step.when;
-
-    if (when != null && !when()) {
-      SdLogger.info(logTag, 'Wipe step skipped', <String, String>{
-        'step': step.name,
-      });
-
-      return;
-    }
-    try {
-      await step.run();
-
-      SdLogger.info(logTag, 'Wipe step done', <String, String>{
-        'step': step.name,
-      });
-    } catch (error, stackTrace) {
-      SdLogger.error(
-        logTag,
-        'Wipe step failed',
-        error: error,
-        stackTrace: stackTrace,
-        data: <String, String>{'step': step.name},
-      );
-    }
-  }
-
-  static Future<void> _clearStore(
-    String logTag,
-    SdFreshInstallStore store,
-  ) async {
-    try {
-      await store.clear();
-
-      SdLogger.info(logTag, 'Store cleared');
-    } catch (error, stackTrace) {
-      SdLogger.error(
-        logTag,
-        'Could not clear the store',
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
-  }
+  ) => SdDeviceWipe.run(
+    logTag: logTag,
+    reason: 'Environment changed from ${previous ?? '—'} to $current',
+    steps: <SdDeviceWipeStep>[
+      ...steps,
+      SdDeviceWipeStep(name: 'Clear the store', run: store.clear),
+    ],
+  );
 }

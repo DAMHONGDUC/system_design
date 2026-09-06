@@ -37,7 +37,7 @@ const String _envKey = 'last_env';
 
 SdFreshInstallPolicy _policy(
   _RecordingStore store, {
-  List<SdFreshInstallStep> steps = const <SdFreshInstallStep>[],
+  List<SdDeviceWipeStep> steps = const <SdDeviceWipeStep>[],
 }) => SdFreshInstall.policy(
   logTag: _logTag,
   envKey: _envKey,
@@ -77,12 +77,12 @@ void main() {
 
       await _policy(
         store,
-        steps: <SdFreshInstallStep>[
-          SdFreshInstallStep(
+        steps: <SdDeviceWipeStep>[
+          SdDeviceWipeStep(
             name: 'first',
             run: () async => ran.add('first'),
           ),
-          SdFreshInstallStep(
+          SdDeviceWipeStep(
             name: 'second',
             run: () async => ran.add('second'),
           ),
@@ -100,12 +100,12 @@ void main() {
 
       await _policy(
         store,
-        steps: <SdFreshInstallStep>[
-          SdFreshInstallStep(
+        steps: <SdDeviceWipeStep>[
+          SdDeviceWipeStep(
             name: 'throws',
             run: () async => throw StateError('no Firebase app'),
           ),
-          SdFreshInstallStep(name: 'after', run: () async => ran.add('after')),
+          SdDeviceWipeStep(name: 'after', run: () async => ran.add('after')),
         ],
       ).wipe(null, 'prod');
 
@@ -119,8 +119,8 @@ void main() {
 
       await _policy(
         store,
-        steps: <SdFreshInstallStep>[
-          SdFreshInstallStep(
+        steps: <SdDeviceWipeStep>[
+          SdDeviceWipeStep(
             name: 'skipped',
             when: () => false,
             run: () async => ran.add('skipped'),
