@@ -92,7 +92,8 @@ cheaper than the coupling.
 Everything above is about rendering. `core/common/` is the one place in this
 package that is not: it holds the plumbing every app of ours stands up
 identically — `SdLogger`, the `SdCrashReporter` contract, `SdFreshInstall` and
-`SdDeviceWipe` today.
+`SdDeviceWipe` today. `SdBootstrap` is the same idea one folder out, in
+`core/sd_bootstrap/`, because it calls `runApp`.
 
 **`SdFreshInstall` is one class, and it used to be three.** Owner's rule. A
 reinstall guard, an environment guard and a widget holding the first frame all
@@ -120,11 +121,16 @@ stamp absent, nothing anywhere .............. first install
   opposite, which is why the stamp lives there. A host with nothing that
   survives a delete passes no `SdDeviceScopedStore` and the reinstall row
   cannot fire.
-- **There is no widget, and there must not be one again.** The host awaits it
-  before `runApp`. It signs out and clears a database cache, and Firestore's
-  `clearPersistence` throws `failed-precondition` once its client is running —
-  so the work has to finish before the first screen can read, which a widget
-  in the tree cannot promise.
+- **The vendor calls arrive as `SdFreshInstallHost`**, an interface with three
+  members: `isBackendReady`, `signOut`, `clearCache`. The *shape and the order*
+  of a wipe are here, where a second app inherits them; only the two SDK calls
+  are written per app. Same split as `SdCrashReporter`.
+- **The host decides where it runs, and both places are wrong in one way.**
+  Before `runApp` the only thing on screen is the platform launch image, so a
+  wipe that takes a second looks like a hang; inside the widget tree it has to
+  sit above everything that opens a backend stream, or the client it must
+  terminate is already running. Reseller Studio takes the second and puts a
+  gate above its own splash screen.
 - **`SdDeviceWipe` is the wipe, and it is written once.** The steps are the
   host's — signing out, clearing a cache — because this package imports no
   storage plugin and no Firebase SDK. Each step is guarded on its own: a wipe
@@ -152,6 +158,25 @@ stamp absent, nothing anywhere .............. first install
 
 Anything with a look, a token or a `BuildContext` is not common — it is a
 generation's, and it goes in `v2/` or `v3/`.
+
+### `SdBootstrap` is startup, and it is the contract half too
+
+Owner's rule. Bringing up a crash reporter, an auth SDK and a billing SDK is
+the same shape in every app of ours — an ordered list of independent steps,
+each of which must be allowed to fail without taking the launch with it — so
+the ordering, the guarding, the logging and the three framework error hooks
+live here and the SDKs arrive as `SdBootstrapStep`s.
+
+- **It is in `core/sd_bootstrap/`, not `core/common/`**, because `runApp`,
+  `FlutterError` and `WidgetsFlutterBinding` are Flutter. Everything else about
+  it follows the common rules: no vendor SDK, additive only.
+- **Three error channels, and missing one hides a whole class of crash** —
+  `FlutterError.onError`, `PlatformDispatcher.instance.onError`, and the
+  guarded zone. Every app was writing all three by hand.
+- **No step can refuse to start the app, and there is no flag to add one.** It
+  could not be built anyway: the guarded zone catches whatever a step rethrows,
+  so a `halt` would read as working while `runApp` was silently skipped. A step
+  whose absence makes the app useless says so on screen, from inside the app.
 
 ## 3. Layout
 
