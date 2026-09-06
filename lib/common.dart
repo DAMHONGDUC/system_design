@@ -14,5 +14,6 @@
 library;
 
 export 'core/common/sd_crash_reporter.dart';
+export 'core/common/sd_fresh_install.dart';
 export 'core/common/sd_logger.dart';
 export 'core/common/sd_reinstall_guard.dart';

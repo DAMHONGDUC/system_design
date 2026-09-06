@@ -2,9 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
+import '../common/sd_fresh_install.dart';
 import '../common/sd_logger.dart';
-
-part 'sd_fresh_install_policy.dart';
 
 /// Holds the app back until it is known that the data on this device belongs
 /// to the environment this binary talks to.
