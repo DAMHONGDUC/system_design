@@ -91,8 +91,8 @@ cheaper than the coupling.
 
 Everything above is about rendering. `core/common/` is the one place in this
 package that is not: it holds the plumbing every app of ours stands up
-identically — `SdLogger`, the `SdCrashReporter` contract, `SdReinstallGuard`
-and `SdFreshInstall` today.
+identically — `SdLogger`, the `SdCrashReporter` contract, `SdReinstallGuard`,
+`SdFreshInstall` and `SdDeviceWipe` today.
 
 `SdReinstallGuard` is the one that was called `SdFreshInstallGuard` and is not
 any more. The name now belongs to a different class entirely: `SdFreshInstallGuard`
@@ -103,12 +103,32 @@ guards, two folders, two entrypoints — which is what the rename bought.
 
 `SdFreshInstall` is that widget's other half, and it is common rather than a
 widget's: `SdFreshInstallGuard` decides *whether* the environment moved, and
-`SdFreshInstall` runs the wipe that follows. Reading and recording the env
-name go through `SdFreshInstallStore`, the cleanups arrive as an ordered list
-of `SdFreshInstallStep`, and the store is cleared last — so the host supplies
-only its plugin and its vendor calls, exactly as `SdReinstallGuard` takes its
-two stores and a `signOut`. `SdFreshInstallPolicy` lives here with it, since
-three function fields need no Flutter and the widget is what imports them.
+`SdFreshInstall` records the env name and asks for the wipe that follows.
+Reading and recording go through `SdFreshInstallStore`, so the host supplies
+only its plugin, exactly as `SdReinstallGuard` takes its two stores and a
+`signOut`. `SdFreshInstallPolicy` lives here with it, since three function
+fields need no Flutter and the widget is what imports them.
+
+**`SdDeviceWipe` is the wipe, and it is written once.** Owner's rule. Two
+guards here reach it — `SdReinstallGuard` when the app was deleted and
+installed again, `SdFreshInstall` when the build now talks to a different
+environment — and they detect completely different things but then do the
+same list of vendor calls in the same order. It was written twice and drifted
+twice.
+
+- **The steps are the host's.** Signing out, clearing a cache and emptying a
+  store all arrive as `SdDeviceWipeStep`s, because this package imports no
+  storage plugin and no Firebase SDK. Each carries its own name for the log
+  and an optional `when`, so a build with no Firebase skips the sign-out
+  rather than guarding it at the call site.
+- **Each step is guarded on its own.** A wipe runs after something has already
+  gone wrong and before the app's first frame, where a throw is not an error
+  screen but an app that never starts — and a device that lost its cache but
+  kept its session is a worse state than one where both went.
+- **`SdDeviceWipeFailure.halt` is the exception**, for a step the rest of the
+  wipe means nothing without: it rethrows, so the caller does not record the
+  wipe as done and the next launch tries again. `SdReinstallGuard` marks its
+  device-scoped clear that way and nothing else does.
 
 - **Pure Dart, no Flutter, ever.** It is exported from `common.dart`, a second
   entrypoint next to `index.dart`, precisely so a feature's `domain/` can log
