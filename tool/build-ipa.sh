@@ -57,29 +57,52 @@ if has_firebase; then
   [ -f "$GSP" ] || fail "$GSP is missing — download it from the Firebase console"
 fi
 
-# Xcode resolves every Swift package from GitHub at the start of the archive,
-# and an unreachable github.com fails ~40 seconds in as `Couldn't fetch updates
-# from remote repositories:` with the reason cut off — flutter drops
-# xcodebuild's detail line, so the one fact that explains it never prints.
-# Named here instead, in a second, before anything long starts.
+# `flutter build ipa` resolves the Swift package graph before it archives, and
+# it runs that step deliberately WITHOUT `-skipPackageUpdates` — so every
+# archive contacts github to re-check the version-ranged remotes, populated
+# cache or not. It also drops that step's stdout, so an unreachable github
+# surfaces ~40 seconds in as `Couldn't fetch updates from remote repositories:`
+# with the reason cut off.
 #
-# Three attempts, because the failure this catches is usually not a clean one:
-# where GitHub is filtered rather than blocked the TCP connect succeeds every
-# time and the TLS handshake hangs on some attempts and not others, so a
-# single probe reports whichever one it happened to get.
+# The same command is run here first, for two reasons: the reason survives, and
+# a resolve that succeeds here leaves flutter's nothing to fetch. Four
+# attempts, because this failure is rarely a clean one — where github is
+# filtered rather than blocked the connect times out on some attempts and not
+# others, so a single probe reports whichever one it happened to get.
 SPM_PINS="ios/Runner.xcworkspace/xcshareddata/swiftpm/Package.resolved"
-if [ -f "$SPM_PINS" ] && command -v curl >/dev/null 2>&1; then
-  GITHUB_UP=0
-  for _ in 1 2 3; do
-    if curl -s -o /dev/null --max-time 8 https://github.com/; then
-      GITHUB_UP=1
+if [ -f "$SPM_PINS" ]; then
+  # Flutter clones into <build dir>/SourcePackages and hands the archive the
+  # same -clonedSourcePackagesDirPath. Warming any other directory would leave
+  # its own resolve with nothing on disk to reuse.
+  SPM_CLONE_DIR="$PWD/build/ios/SourcePackages"
+  SPM_LOG=$(mktemp)
+  SPM_OK=0
+
+  # No -workspace and no -scheme, exactly as flutter runs it: naming a scheme
+  # here would resolve a different graph from the one the archive uses.
+  for _ in 1 2 3 4; do
+    if (
+      cd ios &&
+        xcrun xcodebuild -resolvePackageDependencies \
+          -clonedSourcePackagesDirPath "$SPM_CLONE_DIR"
+    ) >"$SPM_LOG" 2>&1; then
+      SPM_OK=1
       break
     fi
   done
 
-  if [ "$GITHUB_UP" -eq 0 ]; then
-    fail "github.com did not answer in three tries, and Swift Package Manager resolves every dependency from it — the archive would die 40 seconds in with no reason attached. Connect to a VPN and run this again."
+  if [ "$SPM_OK" -eq 0 ]; then
+    # xcodebuild names the host and the timeout on these lines and flutter
+    # throws them away — they are the whole point of resolving here.
+    grep -E 'fatal:|error:|Couldn' "$SPM_LOG" | while IFS= read -r spm_line; do
+      item "$spm_line"
+    done
+    rm -f "$SPM_LOG"
+    fail "swift package resolution failed four times, and every remote package comes from github.com — the archive would die 40 seconds in with the reason cut off. Connect to a VPN and run this again."
   fi
+
+  rm -f "$SPM_LOG"
+  info "swift packages: resolved into $SPM_CLONE_DIR"
 fi
 
 # Both environments write to the same folder under the same filename, so a stale IPA from the other one is indistinguishable from this build's.
