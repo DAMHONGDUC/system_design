@@ -94,6 +94,15 @@ fail() {
 # True when the app owns a Firebase backend. `.firebaserc` is the file the CLI reads its project aliases out of, so an app without one has no rules, no functions and no flavored GoogleService plist to keep in step — these tools are shared with apps that ship no Firebase at all, and there a missing plist fails a release that was never going to reach Firebase.
 has_firebase() { [ -f .firebaserc ]; }
 
+# The checked-in template that DECLARES this app carries dart-define config for flavor $1, or nothing when it carries none. Two names are accepted because two shapes exist: `env/<flavor>.example.json` where the flavours list different keys, and one `env/env.example.json` where they list the same keys with different values — and the app that keeps the shared one is not an app that compiles its config in. Getting that wrong is silent: the build simply drops `--dart-define-from-file` and ships an IPA whose Firebase config is empty, which crashes on the first `FirebaseAuth.instance` naming nothing to do with the missing flag.
+env_template() {
+  if [ -f "env/$1.example.json" ]; then
+    printf '%s' "env/$1.example.json"
+  elif [ -f "env/env.example.json" ]; then
+    printf '%s' "env/env.example.json"
+  fi
+}
+
 # True when the app declares $1 in its pubspec.yaml, under any section. Codegen is a choice an app makes, and these scripts are shared with apps that made it the other way: no `build_runner` there means there is nothing to generate, and running it anyway fails with "could not find package build_runner", which reads as a broken checkout rather than as a step that does not apply.
 has_dep() { grep -q "^[[:space:]]*$1:" pubspec.yaml; }
 

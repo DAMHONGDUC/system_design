@@ -40,8 +40,11 @@ fi
 step "env config"
 MISSING=""
 for f in dev prod; do
-  if [ ! -f "env/$f.json" ]; then
-    cp "env/$f.example.json" "env/$f.json"
+  TEMPLATE=$(env_template "$f")
+  if [ -z "$TEMPLATE" ]; then
+    info "no template for $f — this app compiles its config in, nothing to lay down"
+  elif [ ! -f "env/$f.json" ]; then
+    cp "$TEMPLATE" "env/$f.json"
     MISSING="$MISSING env/$f.json"
   fi
 done
