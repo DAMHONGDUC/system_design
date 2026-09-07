@@ -1,0 +1,45 @@
+# Shared by every app embedding this design system. Imported, never copied:
+#
+#   import "../../packages/system_design/tool/fastlane/Fastfile"
+#
+# It owns the TestFlight note and nothing else. Everything an app knows about
+# itself — signing, flavours, build numbers — stays in that app's own Fastfile,
+# the same split `tool/release.sh` already makes.
+
+# The locale a build note is stored under. App Store Connect keeps one note per
+# locale, and this is the primary locale every app here ships with.
+SD_RELEASE_NOTE_LOCALE = "en-US"
+
+# `dev - 1.0.0 (20)` — the environment, the version name and the version
+# number, which together are everything the TestFlight list does not show.
+def sd_release_note(flavor, version, build_number)
+  "#{flavor} - #{version} (#{build_number})"
+end
+
+# Upload, always with a note. The caller's own text wins and an empty one falls
+# back to the composed default, so no build reaches TestFlight blank.
+#
+# The note travels as `localized_build_info`, never as `changelog`. Both reach
+# the same field, but `changelog` only PATCHES the build localizations that
+# already exist — and a build just uploaded has none, so the note is dropped
+# without a word. Naming the locale is what makes pilot create one.
+#
+# Waiting for processing is the price of the note: App Store Connect accepts
+# one only once the build has finished processing.
+def sd_upload_to_testflight(api_key:, ipa:, flavor:, version:, build_number:, notes: nil)
+  note = notes.to_s.strip
+  note = sd_release_note(flavor, version, build_number) if note.empty?
+
+  UI.message("TestFlight note: #{note}")
+
+  upload_to_testflight(
+    api_key: api_key,
+    ipa: ipa,
+    skip_waiting_for_build_processing: false,
+    localized_build_info: { SD_RELEASE_NOTE_LOCALE => { whats_new: note } },
+    distribute_external: false,
+    skip_submission: true
+  )
+
+  note
+end

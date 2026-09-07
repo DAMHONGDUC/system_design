@@ -24,6 +24,8 @@ step "upload $TARGET"
 for ipa in "$IPA_DIR"/*.ipa; do
   item "$ipa"
 done
-(cd ios && bundle exec fastlane upload flavor:"$TARGET" notes:"$TARGET")
+# No `notes:` — the lane composes "<env> - <version> (<build>)" itself, and the
+# flavour alone would have overwritten it with half the answer.
+(cd ios && bundle exec fastlane upload flavor:"$TARGET")
 
 done_msg "uploaded $TARGET to TestFlight"
