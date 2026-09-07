@@ -57,6 +57,18 @@ if has_firebase; then
   [ -f "$GSP" ] || fail "$GSP is missing — download it from the Firebase console"
 fi
 
+# Xcode resolves every Swift package from GitHub at the start of the archive,
+# and an unreachable github.com fails ~40 seconds in as `Couldn't fetch updates
+# from remote repositories:` with the reason cut off — flutter drops
+# xcodebuild's detail line, so the one fact that explains it never prints.
+# Named here instead, in a second, before anything long starts.
+SPM_PINS="ios/Runner.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+if [ -f "$SPM_PINS" ] && command -v curl >/dev/null 2>&1; then
+  if ! curl -sS -o /dev/null --max-time 10 https://github.com/; then
+    fail "github.com is unreachable, and Swift Package Manager resolves every dependency from it — the archive would die 40 seconds in with no reason attached. Connect to a VPN and run this again."
+  fi
+fi
+
 # Both environments write to the same folder under the same filename, so a stale IPA from the other one is indistinguishable from this build's.
 IPA_DIR="build/ios/ipa"
 rm -rf "$IPA_DIR"
