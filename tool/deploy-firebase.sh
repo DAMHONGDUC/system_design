@@ -45,6 +45,34 @@ if [ -n "$DEV_ID" ] && [ "$DEV_ID" = "$PROD_ID" ]; then
   warn "dev and prod are the SAME project — this reaches real users"
 fi
 
+# The CLI keeps ONE login for every repo on the machine, so a session opened
+# for another app's project is what this deploy runs as — and the way that
+# surfaces is `firebaserules.googleapis.com/...:test had HTTP Error: 403, The
+# caller does not have permission`, which names neither the account nor the
+# project. Asked here instead, where both names are known and nothing has been
+# sent yet.
+#
+# A failure to LIST is not a failure to deploy: CI authenticates with a service
+# account that frequently cannot enumerate projects at all, and refusing a
+# deploy over this probe would be worse than the 403 it replaces. So only a
+# list that succeeds and does not name the project counts as an answer.
+ACCOUNT=$("$FIREBASE" login:list 2>/dev/null | sed -n 's/^Logged in as //p' | head -1)
+if [ -n "$ACCOUNT" ]; then
+  info "account: $ACCOUNT"
+fi
+
+if VISIBLE_PROJECTS=$("$FIREBASE" projects:list --json 2>/dev/null); then
+  case "$VISIBLE_PROJECTS" in
+    *"\"$ENV_ID\""*) ;;
+    *)
+      warn "${ACCOUNT:-the signed-in account} cannot see $ENV_ID — every call would come back 403 with no name attached"
+      fail "sign in as the account that owns it (firebase login), or have this one added to the project"
+      ;;
+  esac
+else
+  info "projects could not be listed — not a user login, so access was not checked"
+fi
+
 # No confirmation, deliberately (owner's rule, docs/rules/COMMANDS.md). Typing
 # the environment IS the decision: `deploy-firebase-prod` and `release-prod` are
 # separate commands from their dev twins precisely so the destination is chosen
