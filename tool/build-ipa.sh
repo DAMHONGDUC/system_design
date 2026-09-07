@@ -62,10 +62,23 @@ fi
 # from remote repositories:` with the reason cut off — flutter drops
 # xcodebuild's detail line, so the one fact that explains it never prints.
 # Named here instead, in a second, before anything long starts.
+#
+# Three attempts, because the failure this catches is usually not a clean one:
+# where GitHub is filtered rather than blocked the TCP connect succeeds every
+# time and the TLS handshake hangs on some attempts and not others, so a
+# single probe reports whichever one it happened to get.
 SPM_PINS="ios/Runner.xcworkspace/xcshareddata/swiftpm/Package.resolved"
 if [ -f "$SPM_PINS" ] && command -v curl >/dev/null 2>&1; then
-  if ! curl -sS -o /dev/null --max-time 10 https://github.com/; then
-    fail "github.com is unreachable, and Swift Package Manager resolves every dependency from it — the archive would die 40 seconds in with no reason attached. Connect to a VPN and run this again."
+  GITHUB_UP=0
+  for _ in 1 2 3; do
+    if curl -s -o /dev/null --max-time 8 https://github.com/; then
+      GITHUB_UP=1
+      break
+    fi
+  done
+
+  if [ "$GITHUB_UP" -eq 0 ]; then
+    fail "github.com did not answer in three tries, and Swift Package Manager resolves every dependency from it — the archive would die 40 seconds in with no reason attached. Connect to a VPN and run this again."
   fi
 fi
 
