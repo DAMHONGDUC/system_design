@@ -16,8 +16,11 @@ def sd_release_note(flavor, version, build_number)
   "#{flavor} - #{version} (#{build_number})"
 end
 
-# Upload, always with a note. The caller's own text wins and an empty one falls
-# back to the composed default, so no build reaches TestFlight blank.
+# Upload, always with a note. The composed line always LEADS and the caller's
+# own text is appended under it — it never replaces it. The flavour and the
+# number are what the TestFlight list cannot show, so a run that passes
+# `notes:` is asking for something to be looked at, not asking for the one line
+# that says which build this is to be dropped.
 #
 # The note travels as `localized_build_info`, never as `changelog`. Both reach
 # the same field, but `changelog` only PATCHES the build localizations that
@@ -26,14 +29,20 @@ end
 #
 # Waiting for processing is the price of the note: App Store Connect accepts
 # one only once the build has finished processing.
-def sd_upload_to_testflight(api_key:, ipa:, flavor:, version:, build_number:, notes: nil)
-  note = notes.to_s.strip
-  note = sd_release_note(flavor, version, build_number) if note.empty?
+def sd_upload_to_testflight(api_key:, app_identifier:, ipa:, flavor:, version:, build_number:, notes: nil)
+  extra = notes.to_s.strip
+  line = sd_release_note(flavor, version, build_number)
+  note = extra.empty? ? line : "#{line}\n\n#{extra}"
 
   UI.message("TestFlight note: #{note}")
 
   upload_to_testflight(
     api_key: api_key,
+    # Named rather than left to the Appfile: the app already passes its bundle
+    # id to every other action in its lane, and one action reading it from
+    # somewhere else is one place a two-app repo can upload into the wrong
+    # record.
+    app_identifier: app_identifier,
     ipa: ipa,
     skip_waiting_for_build_processing: false,
     localized_build_info: { SD_RELEASE_NOTE_LOCALE => { whats_new: note } },
