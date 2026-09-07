@@ -82,7 +82,8 @@ if [ "$TARGET" = "all" ] || [ "$TARGET" = "functions" ]; then
 
   # Without a cleanup policy the CLI asks for one at the END of a successful deploy, and a non-interactive run cannot answer — so the whole command exits non-zero after the functions are already live. Setting it first is idempotent, and tolerated because a project's first-ever deploy has no Artifact Registry repo to set it on yet.
   step "artifact cleanup policy"
-  "$FIREBASE" functions:artifacts:setpolicy --project "$ENV_NAME" --force ||
+  # The retention is passed rather than left to the CLI default: it is the one number here, and a default is free to move under it.
+  "$FIREBASE" functions:artifacts:setpolicy --project "$ENV_NAME" --days 1 --force ||
     warn "no cleanup policy set — first deploy to this project? re-run once it succeeds"
 
   step "functions"
