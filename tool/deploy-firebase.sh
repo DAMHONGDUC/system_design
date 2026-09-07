@@ -80,6 +80,11 @@ if [ "$TARGET" = "all" ] || [ "$TARGET" = "functions" ]; then
     info "no test script in functions/package.json, nothing to run"
   fi
 
+  # Without a cleanup policy the CLI asks for one at the END of a successful deploy, and a non-interactive run cannot answer — so the whole command exits non-zero after the functions are already live. Setting it first is idempotent, and tolerated because a project's first-ever deploy has no Artifact Registry repo to set it on yet.
+  step "artifact cleanup policy"
+  "$FIREBASE" functions:artifacts:setpolicy --project "$ENV_NAME" --force ||
+    warn "no cleanup policy set — first deploy to this project? re-run once it succeeds"
+
   step "functions"
   "$FIREBASE" deploy --project "$ENV_NAME" --only functions
 fi
