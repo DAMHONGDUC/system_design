@@ -91,13 +91,10 @@ main() {
     info "no .firebaserc — this app runs no Firebase backend, nothing to deploy"
   fi
 
-  # fastlane is Ruby, and Ruby without a UTF-8 locale prints a warning on every
-  # line of a 25-minute run and reads a non-ASCII path as ASCII-8BIT.
-  case "${LANG:-}" in
-    *UTF-8 | *utf8) ;;
-    *) LANG=en_US.UTF-8 ;;
-  esac
-  export LANG
+  # fastlane is Ruby, and Ruby without a UTF-8 locale cannot even parse the
+  # shared Fastfile. Extracted on its second caller — upload-ipa.sh needs it
+  # for the same reason, and preflight did too.
+  ensure_utf8_locale
 
   phase testflight
   (cd ios && bundle exec fastlane beta flavor:"$TARGET" bump:true)

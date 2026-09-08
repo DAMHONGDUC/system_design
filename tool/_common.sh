@@ -124,3 +124,13 @@ pad() {
 
   printf '%s' "$_pad_text"
 }
+
+# Give Ruby a UTF-8 external encoding before fastlane starts. `Encoding.default_external` is fixed at Ruby startup from the locale, and fastlane `import`s the shared Fastfile by reading it into a string with that encoding — so under `LANG=C` every em dash in it is `invalid multibyte character 0xE2` and the lane dies with a page of syntax errors that name lines the file has no problem with. A LANG that is already UTF-8 is kept: it is the seller's own, and only the encoding half of it matters here.
+ensure_utf8_locale() {
+  case "${LANG:-}" in
+    *UTF-8 | *utf8) ;;
+    *) LANG=en_US.UTF-8 ;;
+  esac
+
+  export LANG
+}
