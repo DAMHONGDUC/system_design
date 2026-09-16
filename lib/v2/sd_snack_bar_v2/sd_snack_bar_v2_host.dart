@@ -184,14 +184,19 @@ class _SdSnackBarHostV2State extends State<_SdSnackBarHostV2>
           // The overlay has no Material ancestor; text without one renders Flutter's yellow underlined fallback.
           child: Material(
             type: MaterialType.transparency,
-            // - the card takes pointers so it can be swiped away, which costs
-            //   the taps that land on it while it is up: it floats above every
-            //   route, so a tap here is a tap a sheet's button underneath does
-            //   not get
-            // - the trade is deliberate and it is why the card is small, sits
-            //   in a margin, and leaves on its own in seconds
+            // How a card can be swiped away and still cost nothing underneath
+            // it. `translucent` puts the detector in the hit-test path without
+            // claiming the hit, and the `IgnorePointer` below keeps the card's
+            // own pixels out of the path entirely — together they let the
+            // overlay carry on to the route beneath, so both are in it. A tap
+            // has no recognizer here to take it and lands on the button below;
+            // a drag has one, first in the path, and moves the card.
+            //
+            // Neither half works alone: the card floats above every route, so
+            // an `opaque` detector — or a translucent one over a card that
+            // hit-tests — ate the taps meant for the sheet buttons under it.
             child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
+              behavior: HitTestBehavior.translucent,
               onVerticalDragStart: _dragStart,
               onVerticalDragUpdate: _dragUpdateVertical,
               onVerticalDragEnd: _dragEndVertical,
@@ -202,17 +207,19 @@ class _SdSnackBarHostV2State extends State<_SdSnackBarHostV2>
               // finger's position, and easing towards it would put the card a
               // few frames behind the thumb. Let go and the same builder
               // animates whatever distance is left, in or out.
-              child: TweenAnimationBuilder<Offset>(
-                tween: Tween<Offset>(end: _drag),
-                duration: _dragging
-                    ? Duration.zero
-                    : _SdSnackBarHostV2.transition,
-                curve: Curves.easeOutCubic,
-                builder: (BuildContext _, Offset offset, Widget? card) =>
-                    Transform.translate(offset: offset, child: card),
-                child: SdSnackBarCardV2(
-                  message: widget.message,
-                  kind: widget.kind,
+              child: IgnorePointer(
+                child: TweenAnimationBuilder<Offset>(
+                  tween: Tween<Offset>(end: _drag),
+                  duration: _dragging
+                      ? Duration.zero
+                      : _SdSnackBarHostV2.transition,
+                  curve: Curves.easeOutCubic,
+                  builder: (BuildContext _, Offset offset, Widget? card) =>
+                      Transform.translate(offset: offset, child: card),
+                  child: SdSnackBarCardV2(
+                    message: widget.message,
+                    kind: widget.kind,
+                  ),
                 ),
               ),
             ),
