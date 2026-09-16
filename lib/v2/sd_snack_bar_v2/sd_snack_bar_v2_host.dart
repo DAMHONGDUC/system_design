@@ -2,7 +2,7 @@ part of 'sd_snack_bar_v2.dart';
 
 /// Places the card against one edge, fades and slides it in from that edge,
 /// then takes it away again — when [duration] runs out, or when the user
-/// swipes it back towards the edge it came from.
+/// swipes it: back towards its own edge, or sideways either way.
 class _SdSnackBarHostV2 extends StatefulWidget {
   const _SdSnackBarHostV2({
     required this.message,
@@ -55,8 +55,10 @@ class _SdSnackBarHostV2State extends State<_SdSnackBarHostV2>
   Timer? _timer;
 
   /// How far the finger has taken the card from its resting place, in logical
-  /// pixels, signed the way the screen is: negative up, positive down.
-  double _drag = 0;
+  /// pixels, signed the way the screen is: negative up or left, positive down
+  /// or right. Only ever one axis at a time — the gesture arena hands the
+  /// whole drag to whichever recognizer the first few pixels matched.
+  Offset _drag = Offset.zero;
 
   /// The finger is down — the card tracks it frame for frame, so the spring
   /// back is animated and the drag itself never is.
@@ -109,20 +111,41 @@ class _SdSnackBarHostV2State extends State<_SdSnackBarHostV2>
     setState(() => _dragging = true);
   }
 
-  void _dragUpdate(DragUpdateDetails details) {
-    // Only the way out moves. The other direction is clamped rather than
-    // rubber-banded: a card at the top edge that can be pulled down is a card
-    // the user has to put back, for a gesture that does nothing either way.
-    final double next = _drag + details.delta.dy;
+  /// Vertically, only the way out moves. The other direction is clamped rather
+  /// than rubber-banded: a card at the top edge that can be pulled down is a
+  /// card the user has to put back, for a gesture that does nothing either way.
+  void _dragUpdateVertical(DragUpdateDetails details) {
+    final double next = _drag.dy + details.delta.dy;
 
-    setState(() => _drag = _atTop ? math.min(next, 0) : math.max(next, 0));
+    setState(
+      () => _drag = Offset(0, _atTop ? math.min(next, 0) : math.max(next, 0)),
+    );
   }
 
-  void _dragEnd(DragEndDetails details) {
-    setState(() => _dragging = false);
+  /// Sideways, both directions are a way out: there is no edge to push the
+  /// card back towards, so the hand that reaches it decides.
+  void _dragUpdateHorizontal(DragUpdateDetails details) {
+    setState(() => _drag = Offset(_drag.dx + details.delta.dx, 0));
+  }
 
-    final double travel = _drag * _dismissSign;
-    final double speed = details.velocity.pixelsPerSecond.dy * _dismissSign;
+  void _dragEndVertical(DragEndDetails details) => _dragEnd(
+    travel: _drag.dy * _dismissSign,
+    speed: details.velocity.pixelsPerSecond.dy * _dismissSign,
+  );
+
+  void _dragEndHorizontal(DragEndDetails details) {
+    // Measured along the way the card actually went, so a drag one way ended
+    // by a flick back the other is a change of mind, not a dismissal.
+    final double sign = _drag.dx.isNegative ? -1 : 1;
+
+    _dragEnd(
+      travel: _drag.dx * sign,
+      speed: details.velocity.pixelsPerSecond.dx * sign,
+    );
+  }
+
+  void _dragEnd({required double travel, required double speed}) {
+    setState(() => _dragging = false);
 
     // Far enough, or fast enough: a flick that has barely moved is still an
     // answer, and waiting for the distance would ignore it.
@@ -134,7 +157,7 @@ class _SdSnackBarHostV2State extends State<_SdSnackBarHostV2>
 
     // Kept: the card springs back and gets its full time again, because the
     // seconds it spent under a finger were not seconds spent being read.
-    setState(() => _drag = 0);
+    setState(() => _drag = Offset.zero);
     _restartTimer();
   }
 
@@ -170,20 +193,23 @@ class _SdSnackBarHostV2State extends State<_SdSnackBarHostV2>
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onVerticalDragStart: _dragStart,
-              onVerticalDragUpdate: _dragUpdate,
-              onVerticalDragEnd: _dragEnd,
+              onVerticalDragUpdate: _dragUpdateVertical,
+              onVerticalDragEnd: _dragEndVertical,
+              onHorizontalDragStart: _dragStart,
+              onHorizontalDragUpdate: _dragUpdateHorizontal,
+              onHorizontalDragEnd: _dragEndHorizontal,
               // Zero duration while the finger is down: the card IS the
               // finger's position, and easing towards it would put the card a
               // few frames behind the thumb. Let go and the same builder
               // animates whatever distance is left, in or out.
-              child: TweenAnimationBuilder<double>(
-                tween: Tween<double>(end: _drag),
+              child: TweenAnimationBuilder<Offset>(
+                tween: Tween<Offset>(end: _drag),
                 duration: _dragging
                     ? Duration.zero
                     : _SdSnackBarHostV2.transition,
                 curve: Curves.easeOutCubic,
-                builder: (BuildContext _, double dy, Widget? card) =>
-                    Transform.translate(offset: Offset(0, dy), child: card),
+                builder: (BuildContext _, Offset offset, Widget? card) =>
+                    Transform.translate(offset: offset, child: card),
                 child: SdSnackBarCardV2(
                   message: widget.message,
                   kind: widget.kind,
