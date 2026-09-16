@@ -312,6 +312,21 @@ pure dimensions stay parameterless (`SdChartStyleV2.plotHeight`).
 - **Colour is never the only signal.** A state told by colour is also told by
   an icon, a label, or a shape. `SdSnackBarKindV2` changes the glyph as well
   as the accent for exactly this reason.
+- **A message the user can see, the user can throw away — towards the edge it
+  came from** (owner's rule). `SdSnackBarV2` dismisses on a swipe up when it
+  sits at the top and on a swipe down when it sits at the bottom, so the
+  gesture is always "push it back where it came from" and never has to be
+  learned per placement. The other direction is clamped, not rubber-banded: a
+  card that can be pulled into the middle of the screen is a card the user then
+  has to put back. The countdown stops while the finger is down and starts over
+  on a card that is kept — seconds spent under a thumb are not seconds spent
+  being read.
+  - **The price is the taps that land on the card**, and it is paid knowingly.
+    The card floats above every route, so anything hittable there is a tap a
+    button underneath does not get; it used to be wrapped in an
+    `IgnorePointer` for exactly that reason. What keeps the trade honest: the
+    card is small, sits in a margin rather than over content, and leaves by
+    itself in three seconds (five for an error).
 - **Charts hide their marks from screen readers** and expose a summary
   instead — `SdChartFrameV2` takes `semanticsLabel` and wraps its child in
   `ExcludeSemantics`. A chart without that label is unreadable to VoiceOver.
