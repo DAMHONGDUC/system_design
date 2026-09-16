@@ -43,7 +43,9 @@ class SdBootstrapStep {
 /// — and it could not be built anyway: the guarded zone catches whatever a
 /// step rethrows, so a `halt` would look like it worked while `runApp` was
 /// silently skipped. A step whose absence makes the app useless says so on
-/// screen, from inside the app.
+/// screen, from inside the app — which is what [SdBootstrap.onStepFailed] is
+/// for: it hands the host the failure so the tree it builds a moment later can
+/// render it. Telling is not refusing, and the app still starts.
 ///
 /// **Three error channels, and missing one hides a whole class of crash:**
 ///
@@ -60,17 +62,24 @@ final class SdBootstrap {
   const SdBootstrap._();
 
   /// Bring [steps] up in order inside a guarded zone, then `runApp` [builder].
+  ///
+  /// [onStepFailed] is called for each step that threw, after it is logged and
+  /// before [builder] runs, so what it records is already there when the first
+  /// frame is built. It runs inside its own guard: a throw from a host's
+  /// handler would skip the steps after it *and* `runApp`, which is the one
+  /// failure this class exists to prevent.
   static Future<void> run({
     required String logTag,
     required List<SdBootstrapStep> steps,
     required Widget Function() builder,
+    void Function(SdBootstrapStep step, Object error)? onStepFailed,
   }) async {
     await runZonedGuarded<Future<void>>(
       () async {
         WidgetsFlutterBinding.ensureInitialized();
 
         for (final SdBootstrapStep step in steps) {
-          await _runStep(logTag, step);
+          await _runStep(logTag, step, onStepFailed);
         }
 
         _installErrorHooks(logTag);
@@ -88,7 +97,11 @@ final class SdBootstrap {
     );
   }
 
-  static Future<void> _runStep(String logTag, SdBootstrapStep step) async {
+  static Future<void> _runStep(
+    String logTag,
+    SdBootstrapStep step,
+    void Function(SdBootstrapStep step, Object error)? onStepFailed,
+  ) async {
     try {
       await step.run();
 
@@ -104,6 +117,18 @@ final class SdBootstrap {
         data: <String, String>{'step': step.name},
       );
       debugPrintStack(stackTrace: stackTrace);
+
+      try {
+        onStepFailed?.call(step, error);
+      } catch (handlerError, handlerStack) {
+        SdLogger.error(
+          logTag,
+          'Failure handler threw',
+          error: handlerError,
+          stackTrace: handlerStack,
+          data: <String, String>{'step': step.name},
+        );
+      }
     }
   }
 
