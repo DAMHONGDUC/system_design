@@ -320,12 +320,16 @@ pure dimensions stay parameterless (`SdChartStyleV2.plotHeight`).
   rubber-banded, because a card pulled there is a card the user then has to put
   back. The countdown stops while the finger is down and starts over on a card
   that is kept — seconds spent under a thumb are not seconds spent being read.
-  - **The price is the taps that land on the card**, and it is paid knowingly.
-    The card floats above every route, so anything hittable there is a tap a
-    button underneath does not get; it used to be wrapped in an
-    `IgnorePointer` for exactly that reason. What keeps the trade honest: the
-    card is small, sits in a margin rather than over content, and leaves by
-    itself in three seconds (five for an error).
+  - **And it still costs nothing underneath it.** The card floats above every
+    route, so anything hittable up there is a tap a button below does not get —
+    which is why it used to be a plain `IgnorePointer`. It is both now: the
+    card keeps the `IgnorePointer`, and the gesture detector around it is
+    `HitTestBehavior.translucent`, so the detector joins the hit-test path
+    without claiming the hit and the route beneath joins it too. A tap finds no
+    recognizer on the card and lands on the button; a drag finds one, first in
+    the path, and moves the card. **Never make either half opaque** — a snack
+    bar over a sheet's buttons ate the taps meant for them, and two tests
+    caught it.
 - **Charts hide their marks from screen readers** and expose a summary
   instead — `SdChartFrameV2` takes `semanticsLabel` and wraps its child in
   `ExcludeSemantics`. A chart without that label is unreadable to VoiceOver.
