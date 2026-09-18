@@ -27,6 +27,7 @@ export 'sd_dialog_v3/sd_dialog_v3.dart';
 export 'sd_divider_v3/sd_divider_v3.dart';
 export 'sd_elevation_v3/sd_elevation_v3.dart';
 export 'sd_empty_state_v3/sd_empty_state_v3.dart';
+export 'sd_error_view_v3/sd_error_view_v3.dart';
 export 'sd_fab_v3/sd_fab_v3.dart';
 export 'sd_field_label_v3/sd_field_label_v3.dart';
 export 'sd_filter_chip_v3/sd_filter_chip_v3.dart';
