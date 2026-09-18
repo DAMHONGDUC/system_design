@@ -99,50 +99,60 @@ class _GlassNavRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    // The column the rail occupies: the pill's thickness plus its air either
-    // side, derived from the pill's own numbers — see `floatingRailWidth`.
+    // The column the rail occupies: the rail, its outer margin and the thin
+    // air between it and the page — see `floatingRailWidth`.
     width: SdContentPaddingV2.floatingRailWidth,
-    child: Center(
-      child: SdPopScaleV2(
-        peakScale: _popPeakScale,
-        child: LiquidGlass.withOwnLayer(
-          settings: kChromeGlass,
-          shape: LiquidRoundedSuperellipse(
-            borderRadius: SdContentPaddingV2.floatingRailRadius,
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: SizedBox(
-            key: SdNavigationRailV2.railSurfaceKey,
-            // The pill's 56, measured across the width — see
-            // `floatingRailThickness` for why it is not the pill's height.
-            width: SdContentPaddingV2.floatingRailThickness,
-            // One cell per destination — longer than the rail is thick, so a
-            // five-tab rail reads as one control rather than a column of
-            // squares. See `floatingRailCellHeight`.
-            height:
-                SdContentPaddingV2.floatingRailCellHeight * destinations.length,
-            child: Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                _SelectedThumb(
-                  count: destinations.length,
-                  selectedIndex: selectedIndex,
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    for (final (int index, SdNavDestinationV2 destination)
-                        in destinations.indexed)
-                      Expanded(
-                        child: SdNavSegmentV2(
-                          destination: destination,
-                          selected: index == selectedIndex,
-                          onTap: () => onSelected(index),
+    // Leading, not centred: the width above is asymmetric on purpose (a full
+    // margin outside, a sliver inside), so the rail is placed by its outer
+    // margin and whatever is left over is the gap to the content.
+    child: Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: Padding(
+        padding: EdgeInsetsDirectional.only(
+          start: SdContentPaddingV2.floatingBarHorizontal,
+        ),
+        child: SdPopScaleV2(
+          peakScale: _popPeakScale,
+          child: LiquidGlass.withOwnLayer(
+            settings: kChromeGlass,
+            shape: LiquidRoundedSuperellipse(
+              borderRadius: SdContentPaddingV2.floatingRailRadius,
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: SizedBox(
+              key: SdNavigationRailV2.railSurfaceKey,
+              // The pill's 56, measured across the width — see
+              // `floatingRailThickness` for why it is not the pill's height.
+              width: SdContentPaddingV2.floatingRailThickness,
+              // One cell per destination — longer than the rail is thick, so a
+              // five-tab rail reads as one control rather than a column of
+              // squares. See `floatingRailCellHeight`.
+              height:
+                  SdContentPaddingV2.floatingRailCellHeight *
+                  destinations.length,
+              child: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  _SelectedThumb(
+                    count: destinations.length,
+                    selectedIndex: selectedIndex,
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      for (final (int index, SdNavDestinationV2 destination)
+                          in destinations.indexed)
+                        Expanded(
+                          child: SdNavSegmentV2(
+                            destination: destination,
+                            selected: index == selectedIndex,
+                            onTap: () => onSelected(index),
+                          ),
                         ),
-                      ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

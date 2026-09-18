@@ -247,15 +247,27 @@ abstract final class SdContentPaddingV2 {
   /// control, two thicknesses, depending on which way the iPad was held.
   static double get floatingRailThickness => SdSpacingConstant.w56;
 
-  /// The width of the column `SdNavigationRailV2` occupies: the rail is the
-  /// pill stood on its end, so it is [floatingRailThickness] thick with
-  /// [floatingBarHorizontal] of air either side.
+  /// The air between the rail and the content beside it.
   ///
-  /// Derived from those two rather than typed, for the reason
+  /// **Deliberately much less than [floatingBarHorizontal]**, which is the air
+  /// on the rail's *outer* side. The two edges are different problems: outside
+  /// the rail is the edge of the glass, where the pill's own margin belongs;
+  /// inside it is the edge of the page, and the content already brings
+  /// [horizontal] of its own. Equal air on both sides stacked those two and
+  /// put 46 between the rail and the first card — a gutter wider than a phone
+  /// has at the screen edge, for no reason but symmetry with the wrong side.
+  ///
+  /// Not zero: the glass needs to stop somewhere the eye can see it stop.
+  static double get floatingRailInnerAir => SdSpacingConstant.w8;
+
+  /// The width of the column `SdNavigationRailV2` occupies: the rail itself,
+  /// plus [floatingBarHorizontal] outside it and [floatingRailInnerAir] in.
+  ///
+  /// Derived from those three rather than typed, for the reason
   /// [floatingBarHorizontal] exists at all — the day the rail gets thicker,
   /// its column does too, and neither has to remember.
   static double get floatingRailWidth =>
-      floatingRailThickness + floatingBarHorizontal * 2;
+      floatingBarHorizontal + floatingRailThickness + floatingRailInnerAir;
 
   /// The rail's corner radius: half its thickness, so the short ends are full
   /// semicircles. Derived, never typed — see [floatingBarRadius], which is the
