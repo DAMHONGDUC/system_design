@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
+import '../sd_breakpoint_v2/sd_breakpoint_v2.dart';
 import '../sd_floating_bar_scope_v2/sd_floating_bar_scope_v2.dart';
 import '../sd_liquid_glass_theme_v2/sd_liquid_glass_theme_v2.dart';
 import '../sd_pinned_filter_bar_v2/sd_pinned_filter_bar_v2.dart';
@@ -247,27 +248,70 @@ abstract final class SdContentPaddingV2 {
   /// control, two thicknesses, depending on which way the iPad was held.
   static double get floatingRailThickness => SdSpacingConstant.w56;
 
-  /// The air between the rail and the content beside it.
+  /// **The one gap on a tablet.** Owner's rule: screen edge to the rail, rail
+  /// to the content, and the content to the far edge are all this number, and
+  /// it does not vary by screen or by orientation.
   ///
-  /// **Deliberately much less than [floatingBarHorizontal]**, which is the air
-  /// on the rail's *outer* side. The two edges are different problems: outside
-  /// the rail is the edge of the glass, where the pill's own margin belongs;
-  /// inside it is the edge of the page, and the content already brings
-  /// [horizontal] of its own. Equal air on both sides stacked those two and
-  /// put 46 between the rail and the first card — a gutter wider than a phone
-  /// has at the screen edge, for no reason but symmetry with the wrong side.
+  /// ```text
+  /// iPad 11" landscape, 1180 wide
+  /// |<-46->|rail 64|<-46->| content 978 |<-46->|
+  /// ```
   ///
-  /// Not zero: the glass needs to stop somewhere the eye can see it stop.
-  static double get floatingRailInnerAir => SdSpacingConstant.w8;
+  /// It replaces the centred column the page used to get. A cap plus centring
+  /// produced three *different* gaps — 46 at the edge, 107 to the rail in
+  /// landscape and 79 at the far side — because two of them were page margin
+  /// left over from a ceiling and only one was a decision. One number is a
+  /// decision.
+  ///
+  /// 40 design units, so 46 on an iPad. Wide enough to read as a margin rather
+  /// than as a card that failed to reach the edge, and the same order as the
+  /// rail's own thickness so the three bands look deliberate together.
+  ///
+  /// The page ceiling ([SdBreakpointV2.contentMaxWidth]) is NOT gone — it still
+  /// governs the things that are panels rather than pages: the modal sheet, the
+  /// dialog, the paywall, onboarding.
+  static double get tabletMargin => SdSpacingConstant.w40;
 
-  /// The width of the column `SdNavigationRailV2` occupies: the rail itself,
-  /// plus [floatingBarHorizontal] outside it and [floatingRailInnerAir] in.
+  /// What a screen adds on each side to land its content on [tabletMargin],
+  /// given it already pads itself by [horizontal].
   ///
-  /// Derived from those three rather than typed, for the reason
-  /// [floatingBarHorizontal] exists at all — the day the rail gets thicker,
-  /// its column does too, and neither has to remember.
-  static double get floatingRailWidth =>
-      floatingBarHorizontal + floatingRailThickness + floatingRailInnerAir;
+  /// Zero on a phone — below [SdBreakpointV2.medium] nothing changes, and the
+  /// gutter a phone has at the screen edge is the gutter it has always had.
+  /// `SdScaffoldV2` applies it around the WHOLE screen, app bar included, so a
+  /// title and the cards under it keep one leading edge.
+  ///
+  /// **A screen with no shell navigation gets the SAME content width, centred**
+  /// (owner's rule). Every detail screen in this app is a route pushed above
+  /// the shell, so it has no rail beside it and a plain [tabletMargin] would
+  /// make it [floatingRailWidth] wider than the tab screen it was opened from —
+  /// the content would jump outward on the way in and back on the way out. It
+  /// takes half the rail's column on each side instead, which is the one inset
+  /// that makes the two widths identical:
+  ///
+  /// ```text
+  /// iPad 11" portrait, 820 wide — both land on a 618 card
+  /// tab screen     |46| rail 64 |46|      card 618      |46|
+  /// pushed detail  |     101     |46|      card 618      |46|     101     |
+  /// ```
+  static double pageMargin(BuildContext context) {
+    if (SdBreakpointV2.of(context) == SdWindowClassV2.compact) return 0;
+
+    final double margin = math.max(0, tabletMargin - horizontal);
+
+    return SdFloatingBarScopeV2.edgeOf(context) == null
+        ? margin + floatingRailWidth / 2
+        : margin;
+  }
+
+  /// The width of the column `SdNavigationRailV2` occupies: [tabletMargin] of
+  /// air against the screen edge, then the rail.
+  ///
+  /// **Nothing on the inner side.** The gap to the content is the content's to
+  /// leave — it pads itself by [horizontal] plus [pageMargin], which is
+  /// [tabletMargin] by construction. An inner margin here would stack on top
+  /// of that and make one of the three gaps bigger than the other two, which
+  /// is exactly the bug [tabletMargin] exists to close.
+  static double get floatingRailWidth => tabletMargin + floatingRailThickness;
 
   /// The rail's corner radius: half its thickness, so the short ends are full
   /// semicircles. Derived, never typed — see [floatingBarRadius], which is the

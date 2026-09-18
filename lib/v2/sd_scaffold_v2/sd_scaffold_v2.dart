@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../sd_app_bar_v2/sd_app_bar_v2.dart';
+import '../sd_content_padding_v2/sd_content_padding_v2.dart';
 import '../sd_liquid_glass_theme_v2/sd_liquid_glass_theme_v2.dart';
-import '../sd_page_width_v2/sd_page_width_v2.dart';
 
 /// The app's standard screen scaffold. Every top-level screen uses this
 /// instead of a bare [Scaffold] so the frosted [SdAppBarV2] and the
@@ -43,18 +43,31 @@ class SdScaffoldV2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The cap goes around the whole Scaffold, not just the body: the app bar
-    // is part of the screen, and a title spanning a 1070-wide window over a
-    // 920-wide column reads as two screens stacked. `SdPageWidthV2` is a no-op
-    // on every phone, so this is the same single Scaffold there.
+    // The margin goes around the whole Scaffold, not just the body: the app
+    // bar is part of the screen, and a title spanning the window over an inset
+    // body reads as two screens stacked.
     //
-    // The `ColoredBox` is what the margin beside the column is painted with. A
-    // pushed route has no surface of its own behind it, so without this the
-    // two strips either side of a detail screen would show whatever the route
-    // below happened to leave — on a fresh push, black.
+    // It is a margin and not a centred ceiling because every gap on a tablet
+    // is one number — see `SdContentPaddingV2.tabletMargin`. Zero on a phone,
+    // so this is the same single Scaffold there.
+    //
+    // It lives HERE rather than in the shell because the detail screens are
+    // siblings of the shell route, not children of it: a pushed attack or
+    // medication gets no rail, and would otherwise be the one screen in the
+    // app running edge to edge.
+    //
+    // The `ColoredBox` is what the margin is painted with. A pushed route has
+    // no surface of its own behind it, so without this the two strips either
+    // side of a detail screen would show whatever the route below happened to
+    // leave — on a fresh push, black.
     return ColoredBox(
       color: Theme.of(context).scaffoldBackgroundColor,
-      child: SdPageWidthV2(child: _scaffold(context)),
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: SdContentPaddingV2.pageMargin(context),
+        ),
+        child: _scaffold(context),
+      ),
     );
   }
 

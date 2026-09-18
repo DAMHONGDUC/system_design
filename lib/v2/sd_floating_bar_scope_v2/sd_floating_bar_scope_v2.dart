@@ -19,20 +19,41 @@ import 'package:flutter/material.dart';
 /// lives in `SdContentPaddingV2`, and this file deliberately imports nothing
 /// from there: content padding is what asks the question, so the answer
 /// cannot be allowed to depend on it.
-class SdFloatingBarScopeV2 extends InheritedWidget {
-  const SdFloatingBarScopeV2({required super.child, super.key});
+enum SdFloatingBarEdgeV2 {
+  /// `SdBottomNavigationV2` — the pill across the bottom of a phone.
+  bottom,
 
-  /// Whether a floating bar rests on the bottom edge below [context].
+  /// `SdNavigationRailV2` — the rail down the leading edge of a tablet.
+  leading,
+}
+
+class SdFloatingBarScopeV2 extends InheritedWidget {
+  const SdFloatingBarScopeV2({
+    required super.child,
+    this.edge = SdFloatingBarEdgeV2.bottom,
+    super.key,
+  });
+
+  /// Which edge the shell's navigation is on.
+  final SdFloatingBarEdgeV2 edge;
+
+  /// Which edge the shell's navigation is on below [context], or null where
+  /// there is no shell navigation at all — a route pushed above the shell,
+  /// which every detail screen in this app is.
   ///
   /// Reads without subscribing. One caller is a presenter firing from a
   /// callback, where a dependency would outlive the frame that asked for it;
-  /// the other is a layout read, and presence only ever changes when the shell
-  /// swaps the pill for a rail, which rebuilds this whole subtree anyway.
-  static bool isBelow(BuildContext context) =>
-      context.getInheritedWidgetOfExactType<SdFloatingBarScopeV2>() != null;
+  /// the others are layout reads, and the answer only ever changes when the
+  /// shell swaps one chrome for the other, which rebuilds this whole subtree
+  /// anyway.
+  static SdFloatingBarEdgeV2? edgeOf(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<SdFloatingBarScopeV2>()?.edge;
 
-  /// Nothing to notify: the widget carries no value of its own, only the fact
-  /// that it is there.
+  /// Whether a floating bar rests on the bottom edge below [context].
+  static bool isBelow(BuildContext context) =>
+      edgeOf(context) == SdFloatingBarEdgeV2.bottom;
+
   @override
-  bool updateShouldNotify(SdFloatingBarScopeV2 oldWidget) => false;
+  bool updateShouldNotify(SdFloatingBarScopeV2 oldWidget) =>
+      oldWidget.edge != edge;
 }

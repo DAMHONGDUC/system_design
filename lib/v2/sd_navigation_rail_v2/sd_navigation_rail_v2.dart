@@ -4,6 +4,7 @@ import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 import '../../core/sd_spacing_constant.dart';
 import '../sd_content_padding_v2/sd_content_padding_v2.dart';
 import '../sd_context_v2/sd_context_v2.dart';
+import '../sd_floating_bar_scope_v2/sd_floating_bar_scope_v2.dart';
 import '../sd_liquid_glass_theme_v2/sd_liquid_glass_theme_v2.dart';
 import '../sd_nav_destination_v2/sd_nav_destination_v2.dart';
 import '../sd_nav_segment_v2/sd_nav_segment_v2.dart';
@@ -27,10 +28,13 @@ import '../sd_pop_scale_v2/sd_pop_scale_v2.dart';
 ///   a chart being panned or a row being dismissed, and stealing it would
 ///   break both.
 ///
-/// It deliberately does NOT wrap the body in `SdFloatingBarScopeV2`: nothing
-/// rests on the bottom edge here, so a snackbar sits where it should and the
-/// five tab screens stop reserving a pill's height of nothing (see
-/// `SdContentPaddingV2.bottom`).
+/// It publishes `SdFloatingBarEdgeV2.leading` rather than the pill's `bottom`,
+/// which does two things: a snackbar and the five tab screens stop reserving a
+/// pill's height of nothing on the bottom edge (see
+/// `SdContentPaddingV2.bottom`), and a screen can tell the rail is beside it
+/// rather than absent — which is what lets a pushed detail screen, sitting
+/// above the shell with no rail at all, still draw its content at the same
+/// width (see `SdContentPaddingV2.pageMargin`).
 class SdNavigationRailV2 extends StatelessWidget {
   const SdNavigationRailV2({
     required this.body,
@@ -57,15 +61,18 @@ class SdNavigationRailV2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Row(
-        children: <Widget>[
-          _GlassNavRail(
-            destinations: destinations,
-            selectedIndex: selectedIndex,
-            onSelected: onSelected,
-          ),
-          Expanded(child: body),
-        ],
+      body: SdFloatingBarScopeV2(
+        edge: SdFloatingBarEdgeV2.leading,
+        child: Row(
+          children: <Widget>[
+            _GlassNavRail(
+              destinations: destinations,
+              selectedIndex: selectedIndex,
+              onSelected: onSelected,
+            ),
+            Expanded(child: body),
+          ],
+        ),
       ),
     );
   }
@@ -99,17 +106,16 @@ class _GlassNavRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SizedBox(
-    // The column the rail occupies: the rail, its outer margin and the thin
-    // air between it and the page — see `floatingRailWidth`.
+    // The column the rail occupies: `tabletMargin` of air against the screen
+    // edge, then the rail — and nothing on the inner side, because the gap to
+    // the content is the content's own `pageMargin` to leave. See
+    // `floatingRailWidth`.
     width: SdContentPaddingV2.floatingRailWidth,
-    // Leading, not centred: the width above is asymmetric on purpose (a full
-    // margin outside, a sliver inside), so the rail is placed by its outer
-    // margin and whatever is left over is the gap to the content.
     child: Align(
       alignment: AlignmentDirectional.centerStart,
       child: Padding(
         padding: EdgeInsetsDirectional.only(
-          start: SdContentPaddingV2.floatingBarHorizontal,
+          start: SdContentPaddingV2.tabletMargin,
         ),
         child: SdPopScaleV2(
           peakScale: _popPeakScale,
