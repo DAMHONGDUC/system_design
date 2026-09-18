@@ -90,7 +90,7 @@ class _GlassNavBar extends StatelessWidget {
                         for (final (int index, SdNavDestinationV2 destination)
                             in destinations.indexed)
                           Expanded(
-                            child: _NavSegment(
+                            child: SdNavSegmentV2(
                               destination: destination,
                               selected: index == selectedIndex,
                               onTap: () => onSelected(index),

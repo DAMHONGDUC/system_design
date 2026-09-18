@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../core/sd_spacing_constant.dart';
+import '../sd_content_padding_v2/sd_content_padding_v2.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_floating_bar_scope_v2/sd_floating_bar_scope_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
@@ -75,7 +76,9 @@ final class SdSnackBarUtilsV2 {
     // Read here, from the caller's context, not in the entry's builder: the
     // root overlay sits ABOVE the shell, so a scope inside it is invisible
     // from down there.
-    final double floatingBarInset = SdFloatingBarScopeV2.insetOf(context);
+    final double floatingBarInset = SdFloatingBarScopeV2.isBelow(context)
+        ? SdContentPaddingV2.floatingBarInset(context)
+        : 0;
 
     _remove();
 

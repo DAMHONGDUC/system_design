@@ -6,39 +6,12 @@ import '../sd_breakpoint_v2/sd_breakpoint_v2.dart';
 import '../sd_content_padding_v2/sd_content_padding_v2.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_floating_bar_scope_v2/sd_floating_bar_scope_v2.dart';
-import '../sd_icon_v2/sd_icon_v2.dart';
 import '../sd_liquid_glass_theme_v2/sd_liquid_glass_theme_v2.dart';
+import '../sd_nav_destination_v2/sd_nav_destination_v2.dart';
+import '../sd_nav_segment_v2/sd_nav_segment_v2.dart';
 import '../sd_pop_scale_v2/sd_pop_scale_v2.dart';
 
 part 'sd_bottom_navigation_v2_bar.dart';
-part 'sd_bottom_navigation_v2_segment.dart';
-
-/// One destination in [SdBottomNavigationV2].
-///
-/// A value type rather than a widget so the bar controls every dimension —
-/// a destination that brought its own `Icon` would size itself and the row
-/// would stop lining up.
-@immutable
-class SdNavDestinationV2 {
-  const SdNavDestinationV2({
-    required this.icon,
-    required this.label,
-    this.selectedIcon,
-  });
-
-  final IconData icon;
-
-  /// Shown when this destination is current. Leave null for a Material
-  /// Symbols glyph: [SdIconV2] fills the same glyph instead, which is one
-  /// name rather than two. Set it only where the selected state is a
-  /// genuinely different drawing.
-  final IconData? selectedIcon;
-
-  /// **Required on every destination, and the semantics label of every
-  /// segment.** The bar is deliberately glyph-only, but it is not icon-only
-  /// to a screen reader.
-  final String label;
-}
 
 /// The complete frame for a glyph-only floating bottom navigation.
 ///

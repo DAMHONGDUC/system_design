@@ -1,4 +1,23 @@
+import 'package:flutter/widgets.dart';
+
 import '../../core/sd_spacing_constant.dart';
+
+/// How much room the app has, in three sizes.
+///
+/// Named after the *window*, never the device: an iPad in Split View hands the
+/// app a 507-wide window, and chrome that asked "am I on an iPad" would put a
+/// navigation rail in it.
+enum SdWindowClassV2 {
+  /// Every phone, and a tablet sharing its screen with another app.
+  compact,
+
+  /// A tablet in portrait (an 11" iPad is 820), or one taking two thirds of a
+  /// landscape screen.
+  medium,
+
+  /// A tablet in landscape, or a desktop window.
+  expanded,
+}
 
 /// The widths a layout stops growing at.
 ///
@@ -18,6 +37,32 @@ import '../../core/sd_spacing_constant.dart';
 /// a 1254 one on a landscape iPad. Every ceiling is wider than any phone, so
 /// none of them changes a layout that ships today.
 abstract final class SdBreakpointV2 {
+  /// At or above this the window is [SdWindowClassV2.medium], and the shell's
+  /// navigation moves from the bottom edge to the left-hand side.
+  ///
+  /// Material's own window-size boundary, unchanged: it is where the hardware
+  /// actually is (an 11" iPad is 820 portrait, a 13" is 1024), and inventing
+  /// our own would put the boundary in the middle of a device.
+  static const double medium = 600;
+
+  /// At or above this the window is [SdWindowClassV2.expanded] — a tablet in
+  /// landscape. Nothing switches here yet; it is the boundary a second column
+  /// would appear at.
+  static const double expanded = 840;
+
+  /// **Raw logical pixels, never scaled.** These are compared against the
+  /// window, which screenutil knows nothing about; a `.w` here would move the
+  /// boundary every time the design scaled and a device could land in two
+  /// classes at once.
+  static SdWindowClassV2 of(BuildContext context) =>
+      forWidth(MediaQuery.sizeOf(context).width);
+
+  static SdWindowClassV2 forWidth(double width) => switch (width) {
+    >= expanded => SdWindowClassV2.expanded,
+    >= medium => SdWindowClassV2.medium,
+    _ => SdWindowClassV2.compact,
+  };
+
   /// The widest a column of content is ever drawn — what `SdScaffoldV2` caps
   /// its body at, and what a screen building its own `Scaffold` reaches for
   /// through `SdPageWidthV2`.

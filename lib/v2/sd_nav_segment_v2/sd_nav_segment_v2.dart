@@ -1,15 +1,28 @@
-part of 'sd_bottom_navigation_v2.dart';
+import 'package:flutter/material.dart';
 
-/// One equal-width segment of the glyph-only bar.
+import '../../core/sd_spacing_constant.dart';
+import '../sd_context_v2/sd_context_v2.dart';
+import '../sd_icon_v2/sd_icon_v2.dart';
+import '../sd_nav_destination_v2/sd_nav_destination_v2.dart';
+
+/// One glyph cell of the app's navigation chrome.
 ///
-/// **The tap target is the whole cell**, full height and a full share of the
-/// width — the thumb's inset is paint, never a gap in what can be hit
-/// (WIDGET_RULES § 6).
-class _NavSegment extends StatelessWidget {
-  const _NavSegment({
+/// Its own widget rather than a private part of the bar, because the app has
+/// two chromes and only one cell: `SdBottomNavigationV2` lays these out in a
+/// Row on a phone and `SdNavigationRailV2` in a Column on a tablet. Everything
+/// about *being a destination* — the fill, the timing, the semantics, the size
+/// of the tap target — is here once, so the two cannot come out as two
+/// different controls.
+///
+/// **The tap target is the whole cell**, filled by whichever axis its parent
+/// stretches — the selected thumb's inset is paint, never a gap in what can be
+/// hit (WIDGET_RULES § 6).
+class SdNavSegmentV2 extends StatelessWidget {
+  const SdNavSegmentV2({
     required this.destination,
     required this.selected,
     required this.onTap,
+    super.key,
   });
 
   /// Solid when selected, outline when not — colour is never the only signal

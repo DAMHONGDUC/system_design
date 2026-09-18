@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
+import '../sd_floating_bar_scope_v2/sd_floating_bar_scope_v2.dart';
 import '../sd_liquid_glass_theme_v2/sd_liquid_glass_theme_v2.dart';
 import '../sd_pinned_filter_bar_v2/sd_pinned_filter_bar_v2.dart';
 
@@ -173,8 +174,14 @@ abstract final class SdContentPaddingV2 {
   /// behind the nav pill, so it clears the pill's whole footprint plus
   /// [bottomGap]. Everything else — a pushed detail, a sheet route — takes
   /// [detailBottom], which is a different rule and says so.
+  ///
+  /// [floatingNav] says "I am a tab screen", NOT "there is a bar below me":
+  /// on a tablet the shell's nav is a rail down the left and the bottom edge
+  /// is free, so the same five screens must stop reserving a pill's height of
+  /// nothing. `SdFloatingBarScopeV2` is what knows which chrome is up, and it
+  /// is the shell that put it there.
   static double bottom(BuildContext context, {bool floatingNav = false}) =>
-      floatingNav
+      floatingNav && SdFloatingBarScopeV2.isBelow(context)
       ? floatingBarInset(context) + bottomGap
       : detailBottom(context);
 
@@ -229,6 +236,16 @@ abstract final class SdContentPaddingV2 {
   /// — content via [bottom], and a snackbar via `SdFloatingBarScopeV2`.
   static double floatingBarInset(BuildContext context) =>
       navBarOffset(context) + floatingBarHeight;
+
+  /// The width of the column `SdNavigationRailV2` occupies: the rail is the
+  /// pill stood on its end, so it is [floatingBarHeight] thick with
+  /// [floatingBarHorizontal] of air either side.
+  ///
+  /// Derived from the pill's own two numbers rather than typed, for the reason
+  /// [floatingBarHorizontal] exists at all — the day the pill gets thicker,
+  /// the rail does too, and neither has to remember.
+  static double get floatingRailWidth =>
+      floatingBarHeight + floatingBarHorizontal * 2;
 
   /// The device's bottom inset (home indicator), off the **view** — the same
   /// reason [appBarInset] reads the view at the top.
