@@ -247,6 +247,15 @@ abstract final class SdContentPaddingV2 {
   static double get floatingRailWidth =>
       floatingBarHeight + floatingBarHorizontal * 2;
 
+  /// How long one destination's cell is down the rail.
+  ///
+  /// Taller than the rail is thick, deliberately: a column of squares reads as
+  /// a strip of buttons, and the rail is one control. It also buys back the
+  /// vertical travel the thumb lost by standing up — five 110-tall cells is a
+  /// 552-long rail against the pill's 552-wide ceiling, so the two chromes
+  /// give a tab the same amount of room to be aimed at.
+  static double get floatingRailCellHeight => SdSpacingConstant.h96;
+
   /// The device's bottom inset (home indicator), off the **view** — the same
   /// reason [appBarInset] reads the view at the top.
   ///

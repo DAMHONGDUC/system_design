@@ -49,6 +49,11 @@ class SdNavigationRailV2 extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onSelected;
 
+  /// Test seam. How long the rail is and how thick it is are both real layout,
+  /// so a test measures its rect rather than reading arguments back.
+  @visibleForTesting
+  static const Key railSurfaceKey = Key('sd-navigation-rail-v2-surface');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,13 +112,15 @@ class _GlassNavRail extends StatelessWidget {
           ),
           clipBehavior: Clip.antiAlias,
           child: SizedBox(
+            key: SdNavigationRailV2.railSurfaceKey,
             // Thickness is the bar's height: the rail IS the pill turned, so
             // one number governs both and they cannot drift.
             width: SdContentPaddingV2.floatingBarHeight,
-            // One square cell per destination, so a five-tab rail is five
-            // times as long as it is wide and every glyph sits in the middle
-            // of its own square.
-            height: SdContentPaddingV2.floatingBarHeight * destinations.length,
+            // One cell per destination — longer than the rail is thick, so a
+            // five-tab rail reads as one control rather than a column of
+            // squares. See `floatingRailCellHeight`.
+            height:
+                SdContentPaddingV2.floatingRailCellHeight * destinations.length,
             child: Stack(
               fit: StackFit.expand,
               children: <Widget>[

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
 import '../sd_content_padding_v2/sd_content_padding_v2.dart';
-import '../sd_page_width_v2/sd_page_width_v2.dart';
 import '../sd_pinned_filter_bar_v2/sd_pinned_filter_bar_v2.dart';
 import '../sd_scaffold_v2/sd_scaffold_v2.dart';
 
@@ -127,14 +126,7 @@ class _CollapsingFilterScaffoldState
     final Widget? filter = widget.filter;
     final bool collapsed = filter != null && widget.collapsible && _collapsed;
 
-    // The body is a Stack of two different things, so the scaffold's own
-    // width cap is off and applied by hand below: the list is content and gets
-    // capped, the frosted strip is chrome and spans the window like the app
-    // bar it continues.
-    final Widget body = SdPageWidthV2(child: widget.body);
-
     return SdScaffoldV2(
-      constrainBodyWidth: false,
       title: AnimatedSwitcher(
         duration: _duration,
         switchInCurve: Curves.easeOutCubic,
@@ -144,12 +136,12 @@ class _CollapsingFilterScaffoldState
       actions: collapsed ? null : widget.actions,
       leading: widget.leading,
       body: filter == null
-          ? body
+          ? widget.body
           : Stack(
               children: <Widget>[
                 NotificationListener<ScrollUpdateNotification>(
                   onNotification: _onScroll,
-                  child: body,
+                  child: widget.body,
                 ),
                 Positioned(
                   top: 0,

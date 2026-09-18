@@ -26,6 +26,11 @@ enum SdWindowClassV2 {
 /// place in and a chart stretched into a horizon. Past the ceiling the extra
 /// room becomes margin.
 ///
+/// The column takes the **app bar with it** — `SdScaffoldV2` caps the whole
+/// screen, not just the body, so a title and its content share one leading
+/// edge. A header that spanned the window over a narrower column reads as two
+/// screens stacked.
+///
 /// **Three ceilings, not one**, for the same reason `SdContentPaddingV2` keeps
 /// `topGap` and `bottomGap` apart: a page of content, a bar of five glyphs and
 /// a one-question dialog are three different things that happen to measure the
@@ -63,10 +68,15 @@ abstract final class SdBreakpointV2 {
     _ => SdWindowClassV2.compact,
   };
 
-  /// The widest a column of content is ever drawn — what `SdScaffoldV2` caps
-  /// its body at, and what a screen building its own `Scaffold` reaches for
-  /// through `SdPageWidthV2`.
-  static double get contentMaxWidth => SdSpacingConstant.w600;
+  /// The widest a screen is ever drawn — app bar, pinned filter strip and body
+  /// alike. `SdScaffoldV2` applies it; a screen building its own `Scaffold`
+  /// (onboarding, the paywall) reaches for `SdPageWidthV2` instead.
+  ///
+  /// 800 design units, which is 920 rendered on an iPad. An 11" portrait
+  /// window is narrower than that once the rail takes its column, so the cap
+  /// only actually bites in landscape — which is the one window with room to
+  /// waste.
+  static double get contentMaxWidth => SdSpacingConstant.w800;
 
   /// The widest the floating nav pill is ever drawn. Narrower than
   /// [contentMaxWidth] on purpose: five glyphs spread across a 690-wide bar

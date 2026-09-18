@@ -36,7 +36,7 @@ final class SdSpacingConstant {
   /// other number is, and scaled like the rest so a column holds the same
   /// line of text at every size.
   static double get w480 => 480.w;
-  static double get w600 => 600.w;
+  static double get w800 => 800.w;
 
   // --- Vertical (.h) ---
   /// A hairline — the divider's thickness, and nothing else so far.

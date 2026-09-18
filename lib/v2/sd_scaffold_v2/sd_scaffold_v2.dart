@@ -25,7 +25,6 @@ class SdScaffoldV2 extends StatelessWidget {
     this.appBarBottom,
     this.floatingActionButton,
     this.bottomNavigationBar,
-    this.constrainBodyWidth = true,
     super.key,
   });
 
@@ -36,17 +35,6 @@ class SdScaffoldV2 extends StatelessWidget {
   final PreferredSizeWidget? appBarBottom;
   final Widget? floatingActionButton;
 
-  /// Whether [body] is capped at [SdBreakpointV2.contentMaxWidth] and
-  /// centred. On by default because a screen is a column of content and that
-  /// is what a wide window should do with it; a phone is unaffected either
-  /// way, since the cap is wider than any phone.
-  ///
-  /// Pass false where the body is not all content — a `Stack` whose top layer
-  /// is chrome that has to span the window (`SdCollapsingFilterScaffoldV2`'s
-  /// frosted filter strip). Those screens wrap their own scrollable in
-  /// [SdPageWidthV2] instead, so the list is capped and the strip is not.
-  final bool constrainBodyWidth;
-
   /// A bottom bar (e.g. the log flow's floating step progress). When set and
   /// glass is on, the body extends behind it so it refracts through the glass;
   /// pad the body's bottom by `SdContentPaddingV2.bottomBar` so its last item
@@ -55,6 +43,22 @@ class SdScaffoldV2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The cap goes around the whole Scaffold, not just the body: the app bar
+    // is part of the screen, and a title spanning a 1070-wide window over a
+    // 920-wide column reads as two screens stacked. `SdPageWidthV2` is a no-op
+    // on every phone, so this is the same single Scaffold there.
+    //
+    // The `ColoredBox` is what the margin beside the column is painted with. A
+    // pushed route has no surface of its own behind it, so without this the
+    // two strips either side of a detail screen would show whatever the route
+    // below happened to leave — on a fresh push, black.
+    return ColoredBox(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: SdPageWidthV2(child: _scaffold(context)),
+    );
+  }
+
+  Widget _scaffold(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: SdGlassV2.isSupported,
       // Let the body flow behind a floating glass bottom bar so it refracts through it (mirrors the shell's bottom nav).
@@ -70,13 +74,10 @@ class SdScaffoldV2 extends StatelessWidget {
       // - tap anywhere outside a focused field drops focus and dismisses the keyboard
       // - translucent so it never eats taps meant for buttons/list rows; only reached when nothing nearer claims it
       // - a scroll drag defeats the tap, so scrolling is unaffected
-      // The gesture wraps the capped column AND the margin beside it: a tap
-      // on the empty half of a tablet screen is a tap on nothing, which is
-      // exactly what should put the keyboard away.
       body: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         behavior: HitTestBehavior.translucent,
-        child: constrainBodyWidth ? SdPageWidthV2(child: body) : body,
+        child: body,
       ),
     );
   }
