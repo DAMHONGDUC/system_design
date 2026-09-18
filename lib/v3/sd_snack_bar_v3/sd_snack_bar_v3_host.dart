@@ -80,13 +80,14 @@ class _SdSnackBarHostV3State extends State<_SdSnackBarHostV3>
           : SdContentPaddingV3.statusBarInset(context) +
                 kToolbarHeight +
                 SdSpacingConstant.h12,
-      // The same call a tab screen makes for its own last row, so a message
-      // rests exactly where the content it is about does.
+      // The same arithmetic a tab screen makes for its own last row, so a
+      // message rests exactly where the content it is about does. Resolved
+      // from the flag rather than from the scope: this builds in the root
+      // overlay, where the scope is not visible.
       bottom: fromBottom
-          ? SdContentPaddingV3.bottom(
-              context,
-              floatingNav: widget.overFloatingBar,
-            )
+          ? (widget.overFloatingBar
+                ? SdContentPaddingV3.aboveFloatingBar(context)
+                : SdContentPaddingV3.detailBottom(context))
           : null,
       child: FadeTransition(
         opacity: CurvedAnimation(

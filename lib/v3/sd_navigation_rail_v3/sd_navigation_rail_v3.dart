@@ -50,6 +50,12 @@ class SdNavigationRailV3 extends StatelessWidget {
   @visibleForTesting
   static const Key selectedCapsuleKey = Key('sd-navigation-rail-capsule');
 
+  /// Test seam for the rail's own surface. The three gaps either side of it
+  /// are the rule this widget exists under, and a test measures them off the
+  /// glass rather than off the thumb inside it.
+  @visibleForTesting
+  static const Key railSurfaceKey = Key('sd-navigation-rail-surface');
+
   @override
   Widget build(BuildContext context) => SdScaffoldV3(
     pageMargin: false,
@@ -107,6 +113,7 @@ class _Rail extends StatelessWidget {
             fake: !SdGlassV3.isSupported,
             glassContainsChild: false,
             child: SizedBox(
+              key: SdNavigationRailV3.railSurfaceKey,
               width: thickness,
               height:
                   SdContentPaddingV3.railCellLength * destinations.length,

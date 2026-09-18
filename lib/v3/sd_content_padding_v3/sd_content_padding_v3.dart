@@ -287,8 +287,19 @@ abstract final class SdContentPaddingV3 {
   /// above the bottom of the window for no reason.
   static double bottom(BuildContext context, {bool floatingNav = false}) =>
       floatingNav && SdFloatingBarScopeV3.hasBarBelow(context)
-      ? floatingBarInset(context) + bottomGap
+      ? aboveFloatingBar(context)
       : detailBottom(context);
+
+  /// Where the last item ends when a bar is **known** to be below.
+  ///
+  /// [bottom] is the way in for anything building inside the shell, because
+  /// it can ask the scope itself. This is for the one caller that cannot: the
+  /// snackbar renders into the root overlay, above the whole app, where the
+  /// scope is not visible — so it resolves the question at the call site and
+  /// brings the answer here. Same arithmetic either way, which is the point
+  /// of it being a method rather than two additions at a call site.
+  static double aboveFloatingBar(BuildContext context) =>
+      floatingBarInset(context) + bottomGap;
 
   /// Where the last item ends on a route with nothing floating over it.
   ///
