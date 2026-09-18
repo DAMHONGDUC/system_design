@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../sd_app_bar_v2/sd_app_bar_v2.dart';
 import '../sd_liquid_glass_theme_v2/sd_liquid_glass_theme_v2.dart';
+import '../sd_page_width_v2/sd_page_width_v2.dart';
 
 /// The app's standard screen scaffold. Every top-level screen uses this
 /// instead of a bare [Scaffold] so the frosted [SdAppBarV2] and the
@@ -24,6 +25,7 @@ class SdScaffoldV2 extends StatelessWidget {
     this.appBarBottom,
     this.floatingActionButton,
     this.bottomNavigationBar,
+    this.constrainBodyWidth = true,
     super.key,
   });
 
@@ -33,6 +35,17 @@ class SdScaffoldV2 extends StatelessWidget {
   final Widget? leading;
   final PreferredSizeWidget? appBarBottom;
   final Widget? floatingActionButton;
+
+  /// Whether [body] is capped at [SdBreakpointV2.contentMaxWidth] and
+  /// centred. On by default because a screen is a column of content and that
+  /// is what a wide window should do with it; a phone is unaffected either
+  /// way, since the cap is wider than any phone.
+  ///
+  /// Pass false where the body is not all content — a `Stack` whose top layer
+  /// is chrome that has to span the window (`SdCollapsingFilterScaffoldV2`'s
+  /// frosted filter strip). Those screens wrap their own scrollable in
+  /// [SdPageWidthV2] instead, so the list is capped and the strip is not.
+  final bool constrainBodyWidth;
 
   /// A bottom bar (e.g. the log flow's floating step progress). When set and
   /// glass is on, the body extends behind it so it refracts through the glass;
@@ -57,10 +70,13 @@ class SdScaffoldV2 extends StatelessWidget {
       // - tap anywhere outside a focused field drops focus and dismisses the keyboard
       // - translucent so it never eats taps meant for buttons/list rows; only reached when nothing nearer claims it
       // - a scroll drag defeats the tap, so scrolling is unaffected
+      // The gesture wraps the capped column AND the margin beside it: a tap
+      // on the empty half of a tablet screen is a tap on nothing, which is
+      // exactly what should put the keyboard away.
       body: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         behavior: HitTestBehavior.translucent,
-        child: body,
+        child: constrainBodyWidth ? SdPageWidthV2(child: body) : body,
       ),
     );
   }

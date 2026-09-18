@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../core/sd_spacing_constant.dart';
+import '../sd_breakpoint_v2/sd_breakpoint_v2.dart';
 import '../sd_content_padding_v2/sd_content_padding_v2.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 import '../sd_icon_v2/sd_icon_v2.dart';
@@ -59,36 +60,42 @@ class SdDialogV2 extends StatelessWidget {
         borderRadius: BorderRadius.circular(SdSpacingConstant.r20),
       ),
       insetPadding: EdgeInsets.symmetric(horizontal: SdSpacingConstant.w32),
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          SdContentPaddingV2.horizontal,
-          SdSpacingConstant.h22,
-          SdContentPaddingV2.horizontal,
-          SdSpacingConstant.h16,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(title, style: context.textTheme.titleLarge!),
-            if (content != null) ...[
-              SizedBox(height: SdSpacingConstant.h16),
-              content!,
+      // The inset alone is a phone rule: on an iPad it leaves a 746-wide
+      // dialog, which is one question asked across the whole table. The column
+      // below stretches to whatever width it is given, so the ceiling is it.
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: SdBreakpointV2.dialogMaxWidth),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            SdContentPaddingV2.horizontal,
+            SdSpacingConstant.h22,
+            SdContentPaddingV2.horizontal,
+            SdSpacingConstant.h16,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(title, style: context.textTheme.titleLarge!),
+              if (content != null) ...[
+                SizedBox(height: SdSpacingConstant.h16),
+                content!,
+              ],
+              if (actions.isNotEmpty) ...[
+                SizedBox(height: SdSpacingConstant.h20),
+                // Falls back to stacking the actions when a narrow dialog
+                // (insetPadding leaves little room) can't fit them side by
+                // side — a plain Row overflows instead of ever giving up the
+                // row layout.
+                OverflowBar(
+                  alignment: MainAxisAlignment.end,
+                  spacing: SdSpacingConstant.w8,
+                  overflowSpacing: SdSpacingConstant.h8,
+                  children: actions,
+                ),
+              ],
             ],
-            if (actions.isNotEmpty) ...[
-              SizedBox(height: SdSpacingConstant.h20),
-              // Falls back to stacking the actions when a narrow dialog
-              // (insetPadding leaves little room) can't fit them side by
-              // side — a plain Row overflows instead of ever giving up the
-              // row layout.
-              OverflowBar(
-                alignment: MainAxisAlignment.end,
-                spacing: SdSpacingConstant.w8,
-                overflowSpacing: SdSpacingConstant.h8,
-                children: actions,
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );

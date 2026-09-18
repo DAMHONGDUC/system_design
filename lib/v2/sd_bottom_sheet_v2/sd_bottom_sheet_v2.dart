@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
+import '../sd_breakpoint_v2/sd_breakpoint_v2.dart';
 import '../sd_context_v2/sd_context_v2.dart';
 
 /// Standard modal sheet for the app. Always use this instead of raw
@@ -17,6 +18,11 @@ import '../sd_context_v2/sd_context_v2.dart';
 /// handle — which promises a swipe that no longer works — is dropped. The
 /// sheet's own content still has to block the system back gesture
 /// (`PopScope`); that is the route's job, not this presenter's.
+///
+/// The panel is capped at [SdBreakpointV2.contentMaxWidth] and Material
+/// centres it — a sheet that spanned a 1180-wide landscape iPad would be a
+/// dark slab with a column of controls lost in the middle of it. Below the
+/// cap (every phone) the sheet is edge to edge exactly as before.
 Future<T?> showSdBottomSheetV2<T>(
   BuildContext context, {
   required WidgetBuilder builder,
@@ -37,6 +43,7 @@ Future<T?> showSdBottomSheetV2<T>(
         top: Radius.circular(SdSpacingConstant.r22),
       ),
     ),
+    constraints: BoxConstraints(maxWidth: SdBreakpointV2.contentMaxWidth),
     isScrollControlled: isScrollControlled,
     builder: (context) => Column(
       mainAxisSize: MainAxisSize.min,

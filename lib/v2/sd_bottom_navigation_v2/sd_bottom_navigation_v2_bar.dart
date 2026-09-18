@@ -41,50 +41,66 @@ class _GlassNavBar extends StatelessWidget {
       SdContentPaddingV2.floatingBarHorizontal,
       SdContentPaddingV2.navBarOffset(context),
     ),
-    child: SdPopScaleV2(
-      peakScale: _popPeakScale,
-      // The pill keeps its bottom edge on the safe-area line and grows up.
+    // Capped and centred, or the pill spans a 1180-wide iPad and five glyphs
+    // stop reading as one control — the thumb would cross the whole screen to
+    // change tab, and the two end segments sit under different hands. Wider
+    // than the cap is every phone, where this changes nothing.
+    // `heightFactor: 1` so it still wraps the bar's own height: the Scaffold
+    // hands this slot the full viewport height, and a plain Center would take
+    // all of it.
+    child: Align(
       alignment: Alignment.bottomCenter,
-      child: LiquidGlass.withOwnLayer(
-        settings: kChromeGlass,
-        shape: LiquidRoundedSuperellipse(
-          borderRadius: SdContentPaddingV2.floatingBarRadius,
+      heightFactor: 1,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: SdBreakpointV2.floatingBarMaxWidth,
         ),
-        clipBehavior: Clip.antiAlias,
-        // `Scaffold` hands its bottom slot the device inset; the pill already
-        // clears it through `navBarOffset`, and taking it twice lifts the bar
-        // off the bottom of the screen by a home indicator's height.
-        child: MediaQuery.removePadding(
-          context: context,
-          removeBottom: true,
-          child: SizedBox(
-            // Shared with the log flow's step bar and with what content
-            // clears — see `SdContentPaddingV2.floatingBarHeight`.
-            height: SdContentPaddingV2.floatingBarHeight,
-            child: Stack(
-              // Expand, or the row of segments takes only the height of its
-              // own glyphs and the Stack parks it at the top edge.
-              fit: StackFit.expand,
-              children: <Widget>[
-                _SelectedThumb(
-                  count: destinations.length,
-                  selectedIndex: selectedIndex,
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: SdPopScaleV2(
+          peakScale: _popPeakScale,
+          // The pill keeps its bottom edge on the safe-area line and grows up.
+          alignment: Alignment.bottomCenter,
+          child: LiquidGlass.withOwnLayer(
+            settings: kChromeGlass,
+            shape: LiquidRoundedSuperellipse(
+              borderRadius: SdContentPaddingV2.floatingBarRadius,
+            ),
+            clipBehavior: Clip.antiAlias,
+            // `Scaffold` hands its bottom slot the device inset; the pill already
+            // clears it through `navBarOffset`, and taking it twice lifts the bar
+            // off the bottom of the screen by a home indicator's height.
+            child: MediaQuery.removePadding(
+              context: context,
+              removeBottom: true,
+              child: SizedBox(
+                // Shared with the log flow's step bar and with what content
+                // clears — see `SdContentPaddingV2.floatingBarHeight`.
+                height: SdContentPaddingV2.floatingBarHeight,
+                child: Stack(
+                  // Expand, or the row of segments takes only the height of its
+                  // own glyphs and the Stack parks it at the top edge.
+                  fit: StackFit.expand,
                   children: <Widget>[
-                    for (final (int index, SdNavDestinationV2 destination)
-                        in destinations.indexed)
-                      Expanded(
-                        child: _NavSegment(
-                          destination: destination,
-                          selected: index == selectedIndex,
-                          onTap: () => onSelected(index),
-                        ),
-                      ),
+                    _SelectedThumb(
+                      count: destinations.length,
+                      selectedIndex: selectedIndex,
+                    ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        for (final (int index, SdNavDestinationV2 destination)
+                            in destinations.indexed)
+                          Expanded(
+                            child: _NavSegment(
+                              destination: destination,
+                              selected: index == selectedIndex,
+                              onTap: () => onSelected(index),
+                            ),
+                          ),
+                      ],
+                    ),
                   ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

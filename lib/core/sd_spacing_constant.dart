@@ -30,6 +30,14 @@ final class SdSpacingConstant {
   static double get w160 => 160.w;
   static double get w240 => 240.w;
 
+  /// Wide enough to be a measure rather than a gap: the two ceilings a
+  /// tablet layout needs — the content column and the floating nav pill.
+  /// Here rather than as literals at the call site for the same reason every
+  /// other number is, and scaled like the rest so a column holds the same
+  /// line of text at every size.
+  static double get w480 => 480.w;
+  static double get w600 => 600.w;
+
   // --- Vertical (.h) ---
   /// A hairline — the divider's thickness, and nothing else so far.
   static double get h1 => 1.h;
