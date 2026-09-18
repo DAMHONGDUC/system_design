@@ -2,7 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../core/sd_breakpoint.dart';
 import '../../core/sd_spacing_constant.dart';
+import '../sd_floating_bar_scope_v3/sd_floating_bar_scope_v3.dart';
 
 /// Every screen's content insets, in one class.
 ///
@@ -27,74 +29,81 @@ import '../../core/sd_spacing_constant.dart';
 /// every scroll frame of a list that can run to thousands of rows; the tab
 /// bar is a compact fixed strip whose cost does not grow with the content, and
 /// it is the one piece of chrome the whole app is judged by.
-/// The shape a screen's body is, and therefore how wide it may get.
-///
-/// An enum rather than a width at a call site: a screen says what it *is* and
-/// the numbers stay on [SdContentPaddingV3], so two screens of the same shape
-/// cannot come out at two widths.
-enum SdPageWidthV3 {
-  /// One column read top to bottom — a form, a detail, a settings list, a
-  /// list of rows. Extra width becomes margin, because a line of type run
-  /// across a landscape tablet sends the eye back over the whole window to
-  /// find the next one.
-  column,
-
-  /// A body that turns spare width into columns — a grid of cards, a row of
-  /// stat tiles. It still stops, because a grid that never stops is a grid
-  /// whose cards get further apart than they are wide.
-  wide,
-}
-
 abstract final class SdContentPaddingV3 {
   /// The gutter: 16 either side of any content.
-  ///
-  /// **The floor on a screen's side inset, not the whole of it** — see
-  /// [sideInset]. On a phone it is the whole of it, which is why every call
-  /// site written before tablets still reads correctly.
   static double get horizontal => SdSpacingConstant.w16;
 
-  // --- How wide content is allowed to get ---
+  // --- The tablet margin ---
   //
-  // Raw logical pixels, and deliberately not `SdSpacingConstant`: these are
-  // measured against the window rather than drawn on the design canvas, so
-  // scaling them by screenutil would make the cap move with the very width it
-  // is capping. Same reason as `SdBreakpointConstant`.
+  // One number, three gaps: window edge to nav, nav to content, content to
+  // the far edge. Content fills whatever is left, which is why there is no
+  // maximum content width here — a ceiling plus centring produces three
+  // different gaps, and only one of them would be a decision.
 
-  /// The widest a [SdPageWidthV3.column] body gets.
-  static const double maxColumnWidth = 640;
+  /// The one gap either side of a page on anything wider than a phone.
+  static double get tabletMargin => SdSpacingConstant.w40;
 
-  /// The widest a [SdPageWidthV3.wide] body gets.
-  static const double maxWideWidth = 1040;
-
-  /// The cap for a body of this shape.
-  static double maxWidth(SdPageWidthV3 width) => switch (width) {
-    SdPageWidthV3.column => maxColumnWidth,
-    SdPageWidthV3.wide => maxWideWidth,
-  };
-
-  /// How far in from each edge a screen's content starts.
+  /// The rail's thickness.
   ///
-  /// [horizontal] on a phone, and whatever it takes to hold the content at
-  /// [maxWidth] on anything wider — so a body centres itself without any
-  /// screen owning a `ConstrainedBox` of its own.
-  ///
-  /// Pass `gutter: false` for content that brings its own horizontal padding;
-  /// the centring still applies, only the phone's floor drops away.
-  ///
-  /// **Measured from the window**, which is the body's width as long as
-  /// nothing sits beside it. A side rail would change that, and the
-  /// measurement moves to the scope carrying the rail's footprint when one
-  /// lands — never to a `LayoutBuilder` at a call site.
-  static double sideInset(
-    BuildContext context, {
-    SdPageWidthV3 width = SdPageWidthV3.column,
-    bool gutter = true,
-  }) {
-    final double window = MediaQuery.sizeOf(context).width;
-    final double floor = gutter ? horizontal : 0;
+  /// **On the horizontal ladder, and that is not a detail.** A standing rail
+  /// is thick across, so a vertical value would render it at two thicknesses
+  /// on one device — a landscape window's height ratio sits below its width
+  /// ratio, and the control would change as the tablet is turned.
+  static double get railThickness => SdSpacingConstant.w56;
 
-    return math.max(floor, (window - maxWidth(width)) / 2);
+  /// How long one destination cell is down the rail.
+  ///
+  /// Vertical, which is the opposite of [railThickness] and correct for the
+  /// same reason: this measures along the rail, so the shorter window gets
+  /// the shorter cell.
+  static double get railCellLength => SdSpacingConstant.h96;
+
+  /// Everything the rail takes out of the window: its own thickness plus the
+  /// margin between it and the screen edge.
+  static double get railColumnWidth => tabletMargin + railThickness;
+
+  /// What a screen adds either side, on top of the [horizontal] it already
+  /// pays.
+  ///
+  /// Zero on a phone — the whole of this file is a no-op at phone width.
+  ///
+  /// **The margin less the gutter the screen already brings.** Adding the
+  /// whole of it on top stacks two gutters and the gap comes out wider than
+  /// the two beside the nav.
+  ///
+  /// **Half a nav column more when there is no nav.** A route that is a
+  /// sibling of the shell rather than a child of a branch loses the rail, and
+  /// a plain margin would leave it a whole nav column wider than the tab
+  /// screen it was opened from — content jumping outward on the way in and
+  /// back on the way out. This is the inset that lands both on the same
+  /// width.
+  static double pageMargin(BuildContext context) {
+    if (!SdBreakpointConstant.of(MediaQuery.sizeOf(context).width).isWide) {
+      return 0;
+    }
+
+    final double margin = math.max(0, tabletMargin - horizontal);
+
+    return SdFloatingBarScopeV3.edgeOf(context) == null
+        ? margin + railColumnWidth / 2
+        : margin;
   }
+
+  // --- Panel ceilings ---
+  //
+  // A page takes margins; a panel keeps a ceiling. A sheet spanning a
+  // landscape tablet is a slab with a column of controls lost in the middle.
+  //
+  // Separate fields holding the same value on purpose: they are different
+  // things that happen to measure alike today, and one shared constant is how
+  // a change to one silently moves the other.
+
+  /// The widest a modal sheet gets. Material centres it once it is capped.
+  static double get maxSheetWidth => SdSpacingConstant.w800;
+
+  /// The widest a dialog gets. `insetPadding` alone leaves one most of a
+  /// tablet wide.
+  static double get maxDialogWidth => SdSpacingConstant.w480;
 
   /// Gap between the app bar and the first item of content. **8, and every
   /// screen reads it from here** — owner's rule. The bar is already a band of
@@ -270,8 +279,14 @@ abstract final class SdContentPaddingV3 {
   /// behind the glass bar and has to clear its whole footprint plus a gap.
   /// Everything else — a pushed detail, a sheet route — has nothing floating
   /// over it and takes [detailBottom].
+  ///
+  /// **[floatingNav] means "I am a tab screen", not "there is a bar below
+  /// me".** Which is true is the scope's to answer: on a tablet the chrome is
+  /// a rail down the side, nothing covers the bottom edge, and a tab screen
+  /// reserving the pill's footprint there would end its list a bar's height
+  /// above the bottom of the window for no reason.
   static double bottom(BuildContext context, {bool floatingNav = false}) =>
-      floatingNav
+      floatingNav && SdFloatingBarScopeV3.hasBarBelow(context)
       ? floatingBarInset(context) + bottomGap
       : detailBottom(context);
 
@@ -294,20 +309,13 @@ abstract final class SdContentPaddingV3 {
   ///
   /// **No top inset.** [topGap] is a `SizedBox` the screen places itself —
   /// see that getter.
-  static EdgeInsets screen(
-    BuildContext context, {
-    bool floatingNav = false,
-    SdPageWidthV3 width = SdPageWidthV3.column,
-  }) {
-    final double side = sideInset(context, width: width);
-
-    return EdgeInsets.fromLTRB(
-      side,
-      0,
-      side,
-      bottom(context, floatingNav: floatingNav),
-    );
-  }
+  static EdgeInsets screen(BuildContext context, {bool floatingNav = false}) =>
+      EdgeInsets.fromLTRB(
+        horizontal,
+        0,
+        horizontal,
+        bottom(context, floatingNav: floatingNav),
+      );
 
   /// Same vertical insets, no gutter — for a list of rows or cards that bring
   /// their own horizontal padding. Adding the gutter on top of theirs would
@@ -317,13 +325,7 @@ abstract final class SdContentPaddingV3 {
   static EdgeInsets fullBleed(
     BuildContext context, {
     bool floatingNav = false,
-    SdPageWidthV3 width = SdPageWidthV3.column,
-  }) => EdgeInsets.fromLTRB(
-    sideInset(context, width: width, gutter: false),
-    0,
-    sideInset(context, width: width, gutter: false),
-    bottom(context, floatingNav: floatingNav),
-  );
+  }) => EdgeInsets.only(bottom: bottom(context, floatingNav: floatingNav));
 
   /// The status bar, read off the **view** — see [_viewBottom] for why the
   /// ambient `MediaQuery` is the wrong source.

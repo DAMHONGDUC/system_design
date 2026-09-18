@@ -61,6 +61,10 @@ class SdDialogV3 extends StatelessWidget {
     insetPadding: EdgeInsets.symmetric(
       horizontal: SdContentPaddingV3.horizontal,
     ),
+    // A panel keeps a ceiling where a page takes margins: the gutter alone
+    // would leave this most of a tablet wide, which is a slab with a couple
+    // of buttons lost in the middle of it.
+    constraints: BoxConstraints(maxWidth: SdContentPaddingV3.maxDialogWidth),
     child: Container(
       padding: SdContentPaddingV3.card,
       decoration: BoxDecoration(

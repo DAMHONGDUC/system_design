@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/sd_spacing_constant.dart';
 import '../sd_floating_bar_scope_v3/sd_floating_bar_scope_v3.dart';
 import '../sd_glass_nav_bar_v3/sd_glass_nav_bar_v3.dart';
+import '../sd_nav_cell_v3/sd_nav_cell_v3.dart';
 import '../sd_scaffold_v3/sd_scaffold_v3.dart';
 
 /// The complete frame for a glyph-only floating bottom navigation.
@@ -64,7 +65,9 @@ class _SdBottomNavigationV3State extends State<SdBottomNavigationV3> {
   @override
   Widget build(BuildContext context) => SdScaffoldV3(
     extendBody: true,
+    pageMargin: false,
     body: SdFloatingBarScopeV3(
+      edge: SdFloatingBarEdgeV3.bottom,
       child: GestureDetector(
         key: SdBottomNavigationV3.swipeSurfaceKey,
         behavior: HitTestBehavior.translucent,

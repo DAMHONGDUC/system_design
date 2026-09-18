@@ -40,6 +40,8 @@ export 'sd_icon_v3/sd_icon_v3.dart';
 export 'sd_keyboard_dismiss_v3/sd_keyboard_dismiss_v3.dart';
 export 'sd_loading_v3/sd_loading_v3.dart';
 export 'sd_motion_v3/sd_motion_v3.dart';
+export 'sd_nav_cell_v3/sd_nav_cell_v3.dart';
+export 'sd_navigation_rail_v3/sd_navigation_rail_v3.dart';
 export 'sd_radius_v3/sd_radius_v3.dart';
 export 'sd_scaffold_v3/sd_scaffold_v3.dart';
 export 'sd_search_field_v3/sd_search_field_v3.dart';

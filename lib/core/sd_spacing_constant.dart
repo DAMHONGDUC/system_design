@@ -30,6 +30,14 @@ final class SdSpacingConstant {
   static double get w160 => 160.w;
   static double get w240 => 240.w;
 
+  // --- Panel ceilings ---
+  //
+  // Far off the ladder above because they are not spacing: they are how wide
+  // a thing that floats over a page is allowed to get. See
+  // `SdContentPaddingV3`, which is the only caller.
+  static double get w480 => 480.w;
+  static double get w800 => 800.w;
+
   // --- Vertical (.h) ---
   /// A hairline — the divider's thickness, and nothing else so far.
   static double get h1 => 1.h;

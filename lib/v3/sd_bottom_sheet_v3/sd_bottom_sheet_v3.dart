@@ -216,6 +216,9 @@ Future<T?> showSdBottomSheetV3<T>({
     context: context,
     useRootNavigator: true,
     isScrollControlled: true,
+    // A panel keeps a ceiling. Material centres a modal sheet once it is
+    // constrained, so this is the whole of what a wide window needs.
+    constraints: BoxConstraints(maxWidth: SdContentPaddingV3.maxSheetWidth),
     isDismissible: dismissable,
     enableDrag: dismissable,
     backgroundColor: Colors.transparent,
