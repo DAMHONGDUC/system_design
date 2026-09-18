@@ -108,14 +108,14 @@ class _GlassNavRail extends StatelessWidget {
         child: LiquidGlass.withOwnLayer(
           settings: kChromeGlass,
           shape: LiquidRoundedSuperellipse(
-            borderRadius: SdContentPaddingV2.floatingBarRadius,
+            borderRadius: SdContentPaddingV2.floatingRailRadius,
           ),
           clipBehavior: Clip.antiAlias,
           child: SizedBox(
             key: SdNavigationRailV2.railSurfaceKey,
-            // Thickness is the bar's height: the rail IS the pill turned, so
-            // one number governs both and they cannot drift.
-            width: SdContentPaddingV2.floatingBarHeight,
+            // The pill's 56, measured across the width — see
+            // `floatingRailThickness` for why it is not the pill's height.
+            width: SdContentPaddingV2.floatingRailThickness,
             // One cell per destination — longer than the rail is thick, so a
             // five-tab rail reads as one control rather than a column of
             // squares. See `floatingRailCellHeight`.

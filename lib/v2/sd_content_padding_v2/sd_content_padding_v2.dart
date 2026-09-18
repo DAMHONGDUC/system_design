@@ -237,15 +237,30 @@ abstract final class SdContentPaddingV2 {
   static double floatingBarInset(BuildContext context) =>
       navBarOffset(context) + floatingBarHeight;
 
+  /// How thick `SdNavigationRailV2` is — the pill's 56, but measured across
+  /// the width, because on a standing rail that is the axis thickness is on.
+  ///
+  /// **Not [floatingBarHeight].** Same 56 in the design, and it has to be a
+  /// `.w` here: screenutil scales the two axes by different amounts, and a
+  /// landscape iPad (whose height ratio is 0.96 against a width ratio of 1.15)
+  /// drew the rail 54 thick in landscape against 64 in portrait — the same
+  /// control, two thicknesses, depending on which way the iPad was held.
+  static double get floatingRailThickness => SdSpacingConstant.w56;
+
   /// The width of the column `SdNavigationRailV2` occupies: the rail is the
-  /// pill stood on its end, so it is [floatingBarHeight] thick with
+  /// pill stood on its end, so it is [floatingRailThickness] thick with
   /// [floatingBarHorizontal] of air either side.
   ///
-  /// Derived from the pill's own two numbers rather than typed, for the reason
-  /// [floatingBarHorizontal] exists at all — the day the pill gets thicker,
-  /// the rail does too, and neither has to remember.
+  /// Derived from those two rather than typed, for the reason
+  /// [floatingBarHorizontal] exists at all — the day the rail gets thicker,
+  /// its column does too, and neither has to remember.
   static double get floatingRailWidth =>
-      floatingBarHeight + floatingBarHorizontal * 2;
+      floatingRailThickness + floatingBarHorizontal * 2;
+
+  /// The rail's corner radius: half its thickness, so the short ends are full
+  /// semicircles. Derived, never typed — see [floatingBarRadius], which is the
+  /// same rule on the other axis.
+  static double get floatingRailRadius => floatingRailThickness / 2;
 
   /// How long one destination's cell is down the rail.
   ///
