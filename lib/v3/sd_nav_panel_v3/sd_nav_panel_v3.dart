@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 import '../sd_content_padding_v3/sd_content_padding_v3.dart';
 import '../sd_context_v3/sd_context_v3.dart';
 import '../sd_floating_bar_scope_v3/sd_floating_bar_scope_v3.dart';
-import '../sd_icon_v3/sd_icon_v3.dart';
 import '../sd_motion_v3/sd_motion_v3.dart';
 import '../sd_nav_cell_v3/sd_nav_cell_v3.dart';
+import '../sd_nav_panel_scope_v3/sd_nav_panel_scope_v3.dart';
+import '../sd_nav_panel_toggle_v3/sd_nav_panel_toggle_v3.dart';
 import '../sd_scaffold_v3/sd_scaffold_v3.dart';
 
 part 'sd_nav_panel_v3_panel.dart';
 
 /// Proportional tablet navigation; the host owns expansion and routing state.
 /// The toggle is separate from the destinations so it never becomes a tab.
+///
+/// **Collapsed, the panel draws nothing at all.** It publishes
+/// [SdNavPanelScopeV3] over the content and the screen's own chrome hosts the
+/// reopen control — see [SdNavPanelToggleV3.collapsedOf]. So the content
+/// starts where it would with no sidebar, and the top safe inset has one
+/// owner in both states: the screen's app bar.
 class SdNavPanelV3 extends StatelessWidget {
   const SdNavPanelV3({
     required this.body,
@@ -52,9 +58,6 @@ class SdNavPanelV3 extends StatelessWidget {
 
   @visibleForTesting
   static const Key contentRegionKey = Key('sd-nav-panel-content');
-
-  @visibleForTesting
-  static const Key toggleKey = Key('sd-nav-panel-toggle');
 
   @override
   Widget build(BuildContext context) => SdScaffoldV3(
@@ -111,27 +114,15 @@ class SdNavPanelV3 extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: Column(
-                key: contentRegionKey,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  if (!isExpanded)
-                    SafeArea(
-                      bottom: false,
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: _PanelToggle(
-                          key: toggleKey,
-                          expanded: false,
-                          label: expandLabel,
-                          onPressed: () => onExpansionChanged(true),
-                        ),
-                      ),
-                    ),
-                  Expanded(
-                    child: Align(alignment: Alignment.topCenter, child: body),
-                  ),
-                ],
+              child: SdNavPanelScopeV3(
+                isExpanded: isExpanded,
+                onExpand: () => onExpansionChanged(true),
+                expandLabel: expandLabel,
+                child: Align(
+                  key: contentRegionKey,
+                  alignment: Alignment.topCenter,
+                  child: body,
+                ),
               ),
             ),
           ],

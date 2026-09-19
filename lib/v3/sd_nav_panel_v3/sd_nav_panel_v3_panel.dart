@@ -29,8 +29,8 @@ class _Panel extends StatelessWidget {
         children: <Widget>[
           Align(
             alignment: Alignment.centerRight,
-            child: _PanelToggle(
-              key: isExpanded ? SdNavPanelV3.toggleKey : null,
+            child: SdNavPanelToggleV3(
+              key: isExpanded ? SdNavPanelToggleV3.toggleKey : null,
               expanded: isExpanded,
               label: toggleLabel,
               onPressed: onToggle,
@@ -48,29 +48,6 @@ class _Panel extends StatelessWidget {
           ),
         ],
       ),
-    ),
-  );
-}
-
-class _PanelToggle extends StatelessWidget {
-  const _PanelToggle({
-    required this.expanded,
-    required this.label,
-    required this.onPressed,
-    super.key,
-  });
-
-  final bool expanded;
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) => Semantics(
-    expanded: expanded,
-    child: IconButton(
-      tooltip: label,
-      onPressed: onPressed,
-      icon: SdIconV3(Symbols.menu_),
     ),
   );
 }

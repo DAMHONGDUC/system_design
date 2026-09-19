@@ -41,6 +41,8 @@ export 'sd_keyboard_dismiss_v3/sd_keyboard_dismiss_v3.dart';
 export 'sd_loading_v3/sd_loading_v3.dart';
 export 'sd_motion_v3/sd_motion_v3.dart';
 export 'sd_nav_cell_v3/sd_nav_cell_v3.dart';
+export 'sd_nav_panel_scope_v3/sd_nav_panel_scope_v3.dart';
+export 'sd_nav_panel_toggle_v3/sd_nav_panel_toggle_v3.dart';
 export 'sd_nav_panel_v3/sd_nav_panel_v3.dart';
 export 'sd_radius_v3/sd_radius_v3.dart';
 export 'sd_scaffold_v3/sd_scaffold_v3.dart';

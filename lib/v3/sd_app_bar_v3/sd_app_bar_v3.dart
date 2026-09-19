@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/sd_spacing_constant.dart';
 import '../sd_context_v3/sd_context_v3.dart';
 import '../sd_icon_v3/sd_icon_v3.dart';
+import '../sd_nav_panel_toggle_v3/sd_nav_panel_toggle_v3.dart';
 import '../sd_radius_v3/sd_radius_v3.dart';
 import '../sd_text_style_v3/sd_text_style_v3.dart';
 
@@ -28,6 +29,11 @@ import '../sd_text_style_v3/sd_text_style_v3.dart';
 /// [title] is a `String` because a screen title is always a string —
 /// a widget slot here is how app bars grow bespoke layouts that stop matching
 /// each other.
+///
+/// **A collapsed tablet sidebar puts its reopen control in [leading].** The
+/// bar is the only chrome on a tab screen that is always up, so it is where
+/// the menu belongs — and a screen passing its own [leading] keeps it, because
+/// a screen that has taken that slot has a reason to own it.
 class SdAppBarV3 extends StatelessWidget implements PreferredSizeWidget {
   const SdAppBarV3({
     required this.title,
@@ -82,43 +88,48 @@ class SdAppBarV3 extends StatelessWidget implements PreferredSizeWidget {
   );
 
   @override
-  Widget build(BuildContext context) => AppBar(
-    backgroundColor: context.sdTheme3.background,
-    surfaceTintColor: Colors.transparent,
-    scrolledUnderElevation: 0,
-    elevation: 0,
-    centerTitle: false,
-    toolbarHeight: toolbarHeight + (subtitle == null ? 0 : subtitleHeight),
-    leading: leading,
-    automaticallyImplyLeading: automaticallyImplyLeading,
-    actions: actions,
-    bottom: bottom,
-    titleSpacing: SdSpacingConstant.w16,
-    title: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        if (onTitleTap == null)
-          Text(
-            title,
-            style: context.textTheme3.titleMedium!.semiBold3.copyWith(
-              color: context.sdTheme3.textPrimary,
+  Widget build(BuildContext context) {
+    final Widget? barLeading =
+        leading ?? SdNavPanelToggleV3.collapsedOf(context);
+
+    return AppBar(
+      backgroundColor: context.sdTheme3.background,
+      surfaceTintColor: Colors.transparent,
+      scrolledUnderElevation: 0,
+      elevation: 0,
+      centerTitle: false,
+      toolbarHeight: toolbarHeight + (subtitle == null ? 0 : subtitleHeight),
+      leading: barLeading,
+      automaticallyImplyLeading: automaticallyImplyLeading,
+      actions: actions,
+      bottom: bottom,
+      titleSpacing: SdSpacingConstant.w16,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          if (onTitleTap == null)
+            Text(
+              title,
+              style: context.textTheme3.titleMedium!.semiBold3.copyWith(
+                color: context.sdTheme3.textPrimary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            )
+          else
+            _SdAppBarTitleButtonV3(title: title, onTap: onTitleTap!),
+          if (subtitle != null)
+            Text(
+              subtitle!,
+              style: context.textTheme3.bodySmall!.muted3(context),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          )
-        else
-          _SdAppBarTitleButtonV3(title: title, onTap: onTitleTap!),
-        if (subtitle != null)
-          Text(
-            subtitle!,
-            style: context.textTheme3.bodySmall!.muted3(context),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }
 
 /// A title that opens something. Split out so the plain case stays a bare

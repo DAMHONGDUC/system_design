@@ -8,6 +8,7 @@ import '../sd_app_bar_action_button_v3/sd_app_bar_action_button_v3.dart';
 import '../sd_app_bar_v3/sd_app_bar_v3.dart';
 import '../sd_content_padding_v3/sd_content_padding_v3.dart';
 import '../sd_context_v3/sd_context_v3.dart';
+import '../sd_nav_panel_toggle_v3/sd_nav_panel_toggle_v3.dart';
 import '../sd_search_field_v3/sd_search_field_v3.dart';
 import '../sd_text_style_v3/sd_text_style_v3.dart';
 
@@ -45,6 +46,10 @@ final class SdSearchHeaderMetricsV3 {
 /// **The header holds the title, the search field and the actions — nothing
 /// else.** A filter strip is never part of the app bar; it is its own widget
 /// in the body, `SdContentPaddingV3.topGap` below the chrome. Owner's rule.
+///
+/// One thing it takes without being asked: a collapsed tablet sidebar's reopen
+/// control, in the leading slot, because a screen wearing this header wears no
+/// `SdAppBarV3` and would otherwise have nowhere to put it.
 ///
 /// So a seller who has scrolled 300 rows down still has search, filters and
 /// the scanner in reach, and pays 48 points of chrome for them instead of

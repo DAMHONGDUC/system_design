@@ -57,9 +57,15 @@ class _SdSearchHeaderDelegateV3 extends SliverPersistentHeaderDelegate {
     final double trailing = actions.isEmpty
         ? SdContentPaddingV3.horizontal
         : actions.length * SdAppBarActionV3.slot + SdSpacingConstant.w8 * 2;
+    // This header is a sliver, so it is the screen's whole chrome and there is
+    // no app bar above it to hand the sidebar's menu to.
+    final Widget? leading = SdNavPanelToggleV3.collapsedOf(context);
+    final double leadingInset = leading == null
+        ? SdContentPaddingV3.horizontal
+        : SdNavPanelToggleV3.slot + SdSpacingConstant.w16;
     final Rect fieldRect = Rect.lerp(
       _expandedField(width),
-      _collapsedField(width, trailing),
+      _collapsedField(width, trailing, leadingInset),
       t,
     )!;
 
@@ -87,10 +93,18 @@ class _SdSearchHeaderDelegateV3 extends SliverPersistentHeaderDelegate {
             _HeaderTitle(
               title: title,
               top: topPadding,
-              left: SdContentPaddingV3.horizontal,
+              left: leadingInset,
               right: trailing,
               t: t,
             ),
+            if (leading != null)
+              Positioned(
+                top: topPadding,
+                left: 0,
+                width: SdNavPanelToggleV3.slot,
+                height: SdAppBarV3.toolbarHeight,
+                child: Center(child: leading),
+              ),
             _HeaderActions(actions: actions, top: topPadding),
             Positioned.fromRect(
               rect: fieldRect,
@@ -120,17 +134,20 @@ class _SdSearchHeaderDelegateV3 extends SliverPersistentHeaderDelegate {
     SdSearchFieldV3.expandedHeight,
   );
 
-  /// In the title's row, centred in it, stopping short of the actions.
+  /// In the title's row, centred in it, from where the title starts and
+  /// stopping short of the actions.
   ///
   /// It docks at [SdSearchFieldV3.dockedHeight], which is shorter than the row
   /// on purpose — the leftover splits above and below as padding, so the pill
   /// sits *in* the bar rather than filling it edge to edge.
-  Rect _collapsedField(double width, double trailing) => Rect.fromLTWH(
-    SdContentPaddingV3.horizontal,
-    topPadding + (SdAppBarV3.toolbarHeight - SdSearchFieldV3.dockedHeight) / 2,
-    width - SdContentPaddingV3.horizontal - trailing,
-    SdSearchFieldV3.dockedHeight,
-  );
+  Rect _collapsedField(double width, double trailing, double leadingInset) =>
+      Rect.fromLTWH(
+        leadingInset,
+        topPadding +
+            (SdAppBarV3.toolbarHeight - SdSearchFieldV3.dockedHeight) / 2,
+        width - leadingInset - trailing,
+        SdSearchFieldV3.dockedHeight,
+      );
 
   @override
   bool shouldRebuild(covariant _SdSearchHeaderDelegateV3 oldDelegate) =>
