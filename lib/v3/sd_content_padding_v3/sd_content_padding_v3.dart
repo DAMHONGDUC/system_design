@@ -43,24 +43,26 @@ abstract final class SdContentPaddingV3 {
   /// The one gap either side of a page on anything wider than a phone.
   static double get tabletMargin => SdSpacingConstant.w40;
 
-  /// The rail's thickness.
+  /// How wide the tablet's navigation panel is.
   ///
-  /// **On the horizontal ladder, and that is not a detail.** A standing rail
-  /// is thick across, so a vertical value would render it at two thicknesses
-  /// on one device — a landscape window's height ratio sits below its width
+  /// **On the horizontal ladder, and that is not a detail.** A standing panel
+  /// is measured across, so a vertical value would render it at two widths on
+  /// one device — a landscape window's height ratio sits below its width
   /// ratio, and the control would change as the tablet is turned.
-  static double get railThickness => SdSpacingConstant.w56;
+  static double get panelWidth => SdSpacingConstant.w200;
 
-  /// How long one destination cell is down the rail.
+  /// How tall one destination row is down the panel.
   ///
-  /// Vertical, which is the opposite of [railThickness] and correct for the
-  /// same reason: this measures along the rail, so the shorter window gets
-  /// the shorter cell.
-  static double get railCellLength => SdSpacingConstant.h96;
+  /// Vertical, which is the opposite of [panelWidth] and correct for the same
+  /// reason: this is measured along the panel.
+  static double get panelRowHeight => SdSpacingConstant.h56;
 
-  /// Everything the rail takes out of the window: its own thickness plus the
+  /// Between a destination's glyph and its label.
+  static double get navCellLabelGap => SdSpacingConstant.w12;
+
+  /// Everything the panel takes out of the window: its own width plus the
   /// margin between it and the screen edge.
-  static double get railColumnWidth => tabletMargin + railThickness;
+  static double get panelColumnWidth => tabletMargin + panelWidth;
 
   /// What a screen adds either side, on top of the [horizontal] it already
   /// pays.
@@ -78,6 +80,11 @@ abstract final class SdContentPaddingV3 {
   /// back on the way out. This is the inset that lands both on the same
   /// width.
   static double pageMargin(BuildContext context) {
+    // Joined tablet chrome meets the content scaffold without an outer gap.
+    if (SdFloatingBarScopeV3.edgeOf(context) == SdFloatingBarEdgeV3.leading) {
+      return 0;
+    }
+
     if (!SdBreakpointConstant.of(MediaQuery.sizeOf(context).width).isWide) {
       return 0;
     }
@@ -85,7 +92,7 @@ abstract final class SdContentPaddingV3 {
     final double margin = math.max(0, tabletMargin - horizontal);
 
     return SdFloatingBarScopeV3.edgeOf(context) == null
-        ? margin + railColumnWidth / 2
+        ? margin + panelColumnWidth / 2
         : margin;
   }
 
