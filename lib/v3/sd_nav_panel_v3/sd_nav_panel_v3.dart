@@ -44,8 +44,6 @@ class SdNavPanelV3 extends StatelessWidget {
 
   static const int expandedPanelFlex = 1;
   static const int expandedContentFlex = 4;
-  static const int collapsedPanelFlex = 0;
-  static const int collapsedContentFlex = 4;
 
   @visibleForTesting
   static const Key selectedCapsuleKey = Key('sd-nav-panel-capsule');
@@ -58,6 +56,13 @@ class SdNavPanelV3 extends StatelessWidget {
 
   @visibleForTesting
   static const Key contentRegionKey = Key('sd-nav-panel-content');
+
+  /// What the panel measures once open — the share of the window it takes,
+  /// which is also the width its contents are laid out at while it travels.
+  double _openWidth(BuildContext context) =>
+      MediaQuery.sizeOf(context).width *
+      expandedPanelFlex /
+      (expandedPanelFlex + expandedContentFlex);
 
   @override
   Widget build(BuildContext context) => SdScaffoldV3(
@@ -78,22 +83,14 @@ class SdNavPanelV3 extends StatelessWidget {
           children: <Widget>[
             SizedBox(
               key: panelRegionKey,
-              width:
-                  MediaQuery.sizeOf(context).width *
-                  expandedPanelFlex /
-                  (expandedPanelFlex + expandedContentFlex) *
-                  progress,
+              width: _openWidth(context) * progress,
               child: ClipRect(
+                // Laid out at full width and clipped, never reflowed: contents
+                // that re-wrap as the width travels are what overflows.
                 child: OverflowBox(
                   alignment: Alignment.centerLeft,
-                  minWidth:
-                      MediaQuery.sizeOf(context).width *
-                      expandedPanelFlex /
-                      (expandedPanelFlex + expandedContentFlex),
-                  maxWidth:
-                      MediaQuery.sizeOf(context).width *
-                      expandedPanelFlex /
-                      (expandedPanelFlex + expandedContentFlex),
+                  minWidth: _openWidth(context),
+                  maxWidth: _openWidth(context),
                   child: progress > 0
                       ? IgnorePointer(
                           ignoring: !isExpanded,
