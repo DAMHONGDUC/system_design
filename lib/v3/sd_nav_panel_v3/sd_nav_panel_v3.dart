@@ -61,52 +61,81 @@ class SdNavPanelV3 extends StatelessWidget {
     pageMargin: false,
     body: SdFloatingBarScopeV3(
       edge: SdFloatingBarEdgeV3.leading,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Flexible(
-            fit: FlexFit.tight,
-            flex: isExpanded ? expandedPanelFlex : collapsedPanelFlex,
-            child: SizedBox(
+      child: TweenAnimationBuilder<double>(
+        tween: Tween<double>(
+          begin: isExpanded ? 1 : 0,
+          end: isExpanded ? 1 : 0,
+        ),
+        duration: MediaQuery.disableAnimationsOf(context)
+            ? Duration.zero
+            : SdMotionV3.normal,
+        curve: SdMotionV3.emphasized,
+        builder: (context, progress, child) => Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            SizedBox(
               key: panelRegionKey,
-              width: isExpanded ? null : 0,
-              child: isExpanded
-                  ? _Panel(
-                      destinations: destinations,
-                      selectedIndex: selectedIndex,
-                      onSelected: onSelected,
-                      isExpanded: isExpanded,
-                      onToggle: () => onExpansionChanged(!isExpanded),
-                      toggleLabel: collapseLabel,
-                    )
-                  : null,
+              width:
+                  MediaQuery.sizeOf(context).width *
+                  expandedPanelFlex /
+                  (expandedPanelFlex + expandedContentFlex) *
+                  progress,
+              child: ClipRect(
+                child: OverflowBox(
+                  alignment: Alignment.centerLeft,
+                  minWidth:
+                      MediaQuery.sizeOf(context).width *
+                      expandedPanelFlex /
+                      (expandedPanelFlex + expandedContentFlex),
+                  maxWidth:
+                      MediaQuery.sizeOf(context).width *
+                      expandedPanelFlex /
+                      (expandedPanelFlex + expandedContentFlex),
+                  child: progress > 0
+                      ? IgnorePointer(
+                          ignoring: !isExpanded,
+                          child: ExcludeSemantics(
+                            excluding: !isExpanded,
+                            child: _Panel(
+                              destinations: destinations,
+                              selectedIndex: selectedIndex,
+                              onSelected: onSelected,
+                              isExpanded: isExpanded,
+                              onToggle: () => onExpansionChanged(false),
+                              toggleLabel: collapseLabel,
+                            ),
+                          ),
+                        )
+                      : null,
+                ),
+              ),
             ),
-          ),
-          Expanded(
-            flex: isExpanded ? expandedContentFlex : collapsedContentFlex,
-            child: Column(
-              key: contentRegionKey,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                if (!isExpanded)
-                  SafeArea(
-                    bottom: false,
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: _PanelToggle(
-                        expanded: false,
-                        label: expandLabel,
-                        onPressed: () => onExpansionChanged(true),
+            Expanded(
+              child: Column(
+                key: contentRegionKey,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  if (!isExpanded)
+                    SafeArea(
+                      bottom: false,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: _PanelToggle(
+                          key: toggleKey,
+                          expanded: false,
+                          label: expandLabel,
+                          onPressed: () => onExpansionChanged(true),
+                        ),
                       ),
                     ),
+                  Expanded(
+                    child: Align(alignment: Alignment.topCenter, child: body),
                   ),
-                Expanded(
-                  child: Align(alignment: Alignment.topCenter, child: body),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );
