@@ -1,11 +1,11 @@
 import 'package:flutter/widgets.dart';
 
 /// One destination in the app's navigation chrome — `SdBottomNavigationV2` on
-/// a phone, `SdNavigationRailV2` on a tablet.
+/// a phone, `SdNavPanelV2` on a tablet.
 ///
 /// A value type rather than a widget so the chrome controls every dimension —
 /// a destination that brought its own `Icon` would size itself and the row
-/// would stop lining up. Its own file rather than the bar's, because the rail
+/// would stop lining up. Its own file rather than the bar's, because the panel
 /// takes the same list and neither chrome owns the other.
 @immutable
 class SdNavDestinationV2 {
@@ -24,7 +24,7 @@ class SdNavDestinationV2 {
   final IconData? selectedIcon;
 
   /// **Required on every destination, and the semantics label of every
-  /// segment.** The chrome is deliberately glyph-only, but it is not icon-only
-  /// to a screen reader.
+  /// segment.** The phone's pill is glyph-only and is not icon-only to a screen
+  /// reader; the tablet's panel paints this label beside the glyph.
   final String label;
 }

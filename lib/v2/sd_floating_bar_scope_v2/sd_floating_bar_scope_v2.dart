@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 ///
 /// Wrap the shell's body once. Routes pushed above the shell sit outside it
 /// and correctly read false, because they cover the bar anyway — and so does
-/// every screen under `SdNavigationRailV2`, where the shell's nav is down the
+/// every screen under `SdNavPanelV2`, where the shell's nav is down the
 /// left-hand side and the bottom edge is free.
 ///
 /// **It answers presence, not a distance.** The one number a bar occupies
@@ -23,7 +23,8 @@ enum SdFloatingBarEdgeV2 {
   /// `SdBottomNavigationV2` — the pill across the bottom of a phone.
   bottom,
 
-  /// `SdNavigationRailV2` — the rail down the leading edge of a tablet.
+  /// `SdNavPanelV2` — the panel down the leading edge of a tablet, open or
+  /// collapsed: either way nothing rests on the bottom edge.
   leading,
 }
 

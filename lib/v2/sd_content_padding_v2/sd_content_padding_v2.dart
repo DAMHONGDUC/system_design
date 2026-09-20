@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
+import '../sd_app_bar_v2/sd_app_bar_v2.dart';
 import '../sd_breakpoint_v2/sd_breakpoint_v2.dart';
 import '../sd_floating_bar_scope_v2/sd_floating_bar_scope_v2.dart';
 import '../sd_liquid_glass_theme_v2/sd_liquid_glass_theme_v2.dart';
@@ -131,16 +132,21 @@ abstract final class SdContentPaddingV2 {
   /// Use this only to *align* something to the bar — a pinned filter strip,
   /// a refresh indicator. Content wants [top], which adds the gap.
   ///
+  /// The toolbar half is [SdAppBarV2.toolbarHeight], the bar's own intrinsic
+  /// size, so a bar that grows with the scale cannot leave the content it
+  /// covers padding for the old height.
+  ///
   /// Reads the status bar off the **view**, not off the ambient
   /// `MediaQuery`: `Scaffold` wraps its body in `removePadding(removeTop)`
   /// whenever there is an app bar, and that subtracts the status bar from
   /// `viewPadding.top` too. A body-side caller would get just
-  /// [kToolbarHeight] where the screen's own build got the full height — and
+  /// the toolbar alone where the screen's own build got the full height — and
   /// the bar would silently cover the first 47 logical pixels of content.
   /// The status bar is a property of the window, so the answer is the same
   /// anywhere in the tree.
   static double appBarInset(BuildContext context) => SdGlassV2.isSupported
-      ? MediaQueryData.fromView(View.of(context)).padding.top + kToolbarHeight
+      ? MediaQueryData.fromView(View.of(context)).padding.top +
+            SdAppBarV2.toolbarHeight
       : 0;
 
   /// Top inset under a [SdPinnedFilterBarV2]: the app bar plus the strip pinned
@@ -238,94 +244,56 @@ abstract final class SdContentPaddingV2 {
   static double floatingBarInset(BuildContext context) =>
       navBarOffset(context) + floatingBarHeight;
 
-  /// How thick `SdNavigationRailV2` is — the pill's 56, but measured across
-  /// the width, because on a standing rail that is the axis thickness is on.
+  /// The fraction of the window the expanded nav panel takes: one fifth, so
+  /// the content beside it keeps four.
   ///
-  /// **Not [floatingBarHeight].** Same 56 in the design, and it has to be a
-  /// `.w` here: screenutil scales the two axes by different amounts, and a
-  /// landscape iPad (whose height ratio is 0.96 against a width ratio of 1.15)
-  /// drew the rail 54 thick in landscape against 64 in portrait — the same
-  /// control, two thicknesses, depending on which way the iPad was held.
-  static double get floatingRailThickness => SdSpacingConstant.w56;
+  /// **Proportional, and that is the decision.** A fixed width is either too
+  /// wide in an 820 portrait window or too narrow in an 1180 landscape one,
+  /// and the panel is the one control in the app whose room is taken out of
+  /// the page's.
+  static const double navPanelWidthFraction = 1 / 5;
 
-  /// **The one gap on a tablet.** Owner's rule: screen edge to the rail, rail
-  /// to the content, and the content to the far edge are all this number, and
-  /// it does not vary by screen or by orientation.
+  /// How wide the nav panel is while it is expanded.
+  ///
+  /// **Raw window pixels, never a `.w`** — the same rule as
+  /// [SdBreakpointV2.medium]. This is a slice of the window, which screenutil
+  /// knows nothing about; scaling it would apply the design ratio on top of
+  /// the proportion and hand a landscape iPad a panel a fifth wider than a
+  /// fifth.
   ///
   /// ```text
-  /// iPad 11" landscape, 1180 wide
-  /// |<-46->|rail 64|<-46->| content 978 |<-46->|
+  /// iPad 11" portrait,  820 wide -> panel 164, content region 656
+  /// iPad 11" landscape, 1180 wide -> panel 236, content region 944
   /// ```
-  ///
-  /// It replaces the centred column the page used to get. A cap plus centring
-  /// produced three *different* gaps — 46 at the edge, 107 to the rail in
-  /// landscape and 79 at the far side — because two of them were page margin
-  /// left over from a ceiling and only one was a decision. One number is a
-  /// decision.
-  ///
-  /// 40 design units, so 46 on an iPad. Wide enough to read as a margin rather
-  /// than as a card that failed to reach the edge, and the same order as the
-  /// rail's own thickness so the three bands look deliberate together.
-  ///
-  /// The page ceiling ([SdBreakpointV2.contentMaxWidth]) is NOT gone — it still
-  /// governs the things that are panels rather than pages: the modal sheet, the
-  /// dialog, the paywall, onboarding.
-  static double get tabletMargin => SdSpacingConstant.w40;
+  static double navPanelWidth(BuildContext context) =>
+      MediaQuery.sizeOf(context).width * navPanelWidthFraction;
 
-  /// What a screen adds on each side to land its content on [tabletMargin],
-  /// given it already pads itself by [horizontal].
+  /// How tall one destination row is down the panel.
   ///
-  /// Zero on a phone — below [SdBreakpointV2.medium] nothing changes, and the
-  /// gutter a phone has at the screen edge is the gutter it has always had.
-  /// `SdScaffoldV2` applies it around the WHOLE screen, app bar included, so a
-  /// title and the cards under it keep one leading edge.
-  ///
-  /// **A screen with no shell navigation gets the SAME content width, centred**
-  /// (owner's rule). Every detail screen in this app is a route pushed above
-  /// the shell, so it has no rail beside it and a plain [tabletMargin] would
-  /// make it [floatingRailWidth] wider than the tab screen it was opened from —
-  /// the content would jump outward on the way in and back on the way out. It
-  /// takes half the rail's column on each side instead, which is the one inset
-  /// that makes the two widths identical:
-  ///
-  /// ```text
-  /// iPad 11" portrait, 820 wide — both land on a 618 card
-  /// tab screen     |46| rail 64 |46|      card 618      |46|
-  /// pushed detail  |     101     |46|      card 618      |46|     101     |
-  /// ```
-  static double pageMargin(BuildContext context) {
-    if (SdBreakpointV2.of(context) == SdWindowClassV2.compact) return 0;
+  /// Vertical, which is the opposite axis to [navPanelWidth] and correct for
+  /// the same reason: this is measured *along* the panel, that one across it.
+  static double get navPanelRowHeight => SdSpacingConstant.h56;
 
-    final double margin = math.max(0, tabletMargin - horizontal);
+  /// A destination row's own gutter — the screen's [horizontal], so a label
+  /// down the panel keeps the rhythm the content beside it is laid out on.
+  static EdgeInsets get navPanelRow =>
+      EdgeInsets.symmetric(horizontal: horizontal);
 
-    return SdFloatingBarScopeV2.edgeOf(context) == null
-        ? margin + floatingRailWidth / 2
-        : margin;
-  }
+  /// Between a destination's glyph and its label.
+  static double get navPanelLabelGap => SdSpacingConstant.w12;
 
-  /// The width of the column `SdNavigationRailV2` occupies: [tabletMargin] of
-  /// air against the screen edge, then the rail.
-  ///
-  /// **Nothing on the inner side.** The gap to the content is the content's to
-  /// leave — it pads itself by [horizontal] plus [pageMargin], which is
-  /// [tabletMargin] by construction. An inner margin here would stack on top
-  /// of that and make one of the three gaps bigger than the other two, which
-  /// is exactly the bug [tabletMargin] exists to close.
-  static double get floatingRailWidth => tabletMargin + floatingRailThickness;
+  /// The inset between a destination row and the capsule that marks it
+  /// current. Paint only — the row is still hit edge to edge.
+  static EdgeInsets get navPanelCapsuleInset => EdgeInsets.symmetric(
+    horizontal: SdSpacingConstant.w4,
+    vertical: SdSpacingConstant.h4,
+  );
 
-  /// The rail's corner radius: half its thickness, so the short ends are full
-  /// semicircles. Derived, never typed — see [floatingBarRadius], which is the
-  /// same rule on the other axis.
-  static double get floatingRailRadius => floatingRailThickness / 2;
-
-  /// How long one destination's cell is down the rail.
-  ///
-  /// Taller than the rail is thick, deliberately: a column of squares reads as
-  /// a strip of buttons, and the rail is one control. It also buys back the
-  /// vertical travel the thumb lost by standing up — five 110-tall cells is a
-  /// 552-long rail against the pill's 552-wide ceiling, so the two chromes
-  /// give a tab the same amount of room to be aimed at.
-  static double get floatingRailCellHeight => SdSpacingConstant.h96;
+  /// The capsule's radius, concentric with a stadium the row's own height, so
+  /// the inset cannot leave the capsule visibly tighter-cornered than the row
+  /// it sits in. Derived, never typed — see [floatingBarRadius].
+  static double get navPanelCapsuleRadius =>
+      navPanelRowHeight / 2 - navPanelCapsuleInset.vertical / 2;
 
   /// The device's bottom inset (home indicator), off the **view** — the same
   /// reason [appBarInset] reads the view at the top.
