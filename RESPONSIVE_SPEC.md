@@ -11,7 +11,7 @@ a worked example.
 | Flutter, iOS-first, one design size | — |
 | `flutter_screenutil`, every dimension via a constants holder | Skip §1 entirely; it exists only to cap screenutil |
 | Screens are a single scrolling column of cards | §2 still applies; §3 still applies |
-| A bottom tab bar on phone | §3 is about moving it; skip if you have no tab bar |
+| A bottom tab bar on phone | §3 is about replacing it on a tablet; skip if you have no tab bar |
 | Tablet is a target (`TARGETED_DEVICE_FAMILY = "1,2"`) | Nothing below matters |
 
 **The one invariant: every rule here is a no-op at phone width.** If applying
@@ -19,22 +19,38 @@ this moves a single pixel on an iPhone, something is wrong. Assert it.
 
 ---
 
-## 1. Cap the scale ratio
+## 1. Cap the scale ratio — and cap it on every ladder
 
 ### The trap
 
 screenutil multiplies every `.w` / `.h` / `.r` / `.sp` by `window / designSize`,
 with **no upper bound**. A 393-wide design on an 820-wide iPad scales 2.09; in
-landscape the width ratio hits 3.00 while `minTextAdapt` (which takes the
-*smaller* of the two ratios for text) makes the type *smaller* than a phone's.
-The result is a screenshot enlarged in one axis and shrunk in the other.
+landscape the width ratio hits 3.0. The result is a screenshot enlarged.
 
 This is the single largest tablet bug in a screenutil app, and it is invisible
 in tests — nothing overflows, every number is just wrong.
 
+### The second trap, which survives the obvious fix
+
+**The four tokens do not read the same ratio.**
+
+| Token | Used for | screenutil ratio |
+|---|---|---|
+| `w*` | horizontal spacing | width |
+| `sp*` | type | width, via `ScreenUtilInit`'s default `fontSizeResolver` (`FontSizeResolvers.width`) — check your version, because `minTextAdapt` is inert beside a resolver |
+| `h*` | vertical spacing | height |
+| `r*` | **icons, radii, square tap targets** | the **smaller** of the two |
+
+So clamping only the width leaves the height ratio free, and a tablet in
+landscape is *shorter* than a phone design (820 against 852). Its height ratio
+comes out 0.96, `.r` takes the minimum, and the app draws **23-wide icons and
+42-wide tap targets — under Apple's 44 minimum — beside 18 gutters and 16
+type**. Turning the tablet shrinks every glyph in the app.
+
 ### The fix
 
-Grow the design to match the window instead of letting the ratio grow:
+Grow the design to match the window, and once that clamp engages let the height
+follow the same ceiling rather than a phone's floor:
 
 ```dart
 final class SdScreenScale {
@@ -42,12 +58,19 @@ final class SdScreenScale {
 
   /// "The same app at arm's length." Every spacing constant moves by this and
   /// nothing else, so the rhythm the design was drawn at survives.
-  static const double maxScale = 1.15;
+  static const double maxScale = 1.25;
 
-  static Size designSize(Size window, Size design) => Size(
-    math.max(design.width, window.width / maxScale),
-    math.max(design.height, window.height / maxScale),
-  );
+  static Size designSize(Size window, Size design) {
+    final double width = math.max(design.width, window.width / maxScale);
+
+    // Past this point the window is a tablet, and a tablet renders ONE scale.
+    return Size(
+      width,
+      width > design.width
+          ? window.height / maxScale
+          : math.max(design.height, window.height / maxScale),
+    );
+  }
 }
 ```
 
@@ -57,7 +80,6 @@ Split View resize must rebuild this:
 ```dart
 ScreenUtilInit(
   designSize: SdScreenScale.designSize(MediaQuery.sizeOf(context), _designSize),
-  minTextAdapt: true,
   splitScreenMode: true,
   builder: ...,
 )
@@ -65,118 +87,97 @@ ScreenUtilInit(
 
 ### Result
 
-| Window | Design handed to screenutil | Scale | A 16 gutter paints at |
-|---|---|---|---|
-| 393×852 iPhone 15 | 393×852 | 1.00 | 16 |
-| 440×956 iPhone 16 Pro Max | 393×852 | 1.12 | 18 |
-| 820×1180 iPad 11" portrait | 713×1026 | 1.15 | 18 (was **33**) |
-| 1180×820 iPad 11" landscape | 1026×852 | 1.15 / 0.96 | 18 (was **48**) |
+| | Gutter | V gap | Body | Title | Icon | Tap target |
+|---|---|---|---|---|---|---|
+| phone 393×852 | 16 | 16 | 14 | 22 | 24 | 44 |
+| iPad portrait, width clamp only | 18.4 | 18.4 | 16.1 | 25.3 | 27.6 | 50.6 |
+| iPad landscape, width clamp only | 18.4 | **15.4** | 16.1 | 25.3 | **23.1** | **42.3** |
+| iPad, either orientation, both clamps | 20 | 20 | 17.5 | 27.5 | 30 | 55 |
 
-The widest iPhone is 440 and `440 / 1.15 = 383 < 393`, so the clamp cannot
-engage on any phone. That is what makes this safe to ship.
+The clamp cannot engage below `design.width * maxScale` (491 here), and the
+widest phone shipped to is 440 — so a phone resolves exactly what it resolved
+before the clamp existed. That is what makes this safe to ship.
+
+### One number the framework will not scale for you
+
+`kToolbarHeight` is a raw 56. At 1.25 an app bar's leading button is 55 and its
+title 27 inside it — full to the edges, and an overflow at the next raise. Put
+the toolbar height on your own vertical ladder and have the content inset and any
+chrome that aligns to the bar read **that** number, not the constant.
 
 ### Pick your own `maxScale`
 
-1.15 was chosen so type and touch targets grow enough for a tablet held further
-away, without the app reading as blown up. Anything in 1.10–1.25 is defensible.
-`1.0` is wrong — it leaves a phone-sized app marooned on a big screen.
+1.25 was chosen so type and touch targets grow enough for a tablet held further
+away without the app reading as blown up; 1.15 read as a phone layout with a lot
+of empty page around it. Anything in 1.15–1.30 is defensible. `1.0` is wrong —
+it leaves a phone-sized app marooned on a big screen — and past ~1.4 you have
+rebuilt the bug at the top of this section.
 
 ---
 
-## 2. One margin number
+## 2. One gutter, and the chrome joined to the content
 
 ### The rule
 
-**Screen edge → nav, nav → content, content → far edge are the same number**,
-and it does not change with the screen or the orientation.
+**The nav panel meets the content region with no gap at all**, and inside that
+region the screen keeps the same gutter it has on a phone. One gap on a tablet,
+and it is a gap the app already had.
 
 ```text
-iPad 11" landscape, 1180 x 820
-┌──────┬────┬──────────────────────────────────┬────┐
-│      │    │ app bar — same margins as below  │    │
-│ ▓▓▓▓ │ 46 ├──────────────────────────────────┤ 46 │
-│ ▓▓▓▓ │    │ card 978 — fills what is left    │    │
-│  64  │    │                                  │    │
-└──────┴────┴──────────────────────────────────┴────┘
- |<46>|                        nav column = 46 + 64 = 110
+iPad 11" portrait, 820 x 1180
+┌───────────────┬────┬──────────────────────────────┬────┐
+│ panel 164     │ 16 │ app bar — same margins below │ 16 │
+│ (window / 5)  │    ├──────────────────────────────┤    │
+│ Home          │    │ card 624 — fills what is left│    │
+│ History  …    │    │                              │    │
+└───────────────┴────┴──────────────────────────────┴────┘
 ```
 
 ### Why not a max-width column
 
 The obvious move is `maxWidth: 920` + centre. Do not: it produces three
-*different* gaps — 46 at the edge, 107 to the nav, 79 at the far side — because
-two of them are leftover page margin from a ceiling and only one is a decision.
-One number is a decision. Let the content **fill** what the margins leave.
+*different* gaps — the page margin, the gap to the nav, and the leftover on the
+far side — because two of them are left over from a ceiling and only one is a
+decision. Let the content **fill** what the panel leaves.
 
-### The implementation
+### Why not a margin around the nav either
 
-```dart
-/// The one gap. 40 design units = 46 rendered at maxScale.
-static double get tabletMargin => SdSpacingConstant.w40;
+BaroEase shipped that first: one number (46) at the screen edge, between rail
+and content, and at the far edge. It is defensible, and it is one more number
+than a joined panel needs. A panel that runs to the window edge and meets the
+content has exactly one gap left to get wrong — so there is **no page margin at
+all**, and the scaffold is a plain `Scaffold`.
 
-/// What a screen adds per side, given it already pads itself by [horizontal].
-static double pageMargin(BuildContext context) {
-  if (SdBreakpointV2.of(context) == SdWindowClassV2.compact) return 0;
+### Screens with no nav fill the window
 
-  final double margin = math.max(0, tabletMargin - horizontal);
+A detail screen pushed **above** the shell has no panel beside it, and nothing
+to leave room for. It runs the full width with its own gutter.
 
-  // No shell nav at all -> same content width, centred. See below.
-  return SdFloatingBarScopeV2.edgeOf(context) == null
-      ? margin + floatingRailWidth / 2
-      : margin;
-}
-```
+BaroEase tried the other way first — half a panel per side, so the detail's card
+matched the tab screen's — and took it back out. Two reasons, and the second is
+the one that settles it:
 
-`tabletMargin - horizontal` is the crux: **your screens already pad themselves**
-by a gutter. Adding the full margin on top stacks two gutters and the gap comes
-out wrong. Subtract what the content already brings.
+- Against a rail the match cost 55 per side and nobody saw it; against a panel
+  it costs `window / 10`, which is a visible phantom margin the shape of a
+  chrome that is not there.
+- **A collapsible panel has no single width to match.** Collapsed, the tab
+  screen is nearly the whole window while the detail it opens would still be a
+  fifth narrower.
 
-### Apply it around the whole Scaffold, app bar included
-
-```dart
-return ColoredBox(
-  color: Theme.of(context).scaffoldBackgroundColor,
-  child: Padding(
-    padding: EdgeInsets.symmetric(
-      horizontal: SdContentPaddingV2.pageMargin(context),
-    ),
-    child: Scaffold(appBar: ..., body: ...),
-  ),
-);
-```
-
-Two non-obvious parts:
-
-- **The app bar must be inside the margin.** A header spanning the window over
-  an inset body reads as two screens stacked. Pad the `Scaffold`, not its body.
-- **The `ColoredBox` is required.** A pushed route has no surface of its own
-  behind it, so the two strips either side show whatever the route below left —
-  on a fresh push, **black**.
-
-### Screens with no nav get the same width, centred
-
-A detail screen pushed **above** the shell has no nav beside it. A plain
-`tabletMargin` there makes it a nav column wider than the tab screen it was
-opened from, and the content visibly jumps outward on the way in and back on
-the way out. Half the nav column extra per side is the one inset that makes the
-two widths identical:
-
-```text
-iPad 11" portrait, 820 wide — both land on a 618 card
-tab screen     |46| nav 64 |46|      card 618      |46|
-pushed detail  |     101    |46|      card 618      |46|     101     |
-```
+What it costs: pushing a detail from an expanded panel widens the content by a
+fifth of the window. The panel disappearing is the larger change on screen, and
+it is the one the transition is about.
 
 **Check your router first.** In BaroEase the detail routes are *siblings* of
-`StatefulShellRoute`, not children of its branches — which is why the margin
-lives in the scaffold and not in the shell. If your details are inside the
-branches, they keep the nav and this case never fires.
+`StatefulShellRoute`, not children of its branches, which is why they lose the
+panel at all. If your details render inside the branches they keep it, and none
+of this comes up — that is the better answer if you can afford the router work.
 
-### Pages take margins; panels keep ceilings
+### Pages take gutters; panels keep ceilings
 
 | Kind | Rule | Examples |
 |---|---|---|
-| **Page** — fills the window | `pageMargin`, content fills | every screen |
+| **Page** — fills the window | one gutter, no margin, no ceiling | every screen |
 | **Panel** — floats over a page | `maxWidth` + centre | modal sheet, dialog, paywall, onboarding |
 
 A sheet spanning a 1180-wide window is a dark slab with a column of controls
@@ -193,7 +194,7 @@ constant. They are different things that measure alike today.
 
 ---
 
-## 3. Move the nav to the leading edge
+## 3. The nav becomes a collapsible panel on the leading edge
 
 ### Window classes
 
@@ -204,7 +205,7 @@ a boundary in the middle of a device.
 ```dart
 enum SdWindowClassV2 { compact, medium, expanded }
 
-static const double medium = 600;   // nav moves to the side at or above this
+static const double medium = 600;   // the panel appears at or above this
 static const double expanded = 840; // where a second column would appear
 
 static SdWindowClassV2 of(BuildContext context) =>
@@ -215,57 +216,166 @@ static SdWindowClassV2 of(BuildContext context) =>
 which screenutil knows nothing about; a scaled threshold moves every time the
 design scales and a device can land in two classes at once.
 
-### Switch in the shell
+### Switch in the shell, and let the host own the state
 
 ```dart
 return switch (SdBreakpointV2.of(context)) {
   SdWindowClassV2.compact => SdBottomNavigationV2(
     destinations: destinations, selectedIndex: i, onSelected: select, body: shell,
   ),
-  SdWindowClassV2.medium || SdWindowClassV2.expanded => SdNavigationRailV2(
+  SdWindowClassV2.medium || SdWindowClassV2.expanded => SdNavPanelV2(
     destinations: destinations, selectedIndex: i, onSelected: select, body: shell,
+    isExpanded: _expanded, onExpansionChanged: _setExpanded,
+    expandLabel: l10n.navPanelExpand, collapseLabel: l10n.navPanelCollapse,
   ),
 };
 ```
 
+The host owns `isExpanded`; the panel is told. Toggling must keep the selected
+tab and all of its navigation state — free with
+`StatefulShellRoute.indexedStack`, and worth verifying anyway, because it is the
+single most annoying thing to get wrong. Log the change **with its value**
+(`{expanded: false}`), not just that something happened. Whether it persists
+across launches is your call; BaroEase does not persist it, because the panel is
+what names the destinations for a user arriving on a tablet.
+
+### Geometry
+
+| Thing | Value | Note |
+|---|---|---|
+| Panel width, expanded | `window / 5` | proportional, never fixed |
+| Panel width, collapsed | 0 | it draws nothing at all |
+| Destination row height | 56 | one per destination |
+| Row gutter | 16 horizontal | the screen's own gutter |
+| Gap, glyph to label | 12 | |
+| Capsule inset | 4 horizontal, 4 vertical | inside the row, paint only |
+| Capsule radius | 24 | `56 / 2 - 8 / 2`, concentric with the row |
+| Capsule fill | primary at 22% | the same tint as the pill's thumb |
+| Toggle tap target | ≥ 48 square | platform minimum, at every text scale |
+
+**Proportional, not a fixed width.** A fixed panel is either too wide on a
+portrait tablet or too narrow on a landscape one. **The width is raw window
+pixels; the row height is on the vertical ladder** — one is measured across the
+panel, the other along it.
+
+The content column must never read narrower than a phone. That is the trade the
+panel is made against, and the direction it may never go. Assert it.
+
 ### Share the cell, not the chrome
 
-Extract the glyph cell and the destination value type into their own widgets,
-used by both chromes. Everything about *being a destination* — fill, timing,
-semantics, tap target — lives once, so a tab cannot look like one control on a
-phone and a different one on a tablet.
+One cell widget, one destination value type, used by both chromes. Everything
+about *being a destination* — fill, timing, semantics, tap target — lives once,
+so a tab cannot look like one control on a phone and a different one on a
+tablet. What legitimately differs:
 
-What legitimately differs, and only because of the axis:
-
-| What | Pill (phone) | Rail (tablet) |
+| What | Pill (phone) | Panel (tablet) |
 |---|---|---|
-| Layout | floats; body scrolls behind the glass | takes a **real column** |
-| Thickness | vertical measure (`h56`) | **horizontal measure (`w56`)** |
-| Cell per tab | 64 wide | 92–110 long |
-| Inner margin | — | **none** — the gap is the content's own `pageMargin` |
+| Layout | floats; body scrolls behind the glass | a **real column**, joined to the content |
+| Cell | glyph only — five words do not fit at phone width | glyph, gap, label |
+| Collapses | no | to nothing at all |
 | Swipe between tabs | yes | **no** |
-| Scope it publishes | `edge: bottom` | `edge: leading` |
+| Scope it publishes | `edge: bottom` | `edge: leading`, open or collapsed |
 
-- **Real column, not floating.** A phone has no width to give away; a tablet
-  does. A rail in its own column means no screen has to pad a side for it —
-  which matters because screens build their horizontal insets by hand.
-- **No swipe.** An adjacent-tab swipe is a thumb gesture on a one-handed
-  device. At tablet width a horizontal drag is a chart being panned or a row
-  being dismissed, and stealing it breaks both.
-- **No inner margin on the rail.** The gap to the content is the content's to
-  leave. An inner margin stacks on top of `pageMargin` and makes one of the
-  three gaps bigger than the other two — exactly the bug §2 exists to close.
+**Shape is an enum on the cell, not a `showLabel` bool.** Two chromes today and
+a third is not unthinkable; a boolean per difference is how one cell becomes
+four unrelated looks nobody can name.
 
-### The thickness-axis trap
+**No swipe.** An adjacent-tab swipe is a thumb gesture on a one-handed device.
+At tablet width a horizontal drag is a chart being panned or a row being
+dismissed, and stealing it breaks both.
 
-A standing rail's thickness is a **horizontal** dimension. Take it off the
-vertical ladder and screenutil punishes you: a landscape iPad's height ratio is
-0.96 against a width ratio of 1.15, so the rail comes out **54 thick in
-landscape against 64 in portrait** — one control, two thicknesses, depending on
-how the tablet is held.
+### Collapsed, it draws nothing — the part most implementations get wrong
 
-Cell *length* is the opposite and should stay vertical: 110 portrait against 92
-landscape, so the short window gets the shorter rail. **Correct.**
+Not a narrow rail, not a strip of chrome above the content. The reopen control
+goes **into the screen's own leading slot**, the way every app with a drawer
+does it.
+
+The tempting alternative is a strip holding the menu icon above the content. Do
+not. That strip:
+
+- belongs to no screen, so every screen is pushed down by it;
+- duplicates ownership of the top safe inset — the strip pays it, so the content
+  underneath must be told not to pay it again, and that coordination is a bug
+  waiting in every new screen;
+- leaves an empty band under the icon that no amount of tuning makes look
+  intentional.
+
+Three pieces, each with one job:
+
+1. **A scope** — an `InheritedWidget` the panel publishes over the content
+   column, carrying `isExpanded`, an `onExpand` callback and the localized
+   label. **State and a callback, never a widget**: a look that arrived through
+   an inherited widget is one two chromes could draw differently without either
+   file saying so.
+2. **A toggle widget** — the button, plus one static that reads the scope and
+   returns the control or null.
+3. **Every chrome with a leading slot calls that static. No screen does.** A
+   screen that could place the control is a screen that could forget to, and the
+   one that forgets is the one a user gets stuck on.
+
+```dart
+final Widget? barLeading =
+    leading ?? (canPop ? backButton : SdNavPanelToggleV2.collapsedOf(context));
+```
+
+- A screen that passed its own `leading` keeps it — it has a reason to own that
+  slot, and gets the control back when it lets go.
+- A back arrow outranks the menu: a route with something to pop is a route the
+  panel is not beside. If your detail routes render on the root navigator they
+  read no scope at all and this never comes up; if they render inside a branch,
+  the `canPop` check is what stops a back arrow and a hamburger fighting over
+  one slot.
+- **Give the key to exactly one control.** While collapsing, the panel is still
+  painting and the chrome has already claimed its control — the panel's own
+  toggle carries the key only while `isExpanded` is true, `collapsedOf` only
+  while it is false.
+
+Expanded, the toggle sits in the panel's own header, aligned to the trailing
+edge, in a box one toolbar tall so it lands where the app bar's own leading
+button lands and does not jump as the panel closes. It is separate from the
+destinations so it never reads as one more tab, and **the glyph is the same in
+both states** — it is the menu. Distinguish the states by tooltip and by
+`Semantics(expanded:)`, never by swapping the icon.
+
+### Paint the panel AFTER the content
+
+The trap that cost BaroEase a whole shipping cycle of an unreachable chrome:
+**a full-screen route's modal barrier blocks the semantics of everything painted
+before it.** The content column is a `Navigator` full of such routes, so a panel
+laid out as the first child of a `Row` has its destinations silently dropped
+from the semantics tree — the chrome renders, responds to taps, and does not
+exist to a screen reader.
+
+Lay the two regions out in a `Row` (a spacer of the panel's width, then
+`Expanded`), and draw the panel over its own strip from a `Stack` above it. It
+covers only its own width, so nothing below it loses a tap.
+
+### Motion
+
+- Animate the **joined** panel and content widths, so the transition shows where
+  the working space moves. A cross-fade hides the one thing worth seeing.
+- 250ms, `Curves.easeInOutCubic`. The sliding selection capsule runs on the same
+  duration and curve.
+- Honour reduced motion: `MediaQuery.disableAnimationsOf(context)` →
+  `Duration.zero`, and the width changes on the next frame.
+- **Reversing mid-animation must not overflow.** Lay the panel's children out at
+  full width inside an `OverflowBox` and clip, so the contents never reflow as
+  the width travels — reflowing them is what produces the overflow stripes.
+- A panel still painting at 3px wide must not be tappable and must not be read
+  out: `IgnorePointer` and `ExcludeSemantics` while it is on its way out.
+
+### Accessibility
+
+- Toggle target ≥ 48 square, at every text scale, in both themes. A fixed square
+  around a glyph is what makes that true without a test per scale.
+- `Semantics(expanded: …)` on the toggle; the tooltip is the localized "Expand
+  navigation" / "Collapse navigation". A tooltip is a user-facing string.
+- **Each destination is one semantics node carrying its label**, with
+  `container: true` so it is a node of its own rather than an annotation merged
+  into whatever is above it. The panel paints the label, so the cell must
+  `excludeSemantics` its children or a reader says the word twice and a test
+  looking a destination up by name finds a node that is no longer the cell.
+- Selection is signalled by weight and colour, never colour alone.
 
 ### Reclaim the bottom inset
 
@@ -293,7 +403,8 @@ static SdFloatingBarEdgeV2? edgeOf(BuildContext context) =>
     context.getInheritedWidgetOfExactType<SdFloatingBarScopeV2>()?.edge;
 ```
 
-`bottom` = phone pill · `leading` = tablet rail · **`null` = no shell nav**.
+`bottom` = phone pill · `leading` = tablet panel, **open or collapsed** ·
+**`null` = no shell nav**.
 
 **Keep the dependency one-way.** The scope must not import your padding class:
 padding is what asks the question, so the answer cannot depend on it. Have the
@@ -309,13 +420,15 @@ Measure before adding columns. With the content filling the window:
 | Window | Card | 2-up cell | 3-up cell |
 |---|---|---|---|
 | phone 393 | 361 | 175 | 111 |
-| iPad portrait 820 | 618 | 302 | 197 |
-| iPad landscape 1180 | 978 | 482 | 320 |
+| iPad portrait 820, panel open | 624 | 304 | 199 |
+| iPad landscape 1180, panel open | 912 | 448 | 299 |
 
 A third column is only right if its cell stays **wider than the phone's** in
 *both* orientations. Under a capped 690 column it would not have been; filling
 the window it would. The answer depends on your §2 choice — so decide §2 first,
-then measure, then decide the grids.
+then measure, then decide the grids. Note that a collapsible panel gives every
+window two card widths, so a count chosen off one of them changes under the
+toggle.
 
 ---
 
@@ -325,7 +438,7 @@ then measure, then decide the grids.
 `Platform.isIOS` + a model check, never `defaultTargetPlatform`.
 
 An iPad in Split View hands the app a ~507-wide window. `shortestSide` still
-says "tablet" and puts a navigation rail in a phone-shaped window. There is no
+says "tablet" and puts a fifth of a phone-shaped window behind a nav panel. There is no
 `UIRequiresFullScreen` in a modern iPad app, so this is the normal case, not an
 edge case.
 
@@ -352,20 +465,27 @@ One test file, pumping 820×1180 and 1180×820, asserting:
 
 | # | Assertion | Catches |
 |---|---|---|
-| 1 | a 16 gutter renders at ~`16 * maxScale`, not `16 * 2.09` | §1 regressed |
-| 2 | **at 393 it renders at exactly 16** | §1 leaked onto phones |
-| 3 | the three gaps are equal and equal to `tabletMargin` | §2 regressed |
-| 4 | **at 393, `pageMargin == 0`** | §2 leaked onto phones |
-| 5 | a pushed detail screen has the same card width, centred | the no-nav case |
-| 6 | the app bar shares the content's left and right edges | header outside the margin |
-| 7 | which chrome each width gets; content clears the nav | §3 switch |
-| 8 | the rail is longer than thick, **one thickness in both orientations** | the axis trap |
-| 9 | every tab still switches from the rail | dead cells down the rail |
-| 10 | bottom inset reclaimed on tablet, **kept on phone** | the flag's meaning |
-| 11 | no tab screen and no multi-step flow overflows, both orientations | the ordinary breakage |
+| 1 | all four ladders render at `base * maxScale`, **the same in both orientations** | §1 regressed, on the ladder that is easiest to miss |
+| 2 | **at 393 all four render at exactly their base** | §1 leaked onto phones |
+| 3 | the panel is exactly `window / 5` open and exactly 0 collapsed, at the breakpoint and both orientations | §3 geometry |
+| 4 | the content keeps one gutter either side in both states, and a pushed screen fills the window | §2 regressed |
+| 5 | **at 393 the gutter and the chrome are unchanged** | §2 and §3 leaked onto phones |
+| 6 | the content column is wider on both tablet orientations than on a phone | the trade going the wrong way |
+| 7 | a pushed detail screen starts at the window edge | a phantom margin for an absent chrome |
+| 8 | the app bar shares the content's left and right edges | header outside the margin |
+| 9 | collapsed, the control is a descendant of the app bar, and the bar is `toolbarHeight + topInset` | the strip creeping back |
+| 10 | expanded, the control is not in the app bar — **exactly one exists at all times, mid-animation included** | two controls under one key |
+| 11 | collapse, reverse, expand, reverse: no exception, no overflow, widths strictly between 0 and full | the reflow overflow |
+| 12 | reduced motion changes the width on the next frame; motion on does not | the reduced-motion branch |
+| 13 | every destination still switches **through the semantics tree, by label** | a chrome a screen reader cannot reach |
+| 14 | the toggle's target clears 48 | the tap target |
+| 15 | bottom inset reclaimed on tablet, **kept on phone** | the flag's meaning |
+| 16 | no tab screen and no multi-step flow overflows, both orientations, **open and collapsed** | the ordinary breakage |
 
-Assertions 2, 4 and 10's second half are the important ones. They are what let
-you ship this without re-verifying the phone build by hand.
+Assertions 2, 5 and 15's second half are the important ones. They are what let
+you ship this without re-verifying the phone build by hand. **13 is the one that
+would have caught a bug nobody saw**: the chrome was painted before the content
+and a route's modal barrier dropped it from the semantics tree entirely.
 
 **Measure the card, not the column box** — the box carries the screen's own
 gutter inside it, and the gap the eye sees is to the card edge.
@@ -379,25 +499,30 @@ gutter inside it, and the gap the eye sees is to the card edge.
    whole safety net.
 3. Add the window classes (§2/§3), off `MediaQuery`, in raw pixels.
 4. Decide **page vs panel** for every surface you have. Cap the panels.
-5. Pick `tabletMargin`. Apply `pageMargin` around the whole Scaffold, with the
-   `ColoredBox` behind it.
+5. Give pages no horizontal margin at all — the gutter inside each screen's
+   scrollable is the whole of it.
 6. Check your router: are detail screens inside the shell branches or siblings
    of it? That decides whether you need the no-nav case.
-7. Build the rail. Share the cell with the pill. Thickness on the **width**
-   ladder.
-8. Make the bottom-inset flag ask the scope.
-9. Write the test file from §6 before you look at a simulator.
-10. *Then* look at a simulator, and revisit the grids (§4).
+7. Build the panel. Share the cell with the pill, behind a shape enum. Width in
+   raw window pixels; row height on the vertical ladder. **Paint it after the
+   content.**
+8. Add the scope and the toggle, and call `collapsedOf` from every chrome with
+   a leading slot — from the chrome, never from a screen.
+9. Make the bottom-inset flag ask the scope.
+10. Write the test file from §6 before you look at a simulator.
+11. *Then* look at a simulator, and revisit the grids (§4).
 
 ## 8. Numbers, measured
 
 Not calculated — what BaroEase renders at, for comparison against yours.
 
-| | Card | Nav column | Nav thick | Cell | Nav length | All three gaps |
-|---|---|---|---|---|---|---|
-| phone 393×852 | window − 32 | — | — | — | — | — (16 gutter) |
-| iPad portrait 820×1180 | 618 | 110 | 64 | 110 | 552 | 46 |
-| iPad landscape 1180×820 | 978 | 110 | 64 | 92 | 462 | 46 |
+| | Panel | Content region | Card | Row | Gutter |
+|---|---|---|---|---|---|
+| phone 393×852 | — | 393 | 361 | — | 16 |
+| iPad portrait 820×1180 | 164 | 656 | 624 | 56 | 16 |
+| iPad landscape 1180×820 | 236 | 944 | 912 | 56 | 16 |
+| iPad portrait, collapsed | 0 | 820 | 788 | — | 16 |
+| iPad portrait, pushed detail | — | 820 | 788 | — | 16 |
 
 ## 9. Still open here, so decide them deliberately there
 
@@ -406,4 +531,5 @@ Not calculated — what BaroEase renders at, for comparison against yours.
 | Phone landscape | Allowing it is a separate project: a 390-tall window breaks multi-step flows and tall panels. Consider portrait-only on phone. |
 | Two-column pages at ≥840 | The cheap version is splitting an existing `List<Widget>` of sections into two columns. |
 | Master–detail | Expensive: the detail has to render inline, which is a router change, not a layout one. |
-| Labels on the rail at ≥840 | Glyph-only keeps the pill and the rail one control. Adding labels to one splits them. |
+| The panel at exactly 600 | A fifth of 600 is a 120 column and the labels have to shrink to fit it. Consider glyph-only below 840 if that window is a real one for your app. |
+| Persisting the collapse | Not persisted here: the panel is what names the destinations for a user arriving on a tablet, and a remembered collapse hides that on the one launch it matters. |
