@@ -178,12 +178,19 @@ class SdButtonV3 extends StatelessWidget {
                     // Invisible rather than removed: the button must not
                     // change width when a save starts. See the class doc.
                     Opacity(opacity: busy ? 0 : 1, child: content),
+                    // Positioned so it cannot size the stack: a spinner
+                    // wider than the label's line is what made the button
+                    // grow a point mid-tap once the tablet scale reached it.
                     if (busy)
-                      SizedBox.square(
-                        dimension: SdIconV3.defaultSize * scale,
-                        child: CircularProgressIndicator(
-                          strokeWidth: SdSpacingConstant.w2,
-                          color: style.foreground,
+                      Positioned.fill(
+                        child: Center(
+                          child: SizedBox.square(
+                            dimension: SdIconV3.defaultSize * scale,
+                            child: CircularProgressIndicator(
+                              strokeWidth: SdSpacingConstant.w2,
+                              color: style.foreground,
+                            ),
+                          ),
                         ),
                       ),
                   ],

@@ -72,13 +72,13 @@ class _SdSnackBarHostV3State extends State<_SdSnackBarHostV3>
     return Positioned(
       left: SdContentPaddingV3.horizontal,
       right: SdContentPaddingV3.horizontal,
-      // Both insets come off the view through SdContentPaddingV3. An ambient
-      // read here returns 0 for the home indicator, because this host sits
-      // inside a Scaffold body that already had it removed.
+      // - both insets come off the view through SdContentPaddingV3: an
+      //   ambient read returns 0 for the home indicator inside this Scaffold
+      // - the bar's own height, never kToolbarHeight, which nothing scales
       top: fromBottom
           ? null
           : SdContentPaddingV3.statusBarInset(context) +
-                kToolbarHeight +
+                SdAppBarV3.toolbarHeight +
                 SdSpacingConstant.h12,
       // The same arithmetic a tab screen makes for its own last row, so a
       // message rests exactly where the content it is about does. Resolved
