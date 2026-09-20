@@ -10,6 +10,7 @@ import 'package:system_design/index.dart';
 Future<void> _pump(
   WidgetTester tester, {
   String? detail,
+  SdErrorToneV3 tone = SdErrorToneV3.error,
   Size size = const Size(390, 844),
   double textScale = 1.0,
 }) => tester.pumpWidget(
@@ -28,6 +29,7 @@ Future<void> _pump(
               icon: Symbols.error_rounded,
               title: 'Reseller Studio could not start',
               message: 'Close the app completely and open it again.',
+              tone: tone,
               detail: detail,
             ),
           ),
@@ -64,6 +66,21 @@ void main() {
 
     expect(failure.maxLines, SdErrorViewV3.detailMaxLines);
     expect(failure.overflow, TextOverflow.ellipsis);
+  });
+
+  testWidgets('the tone is what colours the glyph', (WidgetTester tester) async {
+    await _pump(tester);
+
+    final Color danger = tester.widget<Icon>(find.byType(Icon)).color!;
+
+    await _pump(tester, tone: SdErrorToneV3.warning);
+
+    final Color warning = tester.widget<Icon>(find.byType(Icon)).color!;
+
+    // Named rather than compared to a literal: the palette is the host's, and
+    // what this pins is that the two tones do not resolve to one colour.
+    expect(danger, SdThemeV3.fallback.danger);
+    expect(warning, SdThemeV3.fallback.warning);
   });
 
   testWidgets('it scrolls instead of overflowing on a short, scaled screen', (

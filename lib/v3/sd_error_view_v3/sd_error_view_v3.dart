@@ -6,17 +6,33 @@ import '../sd_context_v3/sd_context_v3.dart';
 import '../sd_icon_v3/sd_icon_v3.dart';
 import '../sd_text_style_v3/sd_text_style_v3.dart';
 
-/// A failure that took the whole screen with it: an error glyph, what
-/// happened, and — outside production — what the SDK actually said.
+/// How loud the view is: what the glyph is coloured with.
+///
+/// **An enum rather than a `Color` parameter.** A colour at the call site is
+/// one a screen can pick from anywhere, including from outside the theme; a
+/// tone is a choice between the two the palette has a name for.
+enum SdErrorToneV3 {
+  /// Something is broken. [SdThemeV3.danger].
+  error,
+
+  /// Something the reader should know before they carry on, but nothing is
+  /// broken — a planned outage, a notice the product wants read.
+  /// [SdThemeV3.warning].
+  warning,
+}
+
+/// A failure that took the whole screen with it: a glyph, what happened, and
+/// — outside production — what the SDK actually said.
 ///
 /// **This is not [SdEmptyStateV3], and the difference is where it sits.** An
 /// empty state lives *inside* a screen that is working: a tab with no rows
 /// yet, a chart with no data, a load that failed under an app bar the seller
 /// can still leave by. This one *is* the screen — it paints its own surface
 /// and its own safe area, because whatever it replaced is gone and there is no
-/// scaffold left to sit in. That is also why the glyph is [SdThemeV3.danger]
-/// rather than `textTertiary`: an empty state says "normal, nothing here yet",
-/// and this says "broken".
+/// scaffold left to sit in. That is also why the glyph carries a status
+/// colour rather than `textTertiary`: an empty state says "normal, nothing
+/// here yet", and this one says something happened. Which of the two it says
+/// is [tone].
 ///
 /// It owns no strings and no idea of what failed. The host passes [title] and
 /// [message] already localized, and passes [detail] only where it should be
@@ -32,6 +48,7 @@ class SdErrorViewV3 extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.message,
+    this.tone = SdErrorToneV3.error,
     this.detail,
     this.action,
     super.key,
@@ -42,13 +59,21 @@ class SdErrorViewV3 extends StatelessWidget {
   /// product draws.
   final IconData icon;
 
+  /// How loud it is. Defaults to [SdErrorToneV3.error], which is what this
+  /// view drew before there was a choice.
+  final SdErrorToneV3 tone;
+
   /// One line saying what happened, in the user's language.
   final String title;
 
   /// What they can do about it, in the user's language.
   final String message;
 
-  /// The raw failure, for whoever can act on it. Null hides the row.
+  /// A third line, smaller and quieter than [message]. Null hides the row.
+  ///
+  /// Usually the raw failure, passed only where it should be read — a debug
+  /// build, a dev flavour, a support screen. A host with a second sentence of
+  /// its own puts it here too; the slot is a line, not a category.
   final String? detail;
 
   /// The recovery, if there is one. Pass an `SdButtonV3`; this widget does not
@@ -94,7 +119,10 @@ class SdErrorViewV3 extends StatelessWidget {
                         SdIconV3(
                           icon,
                           size: iconSize,
-                          color: context.sdTheme3.danger,
+                          color: switch (tone) {
+                            SdErrorToneV3.error => context.sdTheme3.danger,
+                            SdErrorToneV3.warning => context.sdTheme3.warning,
+                          },
                         ),
                         SizedBox(height: SdSpacingConstant.h16),
                         Text(
