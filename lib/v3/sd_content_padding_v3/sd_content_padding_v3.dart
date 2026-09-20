@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../core/sd_breakpoint.dart';
 import '../../core/sd_spacing_constant.dart';
 import '../sd_floating_bar_scope_v3/sd_floating_bar_scope_v3.dart';
 
@@ -33,68 +32,16 @@ abstract final class SdContentPaddingV3 {
   /// The gutter: 16 either side of any content.
   static double get horizontal => SdSpacingConstant.w16;
 
-  // --- The tablet margin ---
-  //
-  // One number, three gaps: window edge to nav, nav to content, content to
-  // the far edge. Content fills whatever is left, which is why there is no
-  // maximum content width here — a ceiling plus centring produces three
-  // different gaps, and only one of them would be a decision.
-
-  /// The one gap either side of a page on anything wider than a phone.
-  static double get tabletMargin => SdSpacingConstant.w40;
-
-  /// How wide the tablet's navigation panel is.
-  ///
-  /// **On the horizontal ladder, and that is not a detail.** A standing panel
-  /// is measured across, so a vertical value would render it at two widths on
-  /// one device — a landscape window's height ratio sits below its width
-  /// ratio, and the control would change as the tablet is turned.
-  static double get panelWidth => SdSpacingConstant.w200;
+  // --- The tablet panel ---
 
   /// How tall one destination row is down the panel.
   ///
-  /// Vertical, which is the opposite of [panelWidth] and correct for the same
-  /// reason: this is measured along the panel.
+  /// Vertical, because it is measured *along* the panel — unlike the width the
+  /// panel stands at, which is a share of the window and not a token.
   static double get panelRowHeight => SdSpacingConstant.h56;
 
   /// Between a destination's glyph and its label.
   static double get navCellLabelGap => SdSpacingConstant.w12;
-
-  /// Everything the panel takes out of the window: its own width plus the
-  /// margin between it and the screen edge.
-  static double get panelColumnWidth => tabletMargin + panelWidth;
-
-  /// What a screen adds either side, on top of the [horizontal] it already
-  /// pays.
-  ///
-  /// Zero on a phone — the whole of this file is a no-op at phone width.
-  ///
-  /// **The margin less the gutter the screen already brings.** Adding the
-  /// whole of it on top stacks two gutters and the gap comes out wider than
-  /// the two beside the nav.
-  ///
-  /// **Half a nav column more when there is no nav.** A route that is a
-  /// sibling of the shell rather than a child of a branch loses the rail, and
-  /// a plain margin would leave it a whole nav column wider than the tab
-  /// screen it was opened from — content jumping outward on the way in and
-  /// back on the way out. This is the inset that lands both on the same
-  /// width.
-  static double pageMargin(BuildContext context) {
-    // Joined tablet chrome meets the content scaffold without an outer gap.
-    if (SdFloatingBarScopeV3.edgeOf(context) == SdFloatingBarEdgeV3.leading) {
-      return 0;
-    }
-
-    if (!SdBreakpointConstant.of(MediaQuery.sizeOf(context).width).isWide) {
-      return 0;
-    }
-
-    final double margin = math.max(0, tabletMargin - horizontal);
-
-    return SdFloatingBarScopeV3.edgeOf(context) == null
-        ? margin + panelColumnWidth / 2
-        : margin;
-  }
 
   // --- Panel ceilings ---
   //

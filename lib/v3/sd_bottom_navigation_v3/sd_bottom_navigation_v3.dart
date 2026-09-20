@@ -65,7 +65,6 @@ class _SdBottomNavigationV3State extends State<SdBottomNavigationV3> {
   @override
   Widget build(BuildContext context) => SdScaffoldV3(
     extendBody: true,
-    pageMargin: false,
     body: SdFloatingBarScopeV3(
       edge: SdFloatingBarEdgeV3.bottom,
       child: GestureDetector(

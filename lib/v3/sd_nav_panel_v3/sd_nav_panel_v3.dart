@@ -66,7 +66,6 @@ class SdNavPanelV3 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SdScaffoldV3(
-    pageMargin: false,
     body: SdFloatingBarScopeV3(
       edge: SdFloatingBarEdgeV3.leading,
       child: TweenAnimationBuilder<double>(
