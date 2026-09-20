@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/sd_breakpoint.dart';
 import '../sd_theme_v3/sd_theme_v3.dart';
 
 /// Shorthand theme accessors for System Design v3 widgets.
@@ -15,6 +16,18 @@ extension SdContextV3X on BuildContext {
   ThemeData get theme3 => Theme.of(this);
   ColorScheme get colorScheme3 => theme3.colorScheme;
   TextTheme get textTheme3 => theme3.textTheme;
+
+  /// Which of the three widths this window is.
+  ///
+  /// Reads `MediaQuery.sizeOf` rather than `.of`, so a window that changes
+  /// size rebuilds what asked about size and not everything under the query —
+  /// iPadOS Split View and Stage Manager resize a live window, so this is not
+  /// a theoretical saving.
+  ///
+  /// **Never cache the result and never read it once at route entry**, for
+  /// the same reason.
+  SdBreakpoint get sdBreakpoint3 =>
+      SdBreakpointConstant.of(MediaQuery.sizeOf(this).width);
 
   /// True when the app is rendering its dark palette. Widgets should reach
   /// for a token first — this exists for the handful of cases where a value

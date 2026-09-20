@@ -28,6 +28,7 @@ final class SdSpacingConstant {
   static double get w54 => 54.w;
   static double get w56 => 56.w;
   static double get w160 => 160.w;
+  static double get w200 => 200.w;
   static double get w240 => 240.w;
 
   /// Wide enough to be a measure rather than a gap: the two ceilings a

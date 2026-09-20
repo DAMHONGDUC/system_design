@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../sd_content_padding_v3/sd_content_padding_v3.dart';
 import '../sd_context_v3/sd_context_v3.dart';
 import '../sd_keyboard_dismiss_v3/sd_keyboard_dismiss_v3.dart';
 
@@ -19,6 +20,14 @@ import '../sd_keyboard_dismiss_v3/sd_keyboard_dismiss_v3.dart';
 /// **It does not wrap its body in a `SafeArea`.** Insets are
 /// `SdContentPaddingV3`'s job, and a scaffold that padded too would double up
 /// with every screen that already asked. See that class.
+///
+/// **It does draw the tablet margin, and it is the only thing that does.**
+/// `SdContentPaddingV3.pageMargin` is zero at phone width, so this costs a
+/// phone nothing; above it, the margin goes around the whole `Scaffold`
+/// rather than around its body, because a header spanning the window over an
+/// inset body reads as two screens stacked. The surface behind it is not
+/// decoration either — a pushed route has nothing of its own back there, and
+/// the strips either side would show whatever the route below left.
 class SdScaffoldV3 extends StatelessWidget {
   const SdScaffoldV3({
     required this.body,
@@ -28,6 +37,7 @@ class SdScaffoldV3 extends StatelessWidget {
     this.floatingActionButtonLocation,
     this.resizeToAvoidBottomInset = true,
     this.extendBody = false,
+    this.pageMargin = true,
     super.key,
   });
 
@@ -50,15 +60,39 @@ class SdScaffoldV3 extends StatelessWidget {
   /// footprint — see `SdContentPaddingV3.floatingBarInset`.
   final bool extendBody;
 
+  /// False for the two shell chromes, true for everything else.
+  ///
+  /// The shell is what the margin is measured *against* — it holds the nav
+  /// and hands each screen the column beside it — so a shell that also paid
+  /// the margin would pay it twice on every tab screen.
+  final bool pageMargin;
+
   @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: context.sdTheme3.background,
-    appBar: appBar,
-    body: SdKeyboardDismissV3(child: body),
-    bottomNavigationBar: bottomNavigationBar,
-    floatingActionButton: floatingActionButton,
-    floatingActionButtonLocation: floatingActionButtonLocation,
-    resizeToAvoidBottomInset: resizeToAvoidBottomInset,
-    extendBody: extendBody,
-  );
+  Widget build(BuildContext context) {
+    final Color background = context.sdTheme3.background;
+    final double margin = pageMargin
+        ? SdContentPaddingV3.pageMargin(context)
+        : 0;
+
+    final Widget scaffold = Scaffold(
+      backgroundColor: background,
+      appBar: appBar,
+      body: SdKeyboardDismissV3(child: body),
+      bottomNavigationBar: bottomNavigationBar,
+      floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: floatingActionButtonLocation,
+      resizeToAvoidBottomInset: resizeToAvoidBottomInset,
+      extendBody: extendBody,
+    );
+
+    if (margin == 0) return scaffold;
+
+    return ColoredBox(
+      color: background,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: margin),
+        child: scaffold,
+      ),
+    );
+  }
 }

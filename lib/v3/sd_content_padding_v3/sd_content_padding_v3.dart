@@ -2,7 +2,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../core/sd_breakpoint.dart';
 import '../../core/sd_spacing_constant.dart';
+import '../sd_floating_bar_scope_v3/sd_floating_bar_scope_v3.dart';
 
 /// Every screen's content insets, in one class.
 ///
@@ -30,6 +32,85 @@ import '../../core/sd_spacing_constant.dart';
 abstract final class SdContentPaddingV3 {
   /// The gutter: 16 either side of any content.
   static double get horizontal => SdSpacingConstant.w16;
+
+  // --- The tablet margin ---
+  //
+  // One number, three gaps: window edge to nav, nav to content, content to
+  // the far edge. Content fills whatever is left, which is why there is no
+  // maximum content width here — a ceiling plus centring produces three
+  // different gaps, and only one of them would be a decision.
+
+  /// The one gap either side of a page on anything wider than a phone.
+  static double get tabletMargin => SdSpacingConstant.w40;
+
+  /// How wide the tablet's navigation panel is.
+  ///
+  /// **On the horizontal ladder, and that is not a detail.** A standing panel
+  /// is measured across, so a vertical value would render it at two widths on
+  /// one device — a landscape window's height ratio sits below its width
+  /// ratio, and the control would change as the tablet is turned.
+  static double get panelWidth => SdSpacingConstant.w200;
+
+  /// How tall one destination row is down the panel.
+  ///
+  /// Vertical, which is the opposite of [panelWidth] and correct for the same
+  /// reason: this is measured along the panel.
+  static double get panelRowHeight => SdSpacingConstant.h56;
+
+  /// Between a destination's glyph and its label.
+  static double get navCellLabelGap => SdSpacingConstant.w12;
+
+  /// Everything the panel takes out of the window: its own width plus the
+  /// margin between it and the screen edge.
+  static double get panelColumnWidth => tabletMargin + panelWidth;
+
+  /// What a screen adds either side, on top of the [horizontal] it already
+  /// pays.
+  ///
+  /// Zero on a phone — the whole of this file is a no-op at phone width.
+  ///
+  /// **The margin less the gutter the screen already brings.** Adding the
+  /// whole of it on top stacks two gutters and the gap comes out wider than
+  /// the two beside the nav.
+  ///
+  /// **Half a nav column more when there is no nav.** A route that is a
+  /// sibling of the shell rather than a child of a branch loses the rail, and
+  /// a plain margin would leave it a whole nav column wider than the tab
+  /// screen it was opened from — content jumping outward on the way in and
+  /// back on the way out. This is the inset that lands both on the same
+  /// width.
+  static double pageMargin(BuildContext context) {
+    // Joined tablet chrome meets the content scaffold without an outer gap.
+    if (SdFloatingBarScopeV3.edgeOf(context) == SdFloatingBarEdgeV3.leading) {
+      return 0;
+    }
+
+    if (!SdBreakpointConstant.of(MediaQuery.sizeOf(context).width).isWide) {
+      return 0;
+    }
+
+    final double margin = math.max(0, tabletMargin - horizontal);
+
+    return SdFloatingBarScopeV3.edgeOf(context) == null
+        ? margin + panelColumnWidth / 2
+        : margin;
+  }
+
+  // --- Panel ceilings ---
+  //
+  // A page takes margins; a panel keeps a ceiling. A sheet spanning a
+  // landscape tablet is a slab with a column of controls lost in the middle.
+  //
+  // Separate fields holding the same value on purpose: they are different
+  // things that happen to measure alike today, and one shared constant is how
+  // a change to one silently moves the other.
+
+  /// The widest a modal sheet gets. Material centres it once it is capped.
+  static double get maxSheetWidth => SdSpacingConstant.w800;
+
+  /// The widest a dialog gets. `insetPadding` alone leaves one most of a
+  /// tablet wide.
+  static double get maxDialogWidth => SdSpacingConstant.w480;
 
   /// Gap between the app bar and the first item of content. **8, and every
   /// screen reads it from here** — owner's rule. The bar is already a band of
@@ -205,10 +286,27 @@ abstract final class SdContentPaddingV3 {
   /// behind the glass bar and has to clear its whole footprint plus a gap.
   /// Everything else — a pushed detail, a sheet route — has nothing floating
   /// over it and takes [detailBottom].
+  ///
+  /// **[floatingNav] means "I am a tab screen", not "there is a bar below
+  /// me".** Which is true is the scope's to answer: on a tablet the chrome is
+  /// a rail down the side, nothing covers the bottom edge, and a tab screen
+  /// reserving the pill's footprint there would end its list a bar's height
+  /// above the bottom of the window for no reason.
   static double bottom(BuildContext context, {bool floatingNav = false}) =>
-      floatingNav
-      ? floatingBarInset(context) + bottomGap
+      floatingNav && SdFloatingBarScopeV3.hasBarBelow(context)
+      ? aboveFloatingBar(context)
       : detailBottom(context);
+
+  /// Where the last item ends when a bar is **known** to be below.
+  ///
+  /// [bottom] is the way in for anything building inside the shell, because
+  /// it can ask the scope itself. This is for the one caller that cannot: the
+  /// snackbar renders into the root overlay, above the whole app, where the
+  /// scope is not visible — so it resolves the question at the call site and
+  /// brings the answer here. Same arithmetic either way, which is the point
+  /// of it being a method rather than two additions at a call site.
+  static double aboveFloatingBar(BuildContext context) =>
+      floatingBarInset(context) + bottomGap;
 
   /// Where the last item ends on a route with nothing floating over it.
   ///
