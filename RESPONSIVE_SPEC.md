@@ -124,11 +124,11 @@ region the screen keeps the same gutter it has on a phone. One gap on a tablet,
 and it is a gap the app already had.
 
 ```text
-iPad 11" portrait, 820 x 1180
+iPad 11" portrait, 820 x 1180 — rendered, at maxScale 1.25
 ┌───────────────┬────┬──────────────────────────────┬────┐
-│ panel 164     │ 16 │ app bar — same margins below │ 16 │
+│ panel 164     │ 20 │ app bar — same edges below   │ 20 │
 │ (window / 5)  │    ├──────────────────────────────┤    │
-│ Home          │    │ card 624 — fills what is left│    │
+│ Home          │    │ card 616 — fills what is left│    │
 │ History  …    │    │                              │    │
 └───────────────┴────┴──────────────────────────────┴────┘
 ```
@@ -241,9 +241,11 @@ what names the destinations for a user arriving on a tablet.
 
 ### Geometry
 
+Design units, before the scale of §1 multiplies them:
+
 | Thing | Value | Note |
 |---|---|---|
-| Panel width, expanded | `window / 5` | proportional, never fixed |
+| Panel width, expanded | `window / 5` | **raw window pixels**, not a design unit — it is a slice of the window |
 | Panel width, collapsed | 0 | it draws nothing at all |
 | Destination row height | 56 | one per destination |
 | Row gutter | 16 horizontal | the screen's own gutter |
@@ -419,16 +421,16 @@ Measure before adding columns. With the content filling the window:
 
 | Window | Card | 2-up cell | 3-up cell |
 |---|---|---|---|
-| phone 393 | 361 | 175 | 111 |
-| iPad portrait 820, panel open | 624 | 304 | 199 |
-| iPad landscape 1180, panel open | 912 | 448 | 299 |
+| phone 393 | 361 | 175 | 112 |
+| iPad portrait 820, panel open | 616 | 300 | 195 |
+| iPad landscape 1180, panel open | 904 | 444 | 291 |
 
 A third column is only right if its cell stays **wider than the phone's** in
-*both* orientations. Under a capped 690 column it would not have been; filling
-the window it would. The answer depends on your §2 choice — so decide §2 first,
-then measure, then decide the grids. Note that a collapsible panel gives every
-window two card widths, so a count chosen off one of them changes under the
-toggle.
+*both* orientations. A card capped well below the window fails that test; a card
+that fills what the panel leaves passes it. So the answer depends on your §2
+choice — decide §2 first, then measure, then decide the grids. And note that a
+collapsible panel gives every window **two** card widths, so a count chosen off
+one of them changes under the toggle.
 
 ---
 
@@ -438,9 +440,9 @@ toggle.
 `Platform.isIOS` + a model check, never `defaultTargetPlatform`.
 
 An iPad in Split View hands the app a ~507-wide window. `shortestSide` still
-says "tablet" and puts a fifth of a phone-shaped window behind a nav panel. There is no
-`UIRequiresFullScreen` in a modern iPad app, so this is the normal case, not an
-edge case.
+says "tablet", and a chrome that asked it would put a fifth of a phone-shaped
+window behind a nav panel. There is no `UIRequiresFullScreen` in a modern iPad
+app, so this is the normal case, not an edge case.
 
 ---
 
@@ -516,13 +518,17 @@ gutter inside it, and the gap the eye sees is to the card edge.
 
 Not calculated — what BaroEase renders at, for comparison against yours.
 
-| | Panel | Content region | Card | Row | Gutter |
+Rendered values, not design units — `maxScale` is 1.25 here, so a 16 gutter
+paints at 20 and a 56 row at 70.
+
+| | Panel | Content region | Card | Nav row | Gutter |
 |---|---|---|---|---|---|
-| phone 393×852 | — | 393 | 361 | — | 16 |
-| iPad portrait 820×1180 | 164 | 656 | 624 | 56 | 16 |
-| iPad landscape 1180×820 | 236 | 944 | 912 | 56 | 16 |
-| iPad portrait, collapsed | 0 | 820 | 788 | — | 16 |
-| iPad portrait, pushed detail | — | 820 | 788 | — | 16 |
+| phone 393×852 | — | 393 | 361 | 56 (pill) | 16 |
+| iPad portrait 820×1180 | 164 | 656 | 616 | 70 | 20 |
+| iPad landscape 1180×820 | 236 | 944 | 904 | 70 | 20 |
+| iPad portrait, collapsed | 0 | 820 | 780 | 70 | 20 |
+| iPad landscape, collapsed | 0 | 1180 | 1140 | 70 | 20 |
+| iPad, pushed detail | — | window | window − 40 | — | 20 |
 
 ## 9. Still open here, so decide them deliberately there
 
