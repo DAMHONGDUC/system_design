@@ -275,6 +275,14 @@ pure dimensions stay parameterless (`SdChartStyleV2.plotHeight`).
 - **Declarations first, blank line, then logic.** No interleaving.
 - **No standalone top-level functions**, except the sanctioned presenters
   (`showSdBottomSheetV2`, `showSdDialogV2`, `showSdFilterSheetV2`).
+- **A sheet's barrier and its drag are two knobs, not one.**
+  `showSdBottomSheetV2` takes `dismissible` (the barrier, and with it the drag)
+  and `draggable` separately, because a sheet whose CONTENT is dragged — the
+  head picker, turned by a drag — read the same gesture as a dismissal and slid
+  away under the finger. `draggable: false` keeps every other way out and drops
+  the handle, which promised a swipe that no longer works. A widget that owns a
+  gesture the chrome around it also claims needs the chrome to be able to let
+  go.
 - **A container that applies the gutter lets a caller turn it off.** One
   nullable prop defaulting to `SdContentPaddingV2.horizontal` —
   `SdActionViewV2.contentPadding`, `SdSheetContentV2.contentHorizontalPadding`
