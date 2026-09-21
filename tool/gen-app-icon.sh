@@ -3,40 +3,34 @@
 set -eu
 . "$(dirname "$0")/_common.sh"
 
-# Under assets/images/, not assets/: that folder is the one declared in pubspec's `assets:` list, so an icon anywhere else is not a bundled asset at all. Both defaults moved together — FINAL is what `flutter_launcher_icons: image_path` reads, and a FINAL written beside a SOURCE it cannot see fails the next step instead of this one.
+# Under assets/images/, not assets/: that folder is the one declared in pubspec's `assets:` list, so an icon anywhere else is not a bundled asset at all.
+# Owner's rule: this ONE file is the source of every size the app ships — launcher icons AND both native splash screens — and no generated copy stands between it and the output. A `final_app_icon.png` in the middle meant two files that could disagree, and the one pubspec read was the one nobody looked at.
 SOURCE=${APP_ICON_SOURCE:-assets/images/app_icon.png}
-FINAL=${APP_ICON_FINAL:-assets/images/final_app_icon.png}
 LAUNCH_DIR=ios/Runner/Assets.xcassets/LaunchImage.imageset
 ANDROID_RES_DIR=android/app/src/main/res
 IOS_PROJECT=ios/Runner.xcodeproj/project.pbxproj
 ROUNDER="$SCRIPT_DIR/round_icon_corners.dart"
 
-# Named before anything runs: the three steps below all read the file this one writes, so a missing original fails at the end of step one otherwise.
+# Named before anything runs: both steps below read it, so a missing original fails here rather than halfway through a launcher set.
 [ -f "$SOURCE" ] ||
-  fail "no $SOURCE — the generated original goes there (docs/setup/APP_ICON.md)"
+  fail "no $SOURCE — the 1024x1024 artwork goes there (docs/setup/APP_ICON.md)"
 
 # `--verbosity=error` on every `dart run` of ours: Dart 3.9 prints "Running build hooks..." to STDERR, and melos labels every stderr line ERROR — three real-looking errors in a run that worked. Compilation errors still print.
 QUIET="run --verbosity=error"
 
 # $1 = pixel size, $2 = file name. The launch storyboard's image view cannot clip, so the corners are baked into the alpha here.
 launch_icon() {
-  $DT $QUIET "$ROUNDER" "$FINAL" "$LAUNCH_DIR/$2" "$1"
+  $DT $QUIET "$ROUNDER" "$SOURCE" "$LAUNCH_DIR/$2" "$1"
 }
 
 # $1 = density, $2 = pixel size. A transparent rounded tile stays consistent on legacy Android and inside Android 12's system splash mask.
 android_launch_icon() {
   _android_dir="$ANDROID_RES_DIR/drawable-$1"
   mkdir -p "$_android_dir"
-  $DT $QUIET "$ROUNDER" "$FINAL" "$_android_dir/launch_image.png" "$2"
+  $DT $QUIET "$ROUNDER" "$SOURCE" "$_android_dir/launch_image.png" "$2"
 }
 
-step "prepare source icon"
-if [ "${APP_ICON_STRIP_MARKER:-0}" = 1 ]; then
-  $DT $QUIET "$SCRIPT_DIR/strip_icon_marker.dart" "$SOURCE" "$FINAL"
-else
-  cp "$SOURCE" "$FINAL"
-fi
-
+# The watermark stripper is NOT here (owner's rule): it belongs to the artwork, not to the generating, and it runs once per new image rather than once per regenerate. `melos run gen-app-icon-strip-marker` is its command.
 step "launcher icons"
 # Config is the `flutter_launcher_icons:` block at the bottom of pubspec.yaml.
 $DT run flutter_launcher_icons
