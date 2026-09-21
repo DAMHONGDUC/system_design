@@ -40,6 +40,7 @@ class SdSheetContentV2 extends StatelessWidget {
     this.confirmLabel,
     this.footer,
     this.contentHorizontalPadding,
+    this.scrollable = true,
     super.key,
   });
 
@@ -69,6 +70,21 @@ class SdSheetContentV2 extends StatelessWidget {
   /// that are neither commit nor leave — a "clear", a "not recorded".
   final Widget? footer;
 
+  /// Whether [child] scrolls when it is taller than the ceiling.
+  ///
+  /// **False for a [child] that is dragged itself.** On iOS a scroll view
+  /// rubber-bands even when its content fits, and its vertical drag
+  /// recognizer competes in the gesture arena with the child's own — the head
+  /// picker's drag turns the head, and the sheet under it bounced on the same
+  /// finger. False takes the scroll view out entirely, so there is nothing
+  /// left to compete or to bounce.
+  ///
+  /// A [child] that says false owns fitting: it is laid out at whatever height
+  /// it asks for under the ceiling, and anything past that overflows rather
+  /// than scrolling. The head picker sizes itself from the screen for exactly
+  /// this reason.
+  final bool scrollable;
+
   /// The gutter either side of [child]. Defaults to the app's
   /// [SdContentPaddingV2.horizontal]; pass 0 for a [child] that already lays
   /// its own content out against the screen edges.
@@ -94,6 +110,13 @@ class SdSheetContentV2 extends StatelessWidget {
     final bool hasPinned = footer != null || confirmLabel != null;
     final double contentGutter =
         contentHorizontalPadding ?? SdContentPaddingV2.horizontal;
+    final EdgeInsets contentInsets = EdgeInsets.fromLTRB(
+      contentGutter,
+      0,
+      contentGutter,
+      // Only the last pinned thing carries the safe area; anything above it just needs a gap.
+      hasPinned ? SdSpacingConstant.h16 : safeBottom,
+    );
 
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: maxHeight),
@@ -103,16 +126,13 @@ class SdSheetContentV2 extends StatelessWidget {
         children: <Widget>[
           SdSheetHeaderV2(title: title, closeTooltip: closeTooltip),
           Flexible(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(
-                contentGutter,
-                0,
-                contentGutter,
-                // Only the last pinned thing carries the safe area; anything above it just needs a gap.
-                hasPinned ? SdSpacingConstant.h16 : safeBottom,
+            child: switch (scrollable) {
+              true => SingleChildScrollView(
+                padding: contentInsets,
+                child: child,
               ),
-              child: child,
-            ),
+              false => Padding(padding: contentInsets, child: child),
+            },
           ),
           if (footer != null)
             Padding(

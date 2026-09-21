@@ -19,6 +19,14 @@ import '../sd_context_v2/sd_context_v2.dart';
 /// sheet's own content still has to block the system back gesture
 /// (`PopScope`); that is the route's job, not this presenter's.
 ///
+/// **`draggable: false` takes the swipe away and KEEPS the barrier** — for a
+/// sheet whose content is dragged itself. The head picker is the case: a drag
+/// on the head turns it, and the sheet read the same drag as a dismissal, so
+/// turning the head pulled the sheet down under the finger. The handle goes
+/// with the swipe, for the reason above: it promises a gesture that no longer
+/// works. Tapping outside and the content's own close control are then the two
+/// ways out, which is enough — this is not `dismissible: false`.
+///
 /// The panel is capped at [SdBreakpointV2.contentMaxWidth] and Material
 /// centres it — a sheet that spanned a 1180-wide landscape iPad would be a
 /// dark slab with a column of controls lost in the middle of it. Below the
@@ -28,13 +36,18 @@ Future<T?> showSdBottomSheetV2<T>(
   required WidgetBuilder builder,
   bool isScrollControlled = false,
   bool dismissible = true,
+  bool draggable = true,
 }) {
+  // A sheet nobody may dismiss is a sheet nobody may drag either, whatever
+  // [draggable] says: dragging one down IS dismissing it.
+  final bool canDrag = dismissible && draggable;
+
   return showModalBottomSheet<T>(
     context: context,
     useRootNavigator: true,
     showDragHandle: false,
     isDismissible: dismissible,
-    enableDrag: dismissible,
+    enableDrag: canDrag,
     backgroundColor: context.sdTheme.surfaceModal,
     barrierColor: context.sdTheme.barrier,
     clipBehavior: Clip.antiAlias,
@@ -48,7 +61,7 @@ Future<T?> showSdBottomSheetV2<T>(
     builder: (context) => Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (dismissible) const _SheetDragHandle(),
+        if (canDrag) const _SheetDragHandle(),
         Flexible(child: builder(context)),
       ],
     ),
