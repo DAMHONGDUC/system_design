@@ -39,6 +39,7 @@ class SdSheetContentV2 extends StatelessWidget {
     this.onConfirm,
     this.confirmLabel,
     this.footer,
+    this.contentHorizontalPadding,
     super.key,
   });
 
@@ -68,6 +69,18 @@ class SdSheetContentV2 extends StatelessWidget {
   /// that are neither commit nor leave — a "clear", a "not recorded".
   final Widget? footer;
 
+  /// The gutter either side of [child]. Defaults to the app's
+  /// [SdContentPaddingV2.horizontal]; pass 0 for a [child] that already lays
+  /// its own content out against the screen edges.
+  ///
+  /// **This is what lets a sheet show a screen's widget unchanged.** The head
+  /// picker pads its tabs and its tiles itself, because it is also the log
+  /// flow's second step — wrapped in the default gutter it wore both, and the
+  /// same picker came out 16pt narrower in the sheet than in the flow. Only
+  /// the sides are yours: the bottom still clears the keyboard and the home
+  /// indicator, which is not a decision a caller should be able to lose.
+  final double? contentHorizontalPadding;
+
   @override
   Widget build(BuildContext context) {
     final double maxHeight =
@@ -79,6 +92,8 @@ class SdSheetContentV2 extends StatelessWidget {
         SdSpacingConstant.h16;
 
     final bool hasPinned = footer != null || confirmLabel != null;
+    final double contentGutter =
+        contentHorizontalPadding ?? SdContentPaddingV2.horizontal;
 
     return ConstrainedBox(
       constraints: BoxConstraints(maxHeight: maxHeight),
@@ -90,9 +105,9 @@ class SdSheetContentV2 extends StatelessWidget {
           Flexible(
             child: SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(
-                SdContentPaddingV2.horizontal,
+                contentGutter,
                 0,
-                SdContentPaddingV2.horizontal,
+                contentGutter,
                 // Only the last pinned thing carries the safe area; anything above it just needs a gap.
                 hasPinned ? SdSpacingConstant.h16 : safeBottom,
               ),
