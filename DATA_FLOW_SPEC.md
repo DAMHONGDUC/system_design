@@ -197,11 +197,37 @@ references, with **no method that can omit the filter**, and never reach past it
 | `credential-already-in-use` | Fall back to a plain sign-in — this is the path that makes recovery after a reinstall work |
 | After the fallback | Local rows are still pending, so they push into the account that just signed in. **Decide deliberately whether that merge is what you want**; on a shared device it is a surprise |
 
-### 6.3 Sign-out is not a delete
+### 6.3 Sign-out hands the records back
 
-Keep every local record. Drop only what belongs to the account: the cached key,
-the per-account cursors and the floor stamp. Rebind the purchase/entitlement SDK
-to no user, so an entitlement follows the person rather than the install.
+**Decide which of the two the device's copy is, and be consistent — the two
+halves of this cannot be mixed.**
+
+| Model | Sign-out does | Costs |
+|---|---|---|
+| The device owns the data | Keeps every local record | The next account inherits a stranger's history, and those rows — already pushed, therefore clean — never reach it either |
+| **The account owns the data** | Push what is owed, then wipe the device | A sign-out with no network cannot complete |
+
+The second is the one to pick if accounts can be switched on one device. Its
+order is fixed:
+
+1. **Push everything still pending, and read the answer.** The only push in the
+   app whose result is read, because it is the only one with no later retry.
+2. **A failure cancels the sign-out.** Say so on screen — the records still on
+   the device are the only copy there is — and touch nothing.
+3. **Wipe the device's copy only.** Never the account-delete path: the user is
+   getting these records back, not destroying them.
+4. **Drop the cursors and the cached key.** They point past everything just
+   removed; left in place, the next sign-in pulls only what changed since and
+   the history never comes home.
+5. **Sign out**, and rebind the purchase/entitlement SDK to no user, so an
+   entitlement follows the person rather than the install.
+
+**Show the wait.** Step 1 is a network round trip standing between a tap and an
+empty database; a spinner with no words reads as a stall.
+
+**Take the derived files too** — exports, share images, widget caches. They are
+copies of the account's data in the app's own storage, and nothing in them names
+who they belong to.
 
 ---
 
@@ -297,3 +323,4 @@ field would stop two builds in the wild reading each other.
 | 8 | Owner-id rules checked both ways, one filtered-collection helper | The rules test denies a write that rewrites the owner id |
 | 9 | Fresh-install stamp + gate above the app root | The five outcomes are five tests |
 | 10 | Account delete: remote, bounded, before local | A remote timeout leaves the device's copy whole |
+| 11 | Sign-out: flush, then wipe local only, cursors dropped | A failed flush leaves the session and the records untouched |
