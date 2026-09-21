@@ -275,6 +275,14 @@ pure dimensions stay parameterless (`SdChartStyleV2.plotHeight`).
 - **Declarations first, blank line, then logic.** No interleaving.
 - **No standalone top-level functions**, except the sanctioned presenters
   (`showSdBottomSheetV2`, `showSdDialogV2`, `showSdFilterSheetV2`).
+- **A container that applies the gutter lets a caller turn it off.** One
+  nullable prop defaulting to `SdContentPaddingV2.horizontal` —
+  `SdActionViewV2.contentPadding`, `SdSheetContentV2.contentHorizontalPadding`
+  — because a child that pads its own pieces (a picker whose tabs and tiles
+  carry the gutter, a `ListTile` that brings its own) otherwise wears it twice
+  and comes out narrower inside the container than outside it. **Only the sides
+  are the caller's**: a device inset a container computes — a keyboard, a home
+  indicator — is not something a call site may drop.
 
 ## 6. Behaviour
 
