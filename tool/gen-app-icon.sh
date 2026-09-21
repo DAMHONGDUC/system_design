@@ -3,8 +3,9 @@
 set -eu
 . "$(dirname "$0")/_common.sh"
 
-SOURCE=${APP_ICON_SOURCE:-assets/app_icon.png}
-FINAL=${APP_ICON_FINAL:-assets/final_app_icon.png}
+# Under assets/images/, not assets/: that folder is the one declared in pubspec's `assets:` list, so an icon anywhere else is not a bundled asset at all. Both defaults moved together — FINAL is what `flutter_launcher_icons: image_path` reads, and a FINAL written beside a SOURCE it cannot see fails the next step instead of this one.
+SOURCE=${APP_ICON_SOURCE:-assets/images/app_icon.png}
+FINAL=${APP_ICON_FINAL:-assets/images/final_app_icon.png}
 LAUNCH_DIR=ios/Runner/Assets.xcassets/LaunchImage.imageset
 ANDROID_RES_DIR=android/app/src/main/res
 IOS_PROJECT=ios/Runner.xcodeproj/project.pbxproj
