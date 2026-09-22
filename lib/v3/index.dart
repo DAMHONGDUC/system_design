@@ -55,3 +55,4 @@ export 'sd_tag_v3/sd_tag_v3.dart';
 export 'sd_text_field_v3/sd_text_field_v3.dart';
 export 'sd_text_style_v3/sd_text_style_v3.dart';
 export 'sd_theme_v3/sd_theme_v3.dart';
+export 'sd_vendor_button_v3/sd_vendor_button_v3.dart';
