@@ -33,19 +33,30 @@ enum SdBottomSheetExitV3 {
 /// close button are two halves of one decision, and passing the flag to both
 /// the presenter and the widget is how they end up disagreeing — a sheet with
 /// no close button that the barrier still dismisses.
-class _SdBottomSheetExitScopeV3 extends InheritedWidget {
-  const _SdBottomSheetExitScopeV3({required this.exit, required super.child});
+///
+/// **Public, so a blocked sheet can be drawn outside a route.** A sheet that
+/// *is* the app's state — a build too old to run — is not pushed over
+/// anything: it is composed into the tree above every route, so there is no
+/// presenter to read the value from. Such a caller wraps its sheet in this
+/// and gets the same chrome the presenter would have given it. Everything
+/// pushed normally goes through [showSdBottomSheetV3] and never names this.
+class SdBottomSheetExitScopeV3 extends InheritedWidget {
+  const SdBottomSheetExitScopeV3({
+    required this.exit,
+    required super.child,
+    super.key,
+  });
 
   final SdBottomSheetExitV3 exit;
 
   static SdBottomSheetExitV3 of(BuildContext context) =>
       context
-          .dependOnInheritedWidgetOfExactType<_SdBottomSheetExitScopeV3>()
+          .dependOnInheritedWidgetOfExactType<SdBottomSheetExitScopeV3>()
           ?.exit ??
       SdBottomSheetExitV3.close;
 
   @override
-  bool updateShouldNotify(_SdBottomSheetExitScopeV3 oldWidget) =>
+  bool updateShouldNotify(SdBottomSheetExitScopeV3 oldWidget) =>
       oldWidget.exit != exit;
 }
 
@@ -107,7 +118,7 @@ class SdBottomSheetV3 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SdBottomSheetExitV3 exit = _SdBottomSheetExitScopeV3.of(context);
+    final SdBottomSheetExitV3 exit = SdBottomSheetExitScopeV3.of(context);
     final bool blocked = exit == SdBottomSheetExitV3.blocked;
 
     assert(
@@ -204,7 +215,7 @@ class SdBottomSheetV3 extends StatelessWidget {
 ///
 /// **[exit] is set here and nowhere else.** It reaches the sheet through an
 /// inherited scope, so the route's dismissability and the chrome's close
-/// button cannot disagree — see [_SdBottomSheetExitScopeV3].
+/// button cannot disagree — see [SdBottomSheetExitScopeV3].
 Future<T?> showSdBottomSheetV3<T>({
   required BuildContext context,
   required WidgetBuilder builder,
@@ -226,7 +237,7 @@ Future<T?> showSdBottomSheetV3<T>({
     // `Builder` so the sheet is built *below* the scope: passing
     // `builder(context)` directly would construct it with the context above,
     // where the scope is not visible.
-    builder: (BuildContext sheetContext) => _SdBottomSheetExitScopeV3(
+    builder: (BuildContext sheetContext) => SdBottomSheetExitScopeV3(
       exit: exit,
       child: Builder(builder: builder),
     ),
