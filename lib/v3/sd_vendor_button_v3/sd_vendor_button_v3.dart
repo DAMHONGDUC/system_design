@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/sd_spacing_constant.dart';
 import '../sd_button_v3/sd_button_v3.dart';
+import '../sd_content_padding_v3/sd_content_padding_v3.dart';
 import '../sd_context_v3/sd_context_v3.dart';
 import '../sd_icon_v3/sd_icon_v3.dart';
 import '../sd_motion_v3/sd_motion_v3.dart';
@@ -55,10 +56,26 @@ class SdVendorButtonV3 extends StatelessWidget {
 
   final VoidCallback? onPressed;
 
-  /// **Apple's floor, and it is a requirement rather than a preference.** A
-  /// sign-in button below it is a review finding; the extra points over 44
-  /// buy a comfortable target for the one control the whole app depends on.
-  static double get minHeight => SdSpacingConstant.h48;
+  /// **Apple's floor, in logical points, and it is a requirement rather than
+  /// a preference** — a sign-in button below it is a review finding.
+  ///
+  /// It is a floor, not the height: [SdContentPaddingV3.button] gives this
+  /// button its size the way it gives every other button its size, and on
+  /// every window this app ships in that already clears 44. The constraint is
+  /// here so a future change to the padding cannot quietly drop under it, and
+  /// `sd_vendor_button_v3_test.dart` fails if it does.
+  static const double minHeight = 44;
+
+  /// **[SdButtonSizeV3.small]'s padding, not the full-size one.** These two
+  /// sit at the bottom of a screen whose job is to be read, so they are
+  /// compact by design — a taller pair pushed the privacy line off the fold
+  /// on a small phone and made the page feel like a form.
+  ///
+  /// Read through the enum rather than restated, so "small" means one thing.
+  /// [minHeight] is what stops the compact scale dropping under Apple's
+  /// floor, which at this scale it otherwise would.
+  static EdgeInsets get padding =>
+      SdContentPaddingV3.button * SdButtonSizeV3.small.scale;
 
   /// The mark's box, from the label's font size.
   ///
@@ -129,23 +146,26 @@ class SdVendorButtonV3 extends StatelessWidget {
             onTap: _enabled ? onPressed : null,
             borderRadius: SdRadiusV3.buttonAll,
             child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: minHeight),
-              child: Stack(
-                alignment: Alignment.center,
-                children: <Widget>[
-                  // Invisible rather than removed: the button must not change
-                  // size when a sign-in starts, and this one is full width, so
-                  // a reflow here moves the other button too.
-                  Opacity(opacity: busy ? 0 : 1, child: content),
-                  if (busy)
-                    SizedBox.square(
-                      dimension: markSize,
-                      child: CircularProgressIndicator(
-                        strokeWidth: SdSpacingConstant.w2,
-                        color: style.foreground,
+              constraints: const BoxConstraints(minHeight: minHeight),
+              child: Padding(
+                padding: padding,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: <Widget>[
+                    // Invisible rather than removed: the button must not change
+                    // size when a sign-in starts, and this one is full width, so
+                    // a reflow here moves the other button too.
+                    Opacity(opacity: busy ? 0 : 1, child: content),
+                    if (busy)
+                      SizedBox.square(
+                        dimension: markSize,
+                        child: CircularProgressIndicator(
+                          strokeWidth: SdSpacingConstant.w2,
+                          color: style.foreground,
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
