@@ -91,8 +91,15 @@ cheaper than the coupling.
 
 Everything above is about rendering. `core/common/` is the one place in this
 package that is not: it holds the plumbing every app of ours stands up
-identically — `SdLogger`, the `SdCrashReporter` contract, `SdFreshInstall` and
-`SdDeviceWipe` today. `SdBootstrap` is the same idea one folder out, in
+identically — `SdLogger`, the `SdCrashReporter` contract, `SdFreshInstall`,
+`SdDeviceWipe` and `SdId` today.
+
+**`SdId` is where every id is made** (owner's rule, 2026-09-24): `SdId.unique()`
+for a new record, `SdId.owned(ownerId, id)` for the document a user's record is
+stored under. No `Uuid()` in an app, no hand-built `'$uid_$id'`. It exists
+because a record id derived from the data — a day — was the same for every
+user in a flat Firestore collection, and every user but the first was refused
+for good. `SdBootstrap` is the same idea one folder out, in
 `core/sd_bootstrap/`, because it calls `runApp`.
 
 **`SdFreshInstall` is one class, and it used to be three.** Owner's rule. A
