@@ -17,6 +17,9 @@ import '../sd_text_style_v3/sd_text_style_v3.dart';
 /// widget rather than a label plus callback so the call site can pass an
 /// `SdButtonV3(variant: text)` and get the app's real button, instead of this
 /// widget growing its own third button style.
+///
+/// **It carries no gutter.** It sits on the left edge of the card it heads,
+/// so a `fullBleed` list pads it exactly as it pads that card.
 class SdSectionHeaderV3 extends StatelessWidget {
   const SdSectionHeaderV3({
     required this.title,
@@ -24,7 +27,6 @@ class SdSectionHeaderV3 extends StatelessWidget {
     this.leading,
     this.action,
     this.first = false,
-    this.gutter = true,
     super.key,
   });
 
@@ -41,18 +43,9 @@ class SdSectionHeaderV3 extends StatelessWidget {
   /// screen's own top padding has already placed it.
   final bool first;
 
-  /// Whether the heading carries the screen's side inset.
-  ///
-  /// **A flag, not a padding the caller passes.** A heading inside a card or
-  /// a padded block wants the gutter dropped and the vertical rhythm kept,
-  /// which is one answer rather than an open question — and a widget owns
-  /// only its own intrinsic size (`WIDGET_RULES.md` §6), so what it is padded
-  /// by comes from `SdContentPaddingV3` and never from a call site.
-  final bool gutter;
-
   @override
   Widget build(BuildContext context) => Padding(
-    padding: SdContentPaddingV3.sectionHeader(first: first, gutter: gutter),
+    padding: SdContentPaddingV3.sectionHeader(first: first),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[

@@ -137,25 +137,15 @@ abstract final class SdContentPaddingV3 {
   static double get stackedActionsGap => SdSpacingConstant.h12;
 
   /// Padding for a section heading (`SdSectionHeaderV3`): the gap that
-  /// separates it from the group above, the gutter, and the small gap down to
-  /// its own rows.
+  /// separates it from the group above, and the small gap down to its card.
   ///
-  /// [first] drops the top gap — the screen's [topGap] has already placed the
-  /// first heading, and adding the separator on top of it makes a screen
-  /// start noticeably lower than its neighbours.
-  ///
-  /// [gutter] drops the side inset, for a heading inside something that
-  /// already carries it — a card, or a block the screen has padded. The
-  /// vertical rhythm is kept either way, so a flush heading still sits the
-  /// same distance from the group above it as every other heading on the
-  /// screen.
-  static EdgeInsets sectionHeader({bool first = false, bool gutter = true}) =>
-      EdgeInsets.fromLTRB(
-        gutter ? horizontal : 0,
-        first ? 0 : SdSpacingConstant.h24,
-        gutter ? horizontal : 0,
-        SdSpacingConstant.h8,
-      );
+  /// - [first] drops the top gap — the screen's [topGap] already placed it.
+  /// - **No side inset.** The heading sits on its card's left edge, so
+  ///   whatever pads the card pads the heading.
+  static EdgeInsets sectionHeader({bool first = false}) => EdgeInsets.only(
+    top: first ? 0 : SdSpacingConstant.h24,
+    bottom: SdSpacingConstant.h8,
+  );
 
   // --- The floating glass tab bar ---
   //
