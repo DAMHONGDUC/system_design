@@ -22,6 +22,8 @@ dependencies:
   # close cross and a back arrow has to draw them from the same family the
   # host app does, or one screen carries two icon families.
   material_symbols_icons: ^4.2960.0
+  # Pure Dart: SdId's random ids. Not a vendor SDK, so core/common may use it.
+  uuid: ^4.5.3
 
 dev_dependencies:
   flutter_lints: ^6.0.0
